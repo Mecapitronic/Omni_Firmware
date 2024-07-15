@@ -3,7 +3,10 @@
 
 using namespace std;
 
-#include <Arduino.h>
+#include <math.h>
+#include "pin.h"
+
+#define MM_PER_STEP 8
 
 
 #endif
