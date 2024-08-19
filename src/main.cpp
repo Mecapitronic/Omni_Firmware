@@ -1,21 +1,15 @@
 #include "main.h"
 
-megaAVR_PWM* stepper;
+ESP32_FAST_PWM* stepper1;
+ESP32_FAST_PWM* stepper2;
+ESP32_FAST_PWM* stepper3;
 
-void setSpeed(int speed)
-{
-  if (speed == 0)
-  {
-    // Use DC = 0 to stop stepper
-    stepper->setPWM(STEP_PIN, 1000, 0);
-  }
-  else
-  {
-    //  Set the frequency of the PWM output and a duty cycle of 50%
-    digitalWrite(DIR_PIN, (speed < 0));
-    stepper->setPWM(STEP_PIN, abs(speed), 50);
-  }
-}
+// Motion parameters
+double theta = 150 * PI / 180;      // Angle Ref X+
+double theta1 = theta + 0;          // Angle for motor 1
+double theta2 = theta + 2 * PI / 3; // Angle for motor 2 (120 degrees in radians)
+double theta3 = theta + 4 * PI / 3; // Angle for motor 3 (240 degrees in radians)
+
 
 void setup()
 {
@@ -25,120 +19,117 @@ void setup()
   Serial.println("Robot Holonome Firmware");
   delay(1000);
 
-  double theta = 150 * PI / 180;      // Angle Ref X+
-  double theta1 = theta + 0;          // Angle for motor 1
-  double theta2 = theta + 2 * PI / 3; // Angle for motor 2 (120 degrees in radians)
-  double theta3 = theta + 4 * PI / 3; // Angle for motor 3 (240 degrees in radians)
-
   // Sets the two pins as Outputs
   pinMode(stepPinM1, OUTPUT);
   pinMode(dirPinM1, OUTPUT);
+  digitalWrite(dirPinM1, LOW);
+
   pinMode(stepPinM2, OUTPUT);
   pinMode(dirPinM2, OUTPUT);
+  digitalWrite(dirPinM2, LOW);
+
   pinMode(stepPinM3, OUTPUT);
   pinMode(dirPinM3, OUTPUT);
+  digitalWrite(dirPinM3, LOW);
   
-  pinMode(DIR_PIN, OUTPUT);
+  Serial.print(F("\nStarting ESP32_PWM_StepperControl on "));
+  Serial.println(ARDUINO_BOARD);
+  Serial.println(ESP32_FAST_PWM_VERSION);
+  Serial.println(CONTINUOUS_STEPPER_GENERIC_VERSION);
+
+  stepper1 = new ESP32_FAST_PWM(stepPinM1, 500, 50,1,8); // pin, frequency = 500 Hz, dutycycle = 0 %, channel, resolution = 8 ? 10 ? 12 ?
+  if (stepper1)
+  {
+    stepper1->setPWM();
+  }
+
+  stepper2 = new ESP32_FAST_PWM(stepPinM2, 500, 50,2,10);
+  if (stepper2)
+  {
+    stepper2->setPWM();
+  }
+
+  stepper3 = new ESP32_FAST_PWM(stepPinM3, 500, 50,3,12);
+  if (stepper3)
+  {
+    stepper3->setPWM();
+  }
   
-  Serial.print(F("\nStarting PWM_StepperControl on "));
-  Serial.println(BOARD_NAME);
-  Serial.println(MEGA_AVR_PWM_VERSION);
-  
-  // Create PWM object and passed just a random frequency of 500
-  // The duty cycle is how you turn the motor on and off
-  stepper = new megaAVR_PWM(STEP_PIN, 500, 0);
+  delay(2000);
 }
 
+int x = 1;
 void loop()
 {
+  int min = 5;
+  int max = 2000;
 
-  delay(500);
+    for (long x = min; x <= max; x++)
+    {
+      setMotorSpeed(1,x);
+      setMotorSpeed(2,x*2);
+      setMotorSpeed(3,x*3);
+      delay(1);
+    }
+    for (long x = max; x >=min ; x--)
+    {
+      setMotorSpeed(1,x);
+      setMotorSpeed(2,x*2);
+      setMotorSpeed(3,x*3);
+      delay(1);
+    }
 
-  digitalWrite(dirPinM1, HIGH);
-  digitalWrite(dirPinM2, LOW);
+  // stop all motors
+  setMotorSpeed(1,0);
+  setMotorSpeed(2,0);
+  setMotorSpeed(3,0);
 
-  for (long x = 0; x < 100 * MM_PER_STEP; x++)
+  delay(2000);
+
+}
+
+void setMotorSpeed(int motor, float speed)
+{
+  if (motor == 1)
   {
-    digitalWrite(stepPinM1, HIGH);
-    digitalWrite(stepPinM2, HIGH);
-    delayMicroseconds(500);
-    digitalWrite(stepPinM1, LOW);
-    digitalWrite(stepPinM2, LOW);
-    delayMicroseconds(500);
+    if (speed == 0)
+    {
+      // stop motor
+      stepper1->setPWM();
+    }
+    else
+    {
+      //  Set the frequency of the PWM output and a duty cycle of 50%
+      digitalWrite(dirPinM1, (speed < 0));
+      stepper1->setPWM(stepPinM1, abs(speed), 50);
+    }
   }
-  delay(500);
-
-  digitalWrite(dirPinM1, LOW);
-  digitalWrite(dirPinM2, HIGH);
-
-  for (long x = 0; x < 100 * MM_PER_STEP; x++)
+  else if(motor == 2)
   {
-    digitalWrite(stepPinM1, HIGH);
-    digitalWrite(stepPinM2, HIGH);
-    delayMicroseconds(500);
-    digitalWrite(stepPinM1, LOW);
-    digitalWrite(stepPinM2, LOW);
-    delayMicroseconds(500);
+    if (speed == 0)
+    {
+      // stop motor
+      stepper2->setPWM();
+    }
+    else
+    {
+      //  Set the frequency of the PWM output and a duty cycle of 50%
+      digitalWrite(dirPinM2, (speed < 0));
+      stepper2->setPWM(stepPinM2, abs(speed), 50);
+    }
   }
-  delay(1000);
-
-  digitalWrite(dirPinM2, HIGH);
-  digitalWrite(dirPinM3, LOW);
-
-  for (long x = 0; x < 100 * MM_PER_STEP; x++)
+  else if(motor == 3)
   {
-    digitalWrite(stepPinM2, HIGH);
-    digitalWrite(stepPinM3, HIGH);
-    delayMicroseconds(500);
-    digitalWrite(stepPinM2, LOW);
-    digitalWrite(stepPinM3, LOW);
-    delayMicroseconds(500);
+    if (speed == 0)
+    {
+      // stop motor
+      stepper3->setPWM();
+    }
+    else
+    {
+      //  Set the frequency of the PWM output and a duty cycle of 50%
+      digitalWrite(dirPinM3, (speed < 0));
+      stepper3->setPWM(stepPinM3, abs(speed), 50);
+    }
   }
-  delay(500);
-
-  digitalWrite(dirPinM2, LOW);
-  digitalWrite(dirPinM3, HIGH);
-
-  for (long x = 0; x < 100 * MM_PER_STEP; x++)
-  {
-    digitalWrite(stepPinM2, HIGH);
-    digitalWrite(stepPinM3, HIGH);
-    delayMicroseconds(500);
-    digitalWrite(stepPinM2, LOW);
-    digitalWrite(stepPinM3, LOW);
-    delayMicroseconds(500);
-  }
-  delay(1000);
-
-
-  for (long x = 0; x <= 5000; x+=10)
-  {
-
-    setSpeed(x);
-    delay(2);
-  }
-  for (long x = 5000; x >= 0; x-=10)
-  {
-
-    setSpeed(x);
-    delay(2);
-  }
-
-    setSpeed(0);
-/*
-  setSpeed(2000);
-  delay(3000);
-
-  // Stop before reversing
-  setSpeed(0);
-  delay(3000);
-
-  // Reversing
-  setSpeed(-5000);
-  delay(3000);
-
-  // Stop before reversing
-  setSpeed(0);
-  delay(3000);
-*/
 }
