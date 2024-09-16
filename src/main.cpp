@@ -1,8 +1,8 @@
 #include "main.h"
 
-ESP32_FAST_PWM* stepper1;
-ESP32_FAST_PWM* stepper2;
-ESP32_FAST_PWM* stepper3;
+ESP32_FAST_PWM *stepper1;
+ESP32_FAST_PWM *stepper2;
+ESP32_FAST_PWM *stepper3;
 
 // Motion parameters
 double theta = 150 * PI / 180;      // Angle Ref X+
@@ -31,25 +31,24 @@ void setup()
   pinMode(stepPinM3, OUTPUT);
   pinMode(dirPinM3, OUTPUT);
   digitalWrite(dirPinM3, LOW);
-  
-  Serial.print(F("\nStarting ESP32_PWM_StepperControl on "));
-  Serial.println(ARDUINO_BOARD);
-  Serial.println(ESP32_FAST_PWM_VERSION);
-  Serial.println(CONTINUOUS_STEPPER_GENERIC_VERSION);
 
-  stepper1 = new ESP32_FAST_PWM(stepPinM1, 500, 50,1,8); // pin, frequency = 500 Hz, dutycycle = 0 %, channel, resolution = 8 ? 10 ? 12 ?
+  print(F("\nStarting ESP32_PWM_StepperControl on "));
+  println(ARDUINO_BOARD);
+  println(ESP32_FAST_PWM_VERSION);
+
+  stepper1 = new ESP32_FAST_PWM(stepPinM1, 500, 0, 1, 8); // pin, frequency = 500 Hz, dutycycle = 0 %, channel, resolution = 8 ? 10 ? 12 ?
   if (stepper1)
   {
     stepper1->setPWM();
   }
 
-  stepper2 = new ESP32_FAST_PWM(stepPinM2, 500, 50,2,10);
+  stepper2 = new ESP32_FAST_PWM(stepPinM2, 500, 0, 2, 8);
   if (stepper2)
   {
     stepper2->setPWM();
   }
 
-  stepper3 = new ESP32_FAST_PWM(stepPinM3, 500, 50,3,12);
+  stepper3 = new ESP32_FAST_PWM(stepPinM3, 500, 0, 3, 8);
   if (stepper3)
   {
     stepper3->setPWM();
@@ -61,29 +60,23 @@ void setup()
 int x = 1;
 void loop()
 {
-  int min = 5;
-  int max = 2000;
+  setMotorSpeed(1, 2000);
+  setMotorSpeed(2, -2000);
+  delay(2000);
 
-    for (long x = min; x <= max; x++)
-    {
-      setMotorSpeed(1,x);
-      setMotorSpeed(2,x*2);
-      setMotorSpeed(3,x*3);
-      delay(1);
-    }
-    for (long x = max; x >=min ; x--)
-    {
-      setMotorSpeed(1,x);
-      setMotorSpeed(2,x*2);
-      setMotorSpeed(3,x*3);
-      delay(1);
-    }
+  setMotorSpeed(1, 0);
+  setMotorSpeed(2, 0);
+  setMotorSpeed(3, 0);
+  // delay(1000);
+
+  setMotorSpeed(1, -2000);
+  setMotorSpeed(2, 2000);
+  delay(2000);
 
   // stop all motors
-  setMotorSpeed(1,0);
-  setMotorSpeed(2,0);
-  setMotorSpeed(3,0);
-
+  setMotorSpeed(1, 0);
+  setMotorSpeed(2, 0);
+  setMotorSpeed(3, 0);
   delay(2000);
 
 }
