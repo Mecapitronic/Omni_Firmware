@@ -5,19 +5,13 @@ ESP32_FAST_PWM *stepper2;
 ESP32_FAST_PWM *stepper3;
 
 // Motion parameters
-double theta = 150 * PI / 180;      // Angle Ref X+
-double theta1 = theta + 0;          // Angle for motor 1
-double theta2 = theta + 2 * PI / 3; // Angle for motor 2 (120 degrees in radians)
-double theta3 = theta + 4 * PI / 3; // Angle for motor 3 (240 degrees in radians)
 
-
+//******************************************************* SETUP **************************************************************** */
 void setup()
 {
-  Serial.end();
-  Serial.begin(921600);
-  delay(1000);
-  Serial.println("Robot Holonome Firmware");
-  delay(1000);
+  ESP32_Helper::Initialisation();
+  println("Temperature is : ", temperatureRead());
+  println("Robot Holonome Firmware");
 
   // Sets the two pins as Outputs
   pinMode(stepPinM1, OUTPUT);
@@ -58,6 +52,8 @@ void setup()
 }
 
 int x = 1;
+
+//******************************************************* LOOP *****************************************************************/
 void loop()
 {
   setMotorSpeed(1, 2000);
@@ -79,13 +75,24 @@ void loop()
   setMotorSpeed(3, 0);
   delay(2000);
 
-}
-
-void setMotorSpeed(int motor, float speed)
-{
-  if (motor == 1)
+  if (ESP32_Helper::HasWaitingCommand())
   {
-    if (speed == 0)
+    Command cmd = ESP32_Helper::GetCommand();
+
+    otos.HandleCommand(cmd);
+  }
+}
+//**************************************************************************************************************************/
+
+// Set speed in mm/s of one specific motor
+void setMotorSpeed(int motor_ID, float speed_mms)
+{
+  // convert speed in mm/s to frequency in step/s
+  float freq = speed_mms / STEP_PER_MM;
+
+  if (motor_ID == 1)
+  {
+    if (freq == 0)
     {
       // stop motor
       stepper1->setPWM();
@@ -93,13 +100,13 @@ void setMotorSpeed(int motor, float speed)
     else
     {
       //  Set the frequency of the PWM output and a duty cycle of 50%
-      digitalWrite(dirPinM1, (speed < 0));
-      stepper1->setPWM(stepPinM1, abs(speed), 50);
+      digitalWrite(dirPinM1, (freq < 0));
+      stepper1->setPWM(stepPinM1, abs(freq), 50);
     }
   }
-  else if(motor == 2)
+  else if (motor_ID == 2)
   {
-    if (speed == 0)
+    if (freq == 0)
     {
       // stop motor
       stepper2->setPWM();
@@ -107,13 +114,13 @@ void setMotorSpeed(int motor, float speed)
     else
     {
       //  Set the frequency of the PWM output and a duty cycle of 50%
-      digitalWrite(dirPinM2, (speed < 0));
-      stepper2->setPWM(stepPinM2, abs(speed), 50);
+      digitalWrite(dirPinM2, (freq < 0));
+      stepper2->setPWM(stepPinM2, abs(freq), 50);
     }
   }
-  else if(motor == 3)
+  else if (motor_ID == 3)
   {
-    if (speed == 0)
+    if (freq == 0)
     {
       // stop motor
       stepper3->setPWM();
@@ -121,8 +128,8 @@ void setMotorSpeed(int motor, float speed)
     else
     {
       //  Set the frequency of the PWM output and a duty cycle of 50%
-      digitalWrite(dirPinM3, (speed < 0));
-      stepper3->setPWM(stepPinM3, abs(speed), 50);
+      digitalWrite(dirPinM3, (freq < 0));
+      stepper3->setPWM(stepPinM3, abs(freq), 50);
     }
   }
 }
