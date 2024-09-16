@@ -4,9 +4,11 @@
 void OpticalTrackingOdometrySensor::Initialisation()
 {
     println("Init QwiicOTOS");
-    delay(2000);
 
     Wire.begin();
+
+    // Normal speed is 100 000
+    // With higher speed, instructions on I2C take less time
     Wire.setClock(400000UL);
 
     // Attempt to begin the sensor
@@ -25,10 +27,12 @@ void OpticalTrackingOdometrySensor::Initialisation()
     // Wait for user input
     // while (!available());
 
-    println("Calibrating IMU...");
+    println("Calibrating IMU ...");
 
     // Calibrate the IMU, which removes the accelerometer and gyroscope offsets
     myOtos.calibrateImu();
+    
+    println("IMU calibration done !");
 
     // Here we can set the linear and angular scalars, which can compensate for
     // scaling issues with the sensor measurements. Note that as of firmware
@@ -99,6 +103,8 @@ void OpticalTrackingOdometrySensor::Update()
     // if (error != 0)
     //     print("Error Acc : ", error);
 
+    // If Velocity and Acceleration are not needed, use getPosition to decrease blocking time
+    // currently blocking time of getPosVelAcc with 400 000 speed : 600µS
     error = myOtos.getPosVelAcc(myPosition, myVelocity, myAcceleration);
     if (error != 0)
         print("Error Pos : ", error);
