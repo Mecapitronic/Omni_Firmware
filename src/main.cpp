@@ -5,6 +5,27 @@ ESP32_FAST_PWM *stepper2;
 ESP32_FAST_PWM *stepper3;
 
 // Motion parameters
+OpticalTrackingOdometrySensor otos;
+
+// Timer Settings
+static const TickType_t timer_delay_1 = 5 / portTICK_PERIOD_MS; // period of "tic" (ref time for robot motion asserv)
+static TimerHandle_t timer_handle_1 = NULL;
+static const TickType_t timer_delay_2 = 20 / portTICK_PERIOD_MS; // period of update teleplot
+static TimerHandle_t timer_handle_2 = NULL;
+
+void timerCallback1(TimerHandle_t xTimer)
+{
+  // TIMER 1
+  // do NON BLOCKING stuff
+  otos.Update();
+}
+
+void timerCallback2(TimerHandle_t xTimer)
+{
+  // TIMER 2
+  // do NON BLOCKING stuff
+  otos.Teleplot();
+}
 
 //******************************************************* SETUP **************************************************************** */
 void setup()
@@ -47,8 +68,25 @@ void setup()
   {
     stepper3->setPWM();
   }
-  
-  delay(2000);
+
+  otos.Initialisation();
+
+  // Create a timer
+  timer_handle_1 = xTimerCreate(
+      "Timer 1",       // Name of timer
+      timer_delay_1,   // Period of timer (in ticks)
+      pdTRUE,          // Auto-reload
+      (void *)0,       // Timer ID
+      timerCallback1); // Callback function
+  xTimerStart(timer_handle_1, portMAX_DELAY);
+
+  timer_handle_2 = xTimerCreate(
+      "Timer 2",       // Name of timer
+      timer_delay_2,   // Period of timer (in ticks)
+      pdTRUE,          // Auto-reload
+      (void *)0,       // Timer ID
+      timerCallback2); // Callback function
+  xTimerStart(timer_handle_2, portMAX_DELAY);
 }
 
 int x = 1;
