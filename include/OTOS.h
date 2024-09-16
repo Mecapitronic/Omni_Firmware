@@ -12,17 +12,17 @@ using namespace Printer;
 
 class OpticalTrackingOdometrySensor
 {
-   public:
+public:
     void Initialisation();
     void Update();
     void HandleCommand(Command cmd);
     void Teleplot();
-    
+
     sfe_otos_pose2d_t myPosition;
     sfe_otos_pose2d_t myVelocity;
     sfe_otos_pose2d_t myAcceleration;
 
-   private:
+private:
     QwiicOTOS myOtos;
 };
 

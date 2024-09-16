@@ -14,7 +14,4 @@
 #define stepPinM3 2
 #define dirPinM3  4
 
-
-
-
 #endif

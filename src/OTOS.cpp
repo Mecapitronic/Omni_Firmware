@@ -7,7 +7,7 @@ void OpticalTrackingOdometrySensor::Initialisation()
     delay(2000);
 
     Wire.begin();
-    Wire.setClock( 400000UL);
+    Wire.setClock(400000UL);
 
     // Attempt to begin the sensor
     while (myOtos.begin() == false)
@@ -62,7 +62,7 @@ void OpticalTrackingOdometrySensor::Initialisation()
     // Reset the tracking algorithm - this resets the position to the origin,
     // but can also be used to recover from some rare tracking errors
     myOtos.resetTracking();
-    
+
     sfeTkError_t error;
     sfe_otos_signal_process_config_t config;
     error = myOtos.getSignalProcessConfig(config);
@@ -83,22 +83,21 @@ void OpticalTrackingOdometrySensor::Update()
     sfeTkError_t error;
     // Get the latest position, which includes the x and y coordinates, plus the
     // heading angle
-    //sfe_otos_pose2d_t myPosition;
-    //error = myOtos.getPosition(myPosition);
-    //if (error != 0)
+    // sfe_otos_pose2d_t myPosition;
+    // error = myOtos.getPosition(myPosition);
+    // if (error != 0)
     //    print("Error Pos : ", error);
 
     // Create structs for velocity, and acceleration
-    //sfe_otos_pose2d_t myVelocity;
-    //error = myOtos.getVelocity(myVelocity);
-    //if (error != 0)
+    // sfe_otos_pose2d_t myVelocity;
+    // error = myOtos.getVelocity(myVelocity);
+    // if (error != 0)
     //    print("Error Vel : ", error);
 
-    //sfe_otos_pose2d_t myAcceleration;
-    //error = myOtos.getAcceleration(myAcceleration);
-    //if (error != 0)
-    //    print("Error Acc : ", error);
-
+    // sfe_otos_pose2d_t myAcceleration;
+    // error = myOtos.getAcceleration(myAcceleration);
+    // if (error != 0)
+    //     print("Error Acc : ", error);
 
     error = myOtos.getPosVelAcc(myPosition, myVelocity, myAcceleration);
     if (error != 0)
