@@ -119,6 +119,14 @@ void OpticalTrackingOdometrySensor::HandleCommand(Command cmd)
     }
 }
 
+void OpticalTrackingOdometrySensor::PrintCommandHelp()
+{
+    Printer::println("OTOS Command Help :");
+    Printer::println(" > Otos:[int]");
+    Printer::println("      [int] ");
+    Printer::println();
+}
+
 void OpticalTrackingOdometrySensor::Teleplot()
 {
     teleplot("X", myPosition.x * 1000);

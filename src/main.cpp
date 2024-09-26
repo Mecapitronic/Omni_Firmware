@@ -134,6 +134,10 @@ void loop()
   {
     Command cmd = ESP32_Helper::GetCommand();
 
+    if (cmd.cmd.startsWith("Help"))
+    {
+      otos.PrintCommandHelp();
+    }
     otos.HandleCommand(cmd);
   }
 }
