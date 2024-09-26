@@ -1,8 +1,7 @@
 #include "main.h"
 
-ESP32_FAST_PWM *stepper1;
-ESP32_FAST_PWM *stepper2;
-ESP32_FAST_PWM *stepper3;
+Stepper stepper;
+OpticalTrackingOdometrySensor otos;
 
 // Motion parameters
 // https://poivron-robotique.fr/Robot-holonome-localisation-partie-1.html
@@ -13,7 +12,6 @@ float theta1 = PI / 6;     // Angle for motor 1 : 30° PI/6
 float theta2 = PI * 5 / 6; // Angle for motor 2 : 150° PI*5/6
 float theta3 = PI * 3 / 2; // Angle for motor 3 : 270° PI*3/2
 
-OpticalTrackingOdometrySensor otos;
 
 // Timer Settings
 static const TickType_t timer_delay_1 = 5 / portTICK_PERIOD_MS; // period of "tic" (ref time for robot motion asserv)
@@ -47,45 +45,14 @@ void timerCallback2(TimerHandle_t xTimer)
 void setup()
 {
   ESP32_Helper::Initialisation();
+  println(ARDUINO_BOARD);
   println("Temperature is : ", temperatureRead());
+  //println("Frequency  CPU : ", getCpuFrequencyMhz());
+
   println("Robot Holonome Firmware");
 
-  // Sets the two pins as Outputs
-  pinMode(stepPinM1, OUTPUT);
-  pinMode(dirPinM1, OUTPUT);
-  digitalWrite(dirPinM1, LOW);
-
-  pinMode(stepPinM2, OUTPUT);
-  pinMode(dirPinM2, OUTPUT);
-  digitalWrite(dirPinM2, LOW);
-
-  pinMode(stepPinM3, OUTPUT);
-  pinMode(dirPinM3, OUTPUT);
-  digitalWrite(dirPinM3, LOW);
-
-  print(F("\nStarting ESP32_PWM_StepperControl on "));
-  println(ARDUINO_BOARD);
-  println(ESP32_FAST_PWM_VERSION);
-
-  stepper1 = new ESP32_FAST_PWM(stepPinM1, 500, 0, 2, 8); // pin, frequency = 500 Hz, dutycycle = 0 %, channel, resolution = 8
-  if (stepper1)
-  {
-    stepper1->setPWM();
-  }
-
-  stepper2 = new ESP32_FAST_PWM(stepPinM2, 500, 0, 4, 8);
-  if (stepper2)
-  {
-    stepper2->setPWM();
-  }
-
-  stepper3 = new ESP32_FAST_PWM(stepPinM3, 500, 0, 6, 8);
-  if (stepper3)
-  {
-    stepper3->setPWM();
-  }
-
   otos.Initialisation();
+  stepper.Initialisation();
 
   // Create a timer
   timer_handle_1 = xTimerCreate(
@@ -137,8 +104,10 @@ void loop()
     if (cmd.cmd.startsWith("Help"))
     {
       otos.PrintCommandHelp();
+      stepper.PrintCommandHelp();
     }
     otos.HandleCommand(cmd);
+    stepper.HandleCommand(cmd);
   }
 }
 //**************************************************************************************************************************/
@@ -149,11 +118,7 @@ void updateOdometry() // TODO: changer de nom, c'est pas odometry, voir ancien c
   if (commande_position >= consigne_position) // arrêt moteurs et reset consigne quand consigne atteinte
   {
     // stop all motors
-    setMotorSpeed(1, 0);
-    setMotorSpeed(2, 0);
-    setMotorSpeed(3, 0);
-    commande_position = 0;
-    consigne_position = 0;
+    stepper.SetMotorsSpeed(0, 0, 0);
     consigne_vitesse = 0;
   }
   else
@@ -178,57 +143,11 @@ void setRobotPosition(float dx, float dy, float theta)
   SetRobotSpeed(dx, dy, theta);
 }
 
-// Set speed in mm/s of one specific motor
-void setMotorSpeed(int motor_ID, float speed_mms)
-{
-  // convert speed in mm/s to frequency in step/s
-  float freq = speed_mms * STEP_PER_MM;
-
-  if (motor_ID == 1)
-  {
-    if (freq == 0)
-    {
-      // stop motor
-      stepper1->setPWM();
-    }
-    else
-    {
-      //  Set the frequency of the PWM output and a duty cycle of 50%
-      digitalWrite(dirPinM1, (freq > 0));
-      stepper1->setPWM(stepPinM1, abs(freq), 50);
-    }
-  }
-  else if (motor_ID == 2)
-  {
-    if (freq == 0)
-    {
-      // stop motor
-      stepper2->setPWM();
-    }
-    else
-    {
-      //  Set the frequency of the PWM output and a duty cycle of 50%
-      digitalWrite(dirPinM2, (freq > 0));
-      stepper2->setPWM(stepPinM2, abs(freq), 50);
-    }
-  }
-  else if (motor_ID == 3)
-  {
-    if (freq == 0)
-    {
-      // stop motor
-      stepper3->setPWM();
-    }
-    else
-    {
-      //  Set the frequency of the PWM output and a duty cycle of 50%
-      digitalWrite(dirPinM3, (freq > 0));
-      stepper3->setPWM(stepPinM3, abs(freq), 50);
-    }
-  }
-}
-
-// Set the robot center speeds : linear x and y in mm/s, angular omega in °/s
+// Set the robot center linear and angular speeds : 
+// - lin_speed_mms : speed of the linear motion, in mm/s
+// - lin_direction_rad : angle direction of the linear motion, in radians   [direction => where is moving, trajectory]
+// - ang_speed_deg : speed of the angular motion, in °/s                    [orientation => where is facing]
+// Polar coordinate for better vectorial control, only one linear PID combining x and y motions.
 // https://poivron-robotique.fr/Robot-holonome-lois-de-commande.html
 // 2  Y  1
 //    o  X
