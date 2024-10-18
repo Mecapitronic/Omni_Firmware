@@ -21,23 +21,23 @@ void Stepper::Initialisation()
     pinMode(dirPinM3, OUTPUT);
     digitalWrite(dirPinM3, LOW);
 
-    print(F("\nStarting ESP32_PWM_StepperControl"));
+    print("Starting ESP32_PWM_StepperControl : ");
     println(ESP32_FAST_PWM_VERSION);
 
-    // TODO test with Resolution < 8 ?
-    stepper1 = new ESP32_FAST_PWM(stepPinM1, 500, 0, 2, 8); // pin, frequency = 500 Hz, dutyCycle = 0 %, channel with independent timer, resolution = 8
+    // pin, frequency = 500 Hz, dutyCycle = 0 %, choose channel with independent timer, resolution = 13 to go up to 8k Hz
+    stepper1 = new ESP32_FAST_PWM(stepPinM1, 500, 0, 2, BIT_RESOLUTION);
     if (stepper1)
     {
         stepper1->setPWM();
     }
 
-    stepper2 = new ESP32_FAST_PWM(stepPinM2, 500, 0, 4, 8);
+    stepper2 = new ESP32_FAST_PWM(stepPinM2, 500, 0, 4, BIT_RESOLUTION);
     if (stepper2)
     {
         stepper2->setPWM();
     }
 
-    stepper3 = new ESP32_FAST_PWM(stepPinM3, 500, 0, 6, 8);
+    stepper3 = new ESP32_FAST_PWM(stepPinM3, 500, 0, 6, BIT_RESOLUTION);
     if (stepper3)
     {
         stepper3->setPWM();
@@ -61,12 +61,12 @@ void Stepper::HandleCommand(Command cmd)
             println("Freq : ", cmd.data[1]);
             SetMotorSpeed(cmd.data[0], cmd.data[1]);
         }
-        else if (cmd.cmd == ("StepperMotors") && cmd.size == 3)
+        else if (cmd.cmd == ("StepperMotor") && cmd.size == 3)
         {
-            // Stepper:200;500;300
+            // StepperMotor:100;100;100
             println("Stepper 1 with freq : ", cmd.data[0]);
             println("Stepper 2 with freq : ", cmd.data[1]);
-            println("Stepper 3 with freq : ", cmd.data[3]);
+            println("Stepper 3 with freq : ", cmd.data[2]);
             SetMotorsSpeed(cmd.data[0], cmd.data[1], cmd.data[2]);
         }
         else
@@ -88,51 +88,50 @@ void Stepper::PrintCommandHelp()
 
 void Stepper::SetMotorSpeed(int motor_ID, float speed_mms)
 {
-    // TODO STEP_PER_MM
     // convert speed in mm/s to frequency in step/s
-    float freq = speed_mms; //* STEP_PER_MM;
-
+    float speed_step_s = speed_mms * MOTOR_STEP_PER_MM;
+    //print("speed_mms:",speed_mms);
+    int freq = (int)fmin(FREQ_MAX_STEPPER,fabs(speed_step_s));
+    bool direction = (speed_mms > 0.0);
+    //println(" freq:",freq);
     if (motor_ID == 1)
     {
-        // TODO freq min = dead zone
-        if (freq == 0)
+        if (freq == 0 || freq < FREQ_MIN_STEPPER)
         {
             // stop motor
-            stepper1->setPWM();
+            stepper1->setPWM(stepPinM1, FREQ_MIN_STEPPER, 0);
         }
         else
         {
             //  Set the frequency of the PWM output and a duty cycle of 50%
-            digitalWrite(dirPinM1, (freq > 0));
-            stepper1->setPWM(stepPinM1, abs(freq), 50);
+            digitalWrite(dirPinM1, direction);
+            stepper1->setPWM(stepPinM1, freq, 50);
         }
     }
     else if (motor_ID == 2)
     {
-        if (freq == 0)
+        if (freq == 0 || freq < FREQ_MIN_STEPPER)
         {
-            // stop motor
-            stepper2->setPWM();
+            stepper2->setPWM(stepPinM2, FREQ_MIN_STEPPER, 0);
         }
         else
         {
             //  Set the frequency of the PWM output and a duty cycle of 50%
-            digitalWrite(dirPinM2, (freq > 0));
-            stepper2->setPWM(stepPinM2, abs(freq), 50);
+            digitalWrite(dirPinM2, direction);
+            stepper2->setPWM(stepPinM2, freq, 50);
         }
     }
     else if (motor_ID == 3)
     {
-        if (freq == 0)
+        if (freq == 0 || freq < FREQ_MIN_STEPPER)
         {
-            // stop motor
-            stepper3->setPWM();
+            stepper3->setPWM(stepPinM2, FREQ_MIN_STEPPER, 0);
         }
         else
         {
             //  Set the frequency of the PWM output and a duty cycle of 50%
-            digitalWrite(dirPinM3, (freq > 0));
-            stepper3->setPWM(stepPinM3, abs(freq), 50);
+            digitalWrite(dirPinM3, direction);
+            stepper3->setPWM(stepPinM3, freq, 50);
         }
     }
 }
@@ -142,4 +141,40 @@ void Stepper::SetMotorsSpeed(float speed_1_mms, float speed_2_mms, float speed_3
     SetMotorSpeed(1, speed_1_mms);
     SetMotorSpeed(2, speed_2_mms);
     SetMotorSpeed(3, speed_3_mms);
+}
+
+float Stepper::GetMotorSpeed(int motor_ID)
+{
+    bool direction;
+    if (motor_ID == 1)
+    {
+        if (stepper1->getActualDutyCycle() == 0)
+            return 0;
+        direction = digitalRead(dirPinM1);
+        if (direction)
+            return stepper1->getActualFreq() * MM_PER_STEP_MOTOR;
+        else
+            return -stepper1->getActualFreq() * MM_PER_STEP_MOTOR;
+    }
+    else if (motor_ID == 2)
+    {
+        if (stepper1->getActualDutyCycle() == 0)
+            return 0;
+        direction = digitalRead(dirPinM2);
+        if (direction)
+            return stepper2->getActualFreq() * MM_PER_STEP_MOTOR;
+        else
+            return -stepper2->getActualFreq() * MM_PER_STEP_MOTOR;
+    }
+    else if (motor_ID == 3)
+    {
+        if (stepper1->getActualDutyCycle() == 0)
+            return 0;
+        direction = digitalRead(dirPinM3);
+        if (direction)
+            return stepper3->getActualFreq() * MM_PER_STEP_MOTOR;
+        else
+            return -stepper3->getActualFreq() * MM_PER_STEP_MOTOR;
+    }
+    return 0;
 }
