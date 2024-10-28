@@ -98,40 +98,41 @@ void Stepper::SetMotorSpeed(int motor_ID, float speed_mms)
     {
         if (freq == 0 || freq < FREQ_MIN_STEPPER)
         {
-            // stop motor
-            stepper1->setPWM(stepPinM1, FREQ_MIN_STEPPER, 0);
+            // stop motor do not use freq 0 : IntegefromrDivideByZero in ledc.c line 318 with ESP IDF Version : v4.4.7-dirty
+            // use : duty cycle = 0 to put pin to LOW
+            stepper1->setPWM_Int(stepPinM1, FREQ_MIN_STEPPER, 0);
         }
         else
         {
             //  Set the frequency of the PWM output and a duty cycle of 50%
             digitalWrite(dirPinM1, direction);
-            stepper1->setPWM(stepPinM1, freq, 50);
+            stepper1->setPWM_Int(stepPinM1, freq, dutyCycle50);
         }
     }
     else if (motor_ID == 2)
     {
         if (freq == 0 || freq < FREQ_MIN_STEPPER)
         {
-            stepper2->setPWM(stepPinM2, FREQ_MIN_STEPPER, 0);
+            stepper2->setPWM_Int(stepPinM2, FREQ_MIN_STEPPER, 0);
         }
         else
         {
             //  Set the frequency of the PWM output and a duty cycle of 50%
             digitalWrite(dirPinM2, direction);
-            stepper2->setPWM(stepPinM2, freq, 50);
+            stepper2->setPWM_Int(stepPinM2, freq, dutyCycle50);
         }
     }
     else if (motor_ID == 3)
     {
         if (freq == 0 || freq < FREQ_MIN_STEPPER)
         {
-            stepper3->setPWM(stepPinM2, FREQ_MIN_STEPPER, 0);
+            stepper3->setPWM_Int(stepPinM2, FREQ_MIN_STEPPER, 0);
         }
         else
         {
             //  Set the frequency of the PWM output and a duty cycle of 50%
             digitalWrite(dirPinM3, direction);
-            stepper3->setPWM(stepPinM3, freq, 50);
+            stepper3->setPWM_Int(stepPinM3, freq, dutyCycle50);
         }
     }
 }

@@ -37,13 +37,15 @@ const float MM_PER_STEP_MOTOR =1/MOTOR_STEP_PER_MM ;//0.11560693641
 #define FREQ_MIN_STEPPER 489
 #elif BIT_RESOLUTION == 13
 #define FREQ_MAX_STEPPER 9784
-#define FREQ_MIN_STEPPER 10 //! TODO To Be Defined
+#define FREQ_MIN_STEPPER 10 //! TODO To Be Defined, does not work under 10
 #elif BIT_RESOLUTION == 16
 #define FREQ_MAX_STEPPER 1223
 #define FREQ_MIN_STEPPER 1
 #else
 #error "Incorrect Bit Resolution value !"
 #endif
+
+const int dutyCycle50 = MAX_COUNT_16BIT/2;
 
 const int SPEED_MAX_STEPPER = FREQ_MAX_STEPPER/MOTOR_STEP_PER_MM;
 
