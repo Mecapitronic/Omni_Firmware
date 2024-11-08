@@ -2,7 +2,10 @@
     "cSpell.words": [
         "Mecapi",
         "Mecapitronic",
+        "otos",
+        "setpoint",
         "teleplot",
+        "uart",
         "wokwi"
     ],
     "files.associations": {
@@ -10,7 +13,22 @@
         "functional": "cpp",
         "queue": "cpp",
         "array": "cpp",
-        "string_view": "cpp"
+        "string_view": "cpp",
+        "library_module.h": "c",
+        "structure.h": "c",
+        "move_module.h": "c",
+        "deque": "cpp",
+        "unordered_map": "cpp",
+        "unordered_set": "cpp",
+        "vector": "cpp",
+        "initializer_list": "cpp",
+        "cmath": "cpp",
+        "*.tcc": "cpp",
+        "rtc.h": "c",
+        "esp_system.h": "c",
+        "random": "cpp",
+        "new": "cpp",
+        "math_module.h": "c"
     },
     "launch": {
         "version": "0.2.0",

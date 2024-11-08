@@ -8,6 +8,7 @@
 .vscode/ipch
 .vscode/launch.json
 #.vscode/settings.json
+*.code-workspace
 
 # Python
 **/__pycache__
