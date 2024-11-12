@@ -3,3 +3,8 @@
 	url = https://github.com/Mecapitronic/ESP32_Helper.git
 	branch = main
 	ignore = dirty
+[submodule "lib/ESP32_FastPWM"]
+	path = lib/ESP32_FastPWM
+	url = https://github.com/Mecapitronic/ESP32_FastPWM.git
+	branch = main
+	ignore = dirty
