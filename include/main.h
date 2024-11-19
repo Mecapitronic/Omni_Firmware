@@ -22,6 +22,8 @@ using namespace Printer;
 // distance du centre du robot au centre de la roue en mm
 #define WHEEL_DISTANCE 100
 
+#define SQRT3_2 0.86602540378
+
 void setMotorSpeed(int motor_ID, float speed_mms);
 void SetRobotSpeed(float Vx, float Vy, float omega);
 void setRobotPosition(float Vx, float Vy, float omega);

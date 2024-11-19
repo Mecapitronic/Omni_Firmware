@@ -175,9 +175,9 @@ void SetRobotSpeed(float Vx, float Vy, float omega)
   println("v2 : ",v2);
   println("v3 : ",v3);
 
-  setMotorSpeed(1, v1);
-  setMotorSpeed(2, v2);
-  setMotorSpeed(3, v3);
+  stepper.SetMotorSpeed(1, v1);
+  stepper.SetMotorSpeed(2, v2);
+  stepper.SetMotorSpeed(3, v3);
 }
 
 
