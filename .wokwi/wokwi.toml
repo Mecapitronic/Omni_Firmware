@@ -1,6 +1,6 @@
 [wokwi]
 version = 1
-firmware = '../.pio/build/Esp32/firmware.bin'
-elf = '../.pio/build/Esp32/firmware.elf'
+firmware = '../.pio/build/Esp32_NO_WIFI/firmware.bin'
+elf = '../.pio/build/Esp32_NO_WIFI/firmware.elf'
 gdbServerPort=3333
 rfc2217ServerPort = 4000
