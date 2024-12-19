@@ -1,6 +1,5 @@
 #ifndef OTOS_H
 #define OTOS_H
-#ifdef SPARKFUN_OTOS
 
 #include <Arduino.h>
 #include "pin.h"
@@ -33,5 +32,4 @@ private:
     QwiicOTOS myOtos;
 };
 
-#endif
 #endif

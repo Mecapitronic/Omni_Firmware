@@ -1,5 +1,4 @@
 #include "OTOS.h"
-#ifdef SPARKFUN_OTOS
 
 void OpticalTrackingOdometrySensor::Initialisation()
 {
@@ -14,7 +13,7 @@ void OpticalTrackingOdometrySensor::Initialisation()
     int retryConnect = 0;
     // Attempt to begin the sensor
     isConnected = myOtos.begin();
-    while(!isConnected && retryConnect < 3)
+    while(!isConnected && retryConnect < 3) //! TODO define retry to 5 ?
     {
         println("OTOS not connected, check your wiring and I2C address!");
         delay(1000);
@@ -98,7 +97,7 @@ void OpticalTrackingOdometrySensor::Initialisation()
         sfe_otos_signal_process_config_t config;
         error = myOtos.getSignalProcessConfig(config);
         if (error != 0)
-            print("Error get Signal Process Config : ", error);
+            print("Error get Signal Process Config : ", ((int)(error)));
         else
         {
             //println("Signal Process Config :");
@@ -121,7 +120,7 @@ void OpticalTrackingOdometrySensor::ChangePosition(float x, float y, float h)
     // the origin. If your robot does not start at the origin, or you have
     // another source of location information (eg. vision odometry), you can set
     // the OTOS location to match and it will continue to track from there.
-    sfe_otos_pose2d_t currentPosition = {x, y, h};
+    sfe_otos_pose2d_t currentPosition = {x/1000, y/1000, h};
     myOtos.setPosition(currentPosition);
 }
 
@@ -228,5 +227,3 @@ void OpticalTrackingOdometrySensor::Teleplot()
         println(acc.h, 4);
     */
 }
-
-#endif
