@@ -2,57 +2,57 @@
 
 Stepper stepper;
 OpticalTrackingOdometrySensor otos;
-
-// Motion parameters
-// https://poivron-robotique.fr/Robot-holonome-localisation-partie-1.html
-// 2  Y  1
-//    o  X (angle ref X+)
-//    3
-float theta1 = PI / 6;     // Angle for motor 1 : 30° PI/6
-float theta2 = PI * 5 / 6; // Angle for motor 2 : 150° PI*5/6
-float theta3 = PI * 3 / 2; // Angle for motor 3 : 270° PI*3/2
-
+t_robot robot;
+Motion lin; // linear motion in system unit
+Motion ang; // angular motion in system unit => radians
+PointF2D goTo = {500, 500, 0};
+float motor1_speed_ret = 0;
+float motor2_speed_ret = 0;
+float motor3_speed_ret = 0;
 
 // Timer Settings
-static const TickType_t timer_delay_1 = 5 / portTICK_PERIOD_MS; // period of "tic" (ref time for robot motion asserv)
+static const TickType_t timer_delay_1 = (1000 / TIMER_ASSERV_FREQ) / portTICK_PERIOD_MS; // period of robot motion asserv = TIMER_ASSERV_FREQ Hz
 static TimerHandle_t timer_handle_1 = NULL;
-static const TickType_t timer_delay_2 = 20 / portTICK_PERIOD_MS; // period of update teleplot
-static TimerHandle_t timer_handle_2 = NULL;
+static bool timer_enable_1 = false;
 
-// Test variables
-float consigne_position = 0;
-float consigne_vitesse = 0;
-float commande_position = 0;
+bool simulation = false;
 
-//******************************************************* TIMER 5ms => ASSERV **************************************************************** */
-void timerCallback1(TimerHandle_t xTimer)
-{
-  // TIMER 1
-  // do NON BLOCKING stuff
-  otos.Update();
-  updateOdometry();
-}
-
-//******************************************************* TIMER 20ms **************************************************************** */
-void timerCallback2(TimerHandle_t xTimer)
-{
-  // TIMER 2
-  // do NON BLOCKING stuff
-  //otos.Teleplot();
-}
+const int anticipation_mm = 1;
+const int anticipation_unit = MM_TO_UNIT(anticipation_mm);
+const int anticipation_deg = 1;
+const int anticipation_deg_unit = DEG_TO_UNIT(anticipation_deg);
 
 //******************************************************* SETUP **************************************************************** */
 void setup()
 {
   ESP32_Helper::Initialisation();
-  println(ARDUINO_BOARD);
-  println("Temperature is : ", temperatureRead());
-  //println("Frequency  CPU : ", getCpuFrequencyMhz());
+  Wifi_Helper::EnableWifi(ENABLE_FALSE);
+  println("Board : ", String(ARDUINO_BOARD));
+  print("Arduino Version : ", ESP_ARDUINO_VERSION_MAJOR);
+  print(".", ESP_ARDUINO_VERSION_MINOR);
+  println(".", ESP_ARDUINO_VERSION_PATCH);
+  println("ESP IDF Version : ", String(esp_get_idf_version()));
+  // print("ESP IDF Version : ",ESP_IDF_VERSION_MAJOR);  print(".",ESP_IDF_VERSION_MINOR);  println(".",ESP_IDF_VERSION_PATCH);
+  println("Temperature : ", temperatureRead(), " deg Celsius");
+  println("Frequency CPU : ", getCpuFrequencyMhz(), " MHz");
+  println();
 
   println("Robot Holonome Firmware");
 
   otos.Initialisation();
   stepper.Initialisation();
+
+  // Init start zone => team color ?
+  robot.location.x = goTo.x;
+  robot.location.y = goTo.y;
+  robot.orientation = goTo.h;
+  otos.ChangePosition(robot.location.x, robot.location.y, robot.orientation);
+
+  // Init Motion
+  lin.Initialisation(speed_lin_max, accel_lin_max, jerk_lin);
+  ang.Initialisation(speed_ang_max, accel_ang_max, jerk_ang);
+
+  SetRobotPosition(goTo.x, goTo.y, goTo.h);
 
   // Create a timer
   timer_handle_1 = xTimerCreate(
@@ -63,39 +63,190 @@ void setup()
       timerCallback1); // Callback function
   xTimerStart(timer_handle_1, portMAX_DELAY);
 
-  timer_handle_2 = xTimerCreate(
-      "Timer 2",       // Name of timer
-      timer_delay_2,   // Period of timer (in ticks)
-      pdTRUE,          // Auto-reload
-      (void *)1,       // Timer ID
-      timerCallback2); // Callback function
-  xTimerStart(timer_handle_2, portMAX_DELAY);
+  timer_enable_1 = true;
+
+  // Serial.print("FreeRTOS heap remaining ");Serial.print(xPortGetFreeHeapSize());Serial.println(" bytes");
 }
 
-int x = 1;
+unsigned long startChrono = 0;
+unsigned long endChrono = 0;
+unsigned long deltaChrono = 0;
+unsigned long teleplotChrono = 0;
+int nbrLoop = 0;
+
+//******************************************************* TIMER 5ms => ASSERV **************************************************************** */
+void timerCallback1(TimerHandle_t xTimer)
+{
+  if (timer_enable_1)
+  {
+    // startChrono = micros();
+    //  TIMER 1
+    //  do NON BLOCKING stuff
+    updateOdometry();
+    SetRobotPosition(goTo.x, goTo.y, goTo.h);
+
+    if (lin.position.setpoint > anticipation_unit || lin.position.setpoint < -anticipation_unit)
+    {
+      // Anti-lock => Restart from the real position if too much speed difference
+      //! DO WE NEED IT ?
+      // if ((abs(lin.velocity.real - lin.velocity.command) > ANTI_LOCK_SPEED_LIN) )
+      //{
+      //   resetRamp(&(lin));
+      // }
+      lin.Update();
+    }
+    else
+    {
+      lin.Reset_Ramp();
+    }
+
+    if (ang.position.setpoint > anticipation_deg_unit || ang.position.setpoint < -anticipation_deg_unit)
+    {
+      // Anti-lock => Restart from the real position if too much speed difference
+      //! DO WE NEED IT ?
+      // if ((abs(ang.velocity.real - ang.velocity.command) > ANTI_LOCK_SPEED_ANG) )
+      //{
+      //   resetRamp(&(ang));
+      // }
+      ang.Update();
+    }
+    else
+    {
+      ang.Reset_Ramp();
+    }
+
+    SetRobotSpeed(lin.velocity.command, robot.direction, ang.velocity.command);
+
+    // else
+    //{
+    //! RESET ASSERV ?
+    // SetRobotSpeed(0,0,0);
+    //}
+  }
+}
+
+// Odométrie
+void updateOdometry()
+{
+  if (!simulation)
+  {
+    otos.Update();
+  }
+  else
+  {
+    // float motor1_speed = stepper.GetMotorSpeed(1);
+    // float motor2_speed = stepper.GetMotorSpeed(2);
+    // float motor3_speed = stepper.GetMotorSpeed(3);
+
+    float motor1_speed = motor1_speed_ret;
+    float motor2_speed = motor2_speed_ret;
+    float motor3_speed = motor3_speed_ret;
+
+    // println("v1_Simu:", motor1_speed);
+    // println("v2_Simu:", motor2_speed);
+    // println("v3_Simu:", motor3_speed);
+
+    // Simulation Calcul Vitesse OK
+    // Calcul des composantes x, y et ang à partir des vitesses des moteurs
+    float v_x = (motor1_speed + motor2_speed - 2 * motor3_speed) / 3;
+    float v_y = (motor2_speed - motor1_speed) * INV_SQRT3;
+    float v_ang = degrees(-(motor1_speed + motor2_speed + motor3_speed) / (3 * CENTER_WHEEL_DISTANCE));
+
+    // println("v_x:",v_x);
+    // println("v_y:",v_y);
+    // println("v_ang:",v_ang);
+    // printVar(v_ang);
+
+    otos.acceleration.x = v_x - otos.velocity.x;
+    otos.acceleration.y = v_y - otos.velocity.y;
+    otos.acceleration.h = v_ang - otos.velocity.h;
+
+    otos.velocity.x = v_x;
+    otos.velocity.y = v_y;
+    otos.velocity.h = v_ang;
+
+    // Mise à jour des positions en fonction des vitesses
+    otos.position.x += v_x * timer_delay_1 / 1000;
+    otos.position.y += v_y * timer_delay_1 / 1000;
+    otos.position.h += v_ang * timer_delay_1 / 1000;
+  }
+
+  robot.location.x = otos.position.x;
+  robot.location.y = otos.position.y;
+  robot.orientation = otos.position.h;
+
+  // Old position
+  // int32 last_lin_position = lin.position.real;
+  // int32 last_ang_position = ang.position.real;
+
+  // Old velocity
+  int32 last_lin_velocity = lin.velocity.real;
+  int32 last_ang_velocity = ang.velocity.real;
+
+  lin.position.real = sqrtf(robot.location.x * robot.location.x + robot.location.y * robot.location.y);
+  ang.position.real = robot.orientation;
+
+  lin.velocity.real = sqrtf(otos.velocity.x * otos.velocity.x + otos.velocity.y * otos.velocity.y);
+  ang.velocity.real = otos.velocity.h;
+  // lin.velocity.real = lin.position.real - last_lin_position;
+  // ang.velocity.real = ang.position.real - last_ang_position;
+
+  lin.acceleration.real = sqrtf(otos.acceleration.x * otos.acceleration.x + otos.acceleration.y * otos.acceleration.y);
+  ang.acceleration.real = otos.acceleration.h;
+  // lin.acceleration.real = lin.velocity.real - last_lin_velocity;
+  // ang.acceleration.real = ang.velocity.real - last_ang_velocity;
+
+  /*
+  // Old position
+    static int last_lin_position = lin.position.real;
+    static int last_ang_position = ang.position.real;
+
+    // Old velocity
+    static int last_lin_velocity = lin.velocity.real;
+    static int last_ang_velocity = ang.velocity.real;
+
+
+    lin.position.real = ?;
+    ang.position.real = ?;
+
+    // Current velocity (derivate from position)
+    lin.velocity.real = lin.position.real - last_lin_position;
+    ang.velocity.real = ang.position.real - last_ang_position;
+
+    // Current acceleration (derivate from velocity)
+    lin.acceleration.real = lin.velocity.real - last_lin_velocity;
+    ang.acceleration.real = ang.velocity.real - last_ang_velocity;
+  */
+}
 
 //******************************************************* LOOP *****************************************************************/
+
 void loop()
 {
-  
-  setRobotPosition(0, 50, 0); // avance 50mm
-  while(consigne_position != 0); // attendre reset consigne quand consigne atteinte
+  startChrono = micros();
 
-  setRobotPosition(50, 0, 0);
-  while(consigne_position != 0);
+  if (startChrono - teleplotChrono > 1000 * 20) // Update every 20ms
+  {
+    teleplotChrono = startChrono;
 
-  setRobotPosition(0, -50, 0);
-  while(consigne_position != 0);
-  
-  setRobotPosition(-50, 0, 0);
-  while(consigne_position != 0);
-  
+    static PointF2D lastPosition = {0, 0, 0};
 
-  setRobotPosition(0, 0, 60);
-  while(consigne_position != 0);
+    lastPosition.x = otos.position.x;
+    lastPosition.y = otos.position.y;
+    lastPosition.h = otos.position.h;
+    teleplot("Position", lastPosition);
+    teleplot("Orient", lastPosition.h);
+    println(">fixeScale:0:0;0:2000;3000:2000;3000:0;|xy");
 
-  setRobotPosition(0, 0, -60);
-  while(consigne_position != 0);
+    lin.Teleplot("lin");
+    // ang.Teleplot("ang");
+
+    teleplot("v1", stepper.GetMotorSpeed(1));
+    teleplot("v2", stepper.GetMotorSpeed(2));
+    teleplot("v3", stepper.GetMotorSpeed(3));
+
+    // println();
+  }
 
   if (ESP32_Helper::HasWaitingCommand())
   {
@@ -108,42 +259,63 @@ void loop()
     }
     otos.HandleCommand(cmd);
     stepper.HandleCommand(cmd);
+
+    if (cmd.cmd == ("RobotPosition") && cmd.size == 3)
+    {
+      // RobotPosition:510;510;0
+      // RobotPosition:50;50;0
+      // RobotPosition:0;0;45
+      // RobotPosition:0;0;0
+      goTo.x = cmd.data[0];
+      goTo.y = cmd.data[1];
+      goTo.h = cmd.data[2];
+      print("Robot go to x=", goTo.x);
+      print(" y=", goTo.y);
+      print(" h=", goTo.h);
+      println();
+    }
+  }
+
+  endChrono = micros();
+  deltaChrono += endChrono - startChrono;
+  nbrLoop++;
+
+  if (nbrLoop == 1)
+  {
+    // Serial.print(deltaChrono);
+    // Serial.println(" µs/func (1)");
+  }
+  if (nbrLoop >= 1000)
+  {
+    // Serial.print(deltaChrono/1000);
+    // Serial.println(" µs/func (1000)");
+    nbrLoop = 0;
+    deltaChrono = 0;
   }
 }
 //**************************************************************************************************************************/
 
-// Update position and velocity commands according to setpoint and max settings
-void updateOdometry() // TODO: changer de nom, c'est pas odometry, voir ancien code
-{
-  if (commande_position >= consigne_position) // arrêt moteurs et reset consigne quand consigne atteinte
-  {
-    // stop all motors
-    stepper.SetMotorsSpeed(0, 0, 0);
-    consigne_vitesse = 0;
-  }
-  else
-  {
-    commande_position += abs(consigne_vitesse); // estimation position cumulée, intégration vitesse
-  }
-}
-
 // Set the robot center position : linear x and y in mm, angular omega in °
 // TODO: coordonnées absolues, implémenter aussi sur y et theta, gérer correctement les abs et sign pour sens de marche...
 // TODO: en fait, on est un peu en train de refaire les fonctions MOVE...!
-void setRobotPosition(float dx, float dy, float theta)
+void SetRobotPosition(float x, float y, float theta)
 {
-  
-  println("dx : ", dx);
-  println("dy : ", dy);
-  println("theta : ", theta);
-  consigne_position = (abs(dx) + abs(dy) + abs(theta)) * UNIT_PER_MM;
-  println("consigne_position : ", consigne_position);
+  // println("x : ", x);
+  // println("y : ", y);
+  // println("theta : ", theta);
 
-  //SetRobotSpeed(dx*SIGN(dx), dy*SIGN(dy), 0); // 50mm/s, avec sens de marche
-  SetRobotSpeed(dx, dy, theta);
+  int32 dx = x - robot.location.x;
+  int32 dy = y - robot.location.y;
+  robot.direction = atan2(dy, dx); // en valeurs relatives ! //! WTF ?
+  dx = abs(dx);
+  dy = abs(dy);
+  lin.position.setpoint = MM_TO_UNIT(Approx_Distance(dx, dy)); // en valeurs absolus !
+
+  // aller en θ => ça c'est l'orientation du robot, différent de la direction de déplacement pour un holonome !
+  ang.position.setpoint = DEG_TO_UNIT(theta - robot.orientation); // orientation absolu en degrés = 0°
 }
 
-// Set the robot center linear and angular speeds : 
+// Set the robot center linear and angular speeds :
 // - lin_speed_mms : speed of the linear motion, in mm/s
 // - lin_direction_rad : angle direction of the linear motion, in radians   [direction => where is moving, trajectory]
 // - ang_speed_deg : speed of the angular motion, in °/s                    [orientation => where is facing]
@@ -152,34 +324,38 @@ void setRobotPosition(float dx, float dy, float theta)
 // 2  Y  1
 //    o  X
 //    3
-void SetRobotSpeed(float Vx, float Vy, float omega)
+void SetRobotSpeed(float lin_speed_mms, float lin_direction_rad, float ang_speed_deg)
 {
-  println("Vx : ",Vx);
-  println("Vy : ",Vy);
-  println("omega : ",omega);
-  // calcul consigne vitesse en unité interne robot
-  consigne_vitesse = ((Vx+Vy+omega) * UNIT_PER_MM) / TIMER_ASSERV_FREQ;
-  println("consigne_vitesse : ",consigne_vitesse);
+  // Global robot speed conversion to x and y components
+  float x_speed = lin_speed_mms * cos(lin_direction_rad);
+  float y_speed = lin_speed_mms * sin(lin_direction_rad);
+
+  // println(">x_speed:", x_speed);
+  // println(">y_speed:", y_speed);
+  // println(">ang_speed:", ang_speed_deg);
 
   // preliminary calculations
-  float speed_ang = WHEEL_DISTANCE * radians(omega); // d*ωz
-  float speed_vx = Vx / 2;                           // 1/2*Vx
-  float speed_vy = SQRT3_2 * Vy;                     // √3/2*Vy
+  // float ang_component = CENTER_WHEEL_DISTANCE * radians(ang_speed_deg); // d*ωz
+  // float x_component = x_speed / 2;                                      // 1/2*x_speed
+  // float y_component = y_speed * SQRT3_2;                                // √3/2*y_speed
 
   // Speeds calculations for each motor
-  float v1 = speed_vx - speed_vy - speed_ang; // V1 = 1/2*Vx − √3/2*Vy − d*ωz
-  float v2 = speed_vx + speed_vy - speed_ang; // V2 = 1/2*Vx + √3/2*Vy − d*ωz
-  float v3 = -Vx - speed_ang;                  // V3 = -Vx − d*ωz
+  float motor1_speed = x_speed / 2 - y_speed * SQRT3_2 - CENTER_WHEEL_DISTANCE * radians(ang_speed_deg); // V1 = 1/2*x_speed − √3/2*y_speed − d*ωz
+  float motor2_speed = x_speed / 2 + y_speed * SQRT3_2 - CENTER_WHEEL_DISTANCE * radians(ang_speed_deg); // V2 = 1/2*x_speed + √3/2*y_speed − d*ωz
+  float motor3_speed = -x_speed - CENTER_WHEEL_DISTANCE * radians(ang_speed_deg);                        // V3 = -x_speed − d*ωz
 
-  println("v1 : ",v1);
-  println("v2 : ",v2);
-  println("v3 : ",v3);
+  // println(">v1:", motor1_speed);
+  // println(">v2:", motor2_speed);
+  // println(">v3:", motor3_speed);
 
-  setMotorSpeed(1, v1);
-  setMotorSpeed(2, v2);
-  setMotorSpeed(3, v3);
+  stepper.SetMotorSpeed(1, motor1_speed);
+  stepper.SetMotorSpeed(2, motor2_speed);
+  stepper.SetMotorSpeed(3, motor3_speed);
+
+  motor1_speed_ret = motor1_speed;
+  motor2_speed_ret = motor2_speed;
+  motor3_speed_ret = motor3_speed;
 }
-
 
 void functionChrono(int nbrLoop)
 {
