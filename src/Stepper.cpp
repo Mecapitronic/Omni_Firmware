@@ -1,4 +1,5 @@
 #include "Stepper.h"
+//https://lastminuteengineers.com/esp32-pwm-tutorial/
 
 ESP32_FAST_PWM *stepper1;
 ESP32_FAST_PWM *stepper2;
@@ -11,14 +12,17 @@ void Stepper::Initialisation()
     // Sets the two pins as Outputs
     pinMode(stepPinM1, OUTPUT);
     pinMode(dirPinM1, OUTPUT);
+    digitalWrite(stepPinM1, LOW);
     digitalWrite(dirPinM1, LOW);
 
     pinMode(stepPinM2, OUTPUT);
     pinMode(dirPinM2, OUTPUT);
+    digitalWrite(stepPinM2, LOW);
     digitalWrite(dirPinM2, LOW);
 
     pinMode(stepPinM3, OUTPUT);
     pinMode(dirPinM3, OUTPUT);
+    digitalWrite(stepPinM3, LOW);
     digitalWrite(dirPinM3, LOW);
 
     print("Starting ESP32_PWM_StepperControl : ");
@@ -28,19 +32,19 @@ void Stepper::Initialisation()
     stepper1 = new ESP32_FAST_PWM(stepPinM1, 500, 0, 2, BIT_RESOLUTION);
     if (stepper1)
     {
-        stepper1->setPWM();
+        //stepper1->setPWM();
     }
 
     stepper2 = new ESP32_FAST_PWM(stepPinM2, 500, 0, 4, BIT_RESOLUTION);
     if (stepper2)
     {
-        stepper2->setPWM();
+        //stepper2->setPWM();
     }
 
     stepper3 = new ESP32_FAST_PWM(stepPinM3, 500, 0, 6, BIT_RESOLUTION);
     if (stepper3)
     {
-        stepper3->setPWM();
+        //stepper3->setPWM();
     }
 }
 
@@ -54,20 +58,22 @@ void Stepper::HandleCommand(Command cmd)
 
     if (cmd.cmd.startsWith("Stepper"))
     {
-        if (cmd.cmd == ("StepperMotor") && cmd.size == 2)
+        if (cmd.cmd == ("StepperMotor") && cmd.size == 3)
         {
-            // Stepper:1;500
-            print("Stepper : ", cmd.data[0], " with ");
-            println("Freq : ", cmd.data[1]);
-            SetMotorSpeed(cmd.data[0], cmd.data[1]);
-        }
-        else if (cmd.cmd == ("StepperMotor") && cmd.size == 3)
-        {
-            // StepperMotor:100;100;100
-            println("Stepper 1 with freq : ", cmd.data[0]);
-            println("Stepper 2 with freq : ", cmd.data[1]);
-            println("Stepper 3 with freq : ", cmd.data[2]);
-            SetMotorsSpeed(cmd.data[0], cmd.data[1], cmd.data[2]);
+            // StepperMotor:1;1000;50
+            // StepperMotor:1;1;50
+            if(cmd.data[2] >= 0 && cmd.data[2] <= 100)
+            {
+                print("Stepper ", cmd.data[0]);
+                print(" with freq ", cmd.data[1], " Hz");
+                println(" with duty ", cmd.data[2], " %");
+                if(cmd.data[0]==1)
+                    stepper1->setPWM(cmd.data[1],cmd.data[2]);
+                if(cmd.data[0]==2)
+                    stepper2->setPWM(cmd.data[1],cmd.data[2]);
+                if(cmd.data[0]==3)
+                    stepper3->setPWM(cmd.data[1],cmd.data[2]);
+            }
         }
         else
         {
@@ -79,10 +85,8 @@ void Stepper::HandleCommand(Command cmd)
 void Stepper::PrintCommandHelp()
 {
     Printer::println("Stepper Command Help :");
-    Printer::println(" > StepperMotor:[int];[int]");
-    Printer::println("      [int] number of motor, [int] frequency in Hz");
-    Printer::println(" > StepperMotors:[int];[int];[int]");
-    Printer::println("      [int] frequency of motor 1, frequency of motor 2, frequency of motor 3 in Hz");
+    Printer::println(" > StepperMotor:[int];[int];[int]");
+    Printer::println("      [int] number of motor, frequency of motor in Hz, duty cycle of motor between 0 and 100");
     Printer::println();
 }
 
@@ -100,39 +104,39 @@ void Stepper::SetMotorSpeed(int motor_ID, float speed_mms)
         {
             // stop motor do not use freq 0 : IntegefromrDivideByZero in ledc.c line 318 with ESP IDF Version : v4.4.7-dirty
             // use : duty cycle = 0 to put pin to LOW
-            stepper1->setPWM_Int(stepPinM1, FREQ_MIN_STEPPER, 0);
+            stepper1->setPWM(FREQ_MIN_STEPPER, 0);
         }
         else
         {
             //  Set the frequency of the PWM output and a duty cycle of 50%
             digitalWrite(dirPinM1, direction);
-            stepper1->setPWM_Int(stepPinM1, freq, dutyCycle50);
+            stepper1->setPWM(freq, 50);
         }
     }
     else if (motor_ID == 2)
     {
         if (freq == 0 || freq < FREQ_MIN_STEPPER)
         {
-            stepper2->setPWM_Int(stepPinM2, FREQ_MIN_STEPPER, 0);
+            stepper2->setPWM(FREQ_MIN_STEPPER, 0);
         }
         else
         {
             //  Set the frequency of the PWM output and a duty cycle of 50%
             digitalWrite(dirPinM2, direction);
-            stepper2->setPWM_Int(stepPinM2, freq, dutyCycle50);
+            stepper2->setPWM(freq, 50);
         }
     }
     else if (motor_ID == 3)
     {
         if (freq == 0 || freq < FREQ_MIN_STEPPER)
         {
-            stepper3->setPWM_Int(stepPinM2, FREQ_MIN_STEPPER, 0);
+            stepper3->setPWM(FREQ_MIN_STEPPER, 0);
         }
         else
         {
             //  Set the frequency of the PWM output and a duty cycle of 50%
             digitalWrite(dirPinM3, direction);
-            stepper3->setPWM_Int(stepPinM3, freq, dutyCycle50);
+            stepper3->setPWM(freq, 50);
         }
     }
 }
@@ -178,4 +182,113 @@ float Stepper::GetMotorSpeed(int motor_ID)
             return -stepper3->getActualFreq() * MM_PER_STEP_MOTOR;
     }
     return 0;
+}
+
+
+void Stepper::test_ledc()
+{
+    int PIN = 18;
+    int channel = 0;
+    int dutycycle = 4095;
+    int SOC_LEDC_TIMER_BIT_WIDTH = 16;
+    pinMode(PIN, OUTPUT);
+    ledcSetup(channel, 1000, 14);
+    ledcAttachPin(PIN, channel);
+    //ledc_set_duty(0, 0, _dutycycle);
+    
+    uint32_t min_frequency;
+    uint32_t max_frequency;
+    uint32_t frequency;
+    uint32_t successful_frequency;
+    uint32_t max_freq_array[SOC_LEDC_TIMER_BIT_WIDTH];
+    uint32_t min_freq_array[SOC_LEDC_TIMER_BIT_WIDTH];
+
+    // Find Max Frequency
+    for (uint8_t resolution = 1; resolution <= SOC_LEDC_TIMER_BIT_WIDTH; ++resolution)
+    {
+        
+        ledcSetup(channel, 1000, resolution);
+        max_freq_array[resolution - 1] = 0;
+        min_frequency = 0;
+        max_frequency = UINT32_MAX;
+        successful_frequency = 0;
+        while (min_frequency != max_frequency && min_frequency + 1 != max_frequency)
+        {
+            frequency = min_frequency + ((max_frequency - min_frequency) / 2);
+            println("frequency max ",frequency);
+            if (ledcChangeFrequency(channel, frequency, resolution))
+            //if(ledc_set_freq((ledc_mode_t)0, (ledc_timer_t) 0, frequency) == ESP_OK)
+            {
+                min_frequency = frequency;
+                successful_frequency = frequency;
+            }
+            else
+            {
+                max_frequency = frequency;
+            }
+        } // while not found the maximum
+        max_freq_array[resolution - 1] = successful_frequency;
+    } // for all resolutions
+
+    // Find Min Frequency
+    for (uint8_t resolution = 1; resolution <= SOC_LEDC_TIMER_BIT_WIDTH; ++resolution)
+    {
+        ledcSetup(channel, 1000, resolution);
+        min_freq_array[resolution - 1] = 0;
+        min_frequency = 0;
+        max_frequency = max_freq_array[resolution - 1];
+        successful_frequency = max_frequency;
+        while (min_frequency != max_frequency && min_frequency + 1 != max_frequency)
+        {
+            frequency = min_frequency + ((max_frequency - min_frequency) / 2);
+            println("frequency min ",frequency);
+            if (ledcChangeFrequency(channel, frequency, resolution))
+            //if(ledc_set_freq((ledc_mode_t)0, (ledc_timer_t) 0, frequency) == ESP_OK)
+            {
+                max_frequency = frequency;
+                successful_frequency = frequency;
+            }
+            else
+            {
+                min_frequency = frequency;
+            }
+        } // while not found the maximum
+        min_freq_array[resolution - 1] = successful_frequency;
+    } // for all resolutions
+
+    printf("Bit resolution | Min Frequency [Hz] | Max Frequency [Hz]\n");
+    for (uint8_t r = 1; r <= SOC_LEDC_TIMER_BIT_WIDTH; ++r)
+    {
+        size_t max_len = std::to_string(UINT32_MAX).length();
+        printf(
+            "            %s%d |         %s%lu |         %s%lu\n", std::string(2 - std::to_string(r).length(), ' ').c_str(), r,
+            std::string(max_len - std::to_string(min_freq_array[r - 1]).length(), ' ').c_str(), min_freq_array[r - 1],
+            std::string(max_len - std::to_string(max_freq_array[r - 1]).length(), ' ').c_str(), max_freq_array[r - 1]);
+    }
+    ledcDetachPin(PIN);
+}
+
+
+
+void Stepper::test_ledc2()
+{
+ESP32_FAST_PWM *stepper0;
+
+    uint8_t resolution = 14;
+    int dutycycle = 50;
+    int freq = 500;
+    uint8_t pin = 20;
+    uint8_t channel = 0;
+    
+    stepper0 = new ESP32_FAST_PWM(pin, freq, dutycycle, channel, resolution);
+    //if (stepper0)
+    //{
+    //   stepper0->setPWM();
+    //}
+    for (uint32_t freq = 1; freq <= 20; freq++)
+    {
+      stepper0->setPWM(freq, 50);
+      delay(1);
+    }
+    println();
 }

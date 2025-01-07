@@ -12,7 +12,7 @@ using namespace Printer;
 #define MOTOR_STEP_PER_MM 8.65
 const float MM_PER_STEP_MOTOR =1/MOTOR_STEP_PER_MM ;//0.11560693641
 
-#define BIT_RESOLUTION 13
+#define BIT_RESOLUTION 14
 
 // Bit resolution | Min Frequency [Hz] | Max Frequency [Hz]
 //              1 |                489 |         40 078 277
@@ -35,17 +35,21 @@ const float MM_PER_STEP_MOTOR =1/MOTOR_STEP_PER_MM ;//0.11560693641
 #if BIT_RESOLUTION == 1
 #define FREQ_MAX_STEPPER 40078277
 #define FREQ_MIN_STEPPER 489
+#elif BIT_RESOLUTION == 12
+#define FREQ_MAX_STEPPER 19569
+#define FREQ_MIN_STEPPER 1
 #elif BIT_RESOLUTION == 13
 #define FREQ_MAX_STEPPER 9784
-#define FREQ_MIN_STEPPER 10 //! TODO To Be Defined, does not work under 10
+#define FREQ_MIN_STEPPER 10 //! does not work under 10
+#elif BIT_RESOLUTION == 14
+#define FREQ_MAX_STEPPER 4892
+#define FREQ_MIN_STEPPER 5
 #elif BIT_RESOLUTION == 16
 #define FREQ_MAX_STEPPER 1223
 #define FREQ_MIN_STEPPER 1
 #else
 #error "Incorrect Bit Resolution value !"
 #endif
-
-const int dutyCycle50 = MAX_COUNT_16BIT/2;
 
 const int SPEED_MAX_STEPPER = FREQ_MAX_STEPPER/MOTOR_STEP_PER_MM;
 
@@ -60,6 +64,8 @@ public:
     void SetMotorsSpeed(float speed_1_mms,float speed_2_mms,float speed_3_mms);
     void SetMotorSpeed(int motor_ID, float speed_mms);
     float GetMotorSpeed(int motor_ID);
+    void test_ledc(void);
+    void test_ledc2(void);
 };
 
 #endif
