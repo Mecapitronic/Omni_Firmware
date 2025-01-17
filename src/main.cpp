@@ -1,5 +1,11 @@
 #include "main.h"
 
+// When setting up the NeoPixel library, we tell it how many pixels,
+// and which pin to use to send signals. Note that for older NeoPixel
+// strips you might need to change the third parameter -- see the
+// strandtest example for more information on possible values.
+Adafruit_NeoPixel pixels(NUMPIXELS, PIN_RGB_LED, NEO_GRB + NEO_KHZ800);
+
 Stepper stepper;
 OpticalTrackingOdometrySensor otos;
 t_robot robot;
@@ -22,6 +28,8 @@ const int anticipation_unit = MM_TO_UNIT(anticipation_mm);
 const int anticipation_deg = 1;
 const int anticipation_deg_unit = DEG_TO_UNIT(anticipation_deg);
 
+std::vector<uint32_t> color = {0x0F0000,0x000F00,0x00000F,0x000000};
+
 //******************************************************* SETUP **************************************************************** */
 void setup()
 {
@@ -38,6 +46,9 @@ void setup()
   println();
 
   println("Robot Holonome Firmware");
+
+  pixels.begin(); // INITIALIZE NeoPixel strip object (REQUIRED)
+  pixels.setBrightness(RGB_BRIGHTNESS);
 
   otos.Initialisation();
   stepper.Initialisation();
@@ -72,6 +83,7 @@ unsigned long startChrono = 0;
 unsigned long endChrono = 0;
 unsigned long deltaChrono = 0;
 unsigned long teleplotChrono = 0;
+unsigned long rgbChrono = 0;
 int nbrLoop = 0;
 
 //******************************************************* TIMER 5ms => ASSERV **************************************************************** */
@@ -246,6 +258,17 @@ void loop()
     teleplot("v3", stepper.GetMotorSpeed(3));
 
     // println();
+  }
+
+  if (startChrono - rgbChrono > 1000 * 100) // Update every 100ms
+  {
+    rgbChrono = startChrono;
+    static int i = 0;
+    if(i>color.capacity())
+      i=0;
+    pixels.fill(color[i++]);
+    pixels.show();
+    println("RGB Fill");
   }
 
   if (ESP32_Helper::HasWaitingCommand())

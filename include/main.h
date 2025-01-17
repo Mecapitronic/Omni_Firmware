@@ -12,6 +12,8 @@ using namespace Printer;
 #include "OTOS.h"
 #include "Stepper.h"
 #include "Motion.h"
+#include <Adafruit_NeoPixel.h>
+
 
 #ifndef ARDUINO_USB_MODE
 #warning /*error*/ This ESP32 SoC has no Native USB interface
@@ -26,6 +28,8 @@ using namespace Printer;
 
 #endif
 
+// How many NeoPixels are attached to the Arduino?
+#define NUMPIXELS 1 // Popular NeoPixel ring size
 
 // Motion parameters
 // https://poivron-robotique.fr/Robot-holonome-localisation-partie-1.html
