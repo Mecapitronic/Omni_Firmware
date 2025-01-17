@@ -13,6 +13,20 @@ using namespace Printer;
 #include "Stepper.h"
 #include "Motion.h"
 
+#ifndef ARDUINO_USB_MODE
+#warning /*error*/ This ESP32 SoC has no Native USB interface
+#elif  ARDUINO_USB_MODE == 1
+#warning USB is in device mode
+#else
+#warning USB is in OTG mode
+#include "USB.h"
+#endif
+
+#ifdef ARDUINO_USB_CDC_ON_BOOT
+
+#endif
+
+
 // Motion parameters
 // https://poivron-robotique.fr/Robot-holonome-localisation-partie-1.html
 // 2  Y  1
