@@ -12,7 +12,7 @@ using namespace Printer;
 #include "OTOS.h"
 #include "Stepper.h"
 #include "Motion.h"
-#include <Adafruit_NeoPixel.h>
+#include "LedRGB.h"
 
 
 #ifndef ARDUINO_USB_MODE
@@ -27,9 +27,6 @@ using namespace Printer;
 #ifdef ARDUINO_USB_CDC_ON_BOOT
 
 #endif
-
-// How many NeoPixels are attached to the Arduino?
-#define NUMPIXELS 1 // Popular NeoPixel ring size
 
 // Motion parameters
 // https://poivron-robotique.fr/Robot-holonome-localisation-partie-1.html
