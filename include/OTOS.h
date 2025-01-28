@@ -14,10 +14,11 @@ class OpticalTrackingOdometrySensor
 {
 public:
     void Initialisation();
-    void ChangePosition(float x, float y, float h);
     void Update();
     void HandleCommand(Command cmd);
     void PrintCommandHelp();
+    
+    void SetPosition(float x, float y, float h);
     void Teleplot();
 
     PointF2D position;

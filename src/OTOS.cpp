@@ -111,20 +111,6 @@ void OpticalTrackingOdometrySensor::Initialisation()
     }
 }
 
-void OpticalTrackingOdometrySensor::ChangePosition(float x, float y, float h)
-{
-    // Reset the tracking algorithm - this resets the position to the origin,
-    // but can also be used to recover from some rare tracking errors
-    myOtos.resetTracking();
-
-    // After resetting the tracking, the OTOS will report that the robot is at
-    // the origin. If your robot does not start at the origin, or you have
-    // another source of location information (eg. vision odometry), you can set
-    // the OTOS location to match and it will continue to track from there.
-    sfe_otos_pose2d_t currentPosition = {x/1000, y/1000, h};
-    myOtos.setPosition(currentPosition);
-}
-
 void OpticalTrackingOdometrySensor::Update()
 {
     if (isConnected)
@@ -167,19 +153,34 @@ void OpticalTrackingOdometrySensor::Update()
 
 void OpticalTrackingOdometrySensor::HandleCommand(Command cmd)
 {
-    if (cmd.cmd == ("Otos"))
-    {
+    //if (cmd.cmd == ("Otos"))
+    //{
         // Otos:0;0
-        print("Otos : ", cmd.data[0]);
-    }
+    //    print("Otos : ", cmd.data[0]);
+    //}
 }
 
 void OpticalTrackingOdometrySensor::PrintCommandHelp()
 {
     Printer::println("OTOS Command Help :");
-    Printer::println(" > Otos:[int]");
-    Printer::println("      [int] ");
-    Printer::println();
+    Printer::println("! No Command yet !");
+    //Printer::println(" > Otos:[int]");
+    //Printer::println("      [int] ");
+    //Printer::println();
+}
+
+void OpticalTrackingOdometrySensor::SetPosition(float x, float y, float h)
+{
+    // Reset the tracking algorithm - this resets the position to the origin,
+    // but can also be used to recover from some rare tracking errors
+    myOtos.resetTracking();
+
+    // After resetting the tracking, the OTOS will report that the robot is at
+    // the origin. If your robot does not start at the origin, or you have
+    // another source of location information (eg. vision odometry), you can set
+    // the OTOS location to match and it will continue to track from there.
+    sfe_otos_pose2d_t currentPosition = {x/1000, y/1000, h};
+    myOtos.setPosition(currentPosition);
 }
 
 void OpticalTrackingOdometrySensor::Teleplot()
