@@ -21,10 +21,18 @@ void LedRGB::Update()
 
 void LedRGB::HandleCommand(Command cmd)
 {
-    // HandleCommand implementation
+    //if (cmd.cmd == ("RGB"))
+    //{
+        // RGB:0;0;0
+    //    print("RGB : ", cmd.data[0]);
+    //    print(" : ", cmd.data[1]);
+    //    print(" : ", cmd.data[2]);
+    //    println();
+    //}
 }
 
 void LedRGB::PrintCommandHelp()
 {
-    // PrintCommandHelp implementation
+    Printer::println("RGB Command Help :");
+    Printer::println("! No Command yet !");
 }
