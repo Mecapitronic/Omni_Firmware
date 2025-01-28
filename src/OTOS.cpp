@@ -4,6 +4,7 @@ void OpticalTrackingOdometrySensor::Initialisation()
 {
     println("Init QwiicOTOS");
 
+    Wire.setPins(SDA, SCL);
     Wire.begin();
 
     // Normal speed is 100 000
