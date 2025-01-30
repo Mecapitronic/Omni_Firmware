@@ -137,28 +137,15 @@ void updateOdometry()
   }
   else
   {
-    // float motor1_speed = stepper.GetMotorSpeed(1);
-    // float motor2_speed = stepper.GetMotorSpeed(2);
-    // float motor3_speed = stepper.GetMotorSpeed(3);
-
-    float motor1_speed = motor1_speed_ret;
+        float motor1_speed = motor1_speed_ret;
     float motor2_speed = motor2_speed_ret;
     float motor3_speed = motor3_speed_ret;
-
-    // println("v1_Simu:", motor1_speed);
-    // println("v2_Simu:", motor2_speed);
-    // println("v3_Simu:", motor3_speed);
 
     // Simulation Calcul Vitesse OK
     // Calcul des composantes x, y et ang à partir des vitesses des moteurs
     float v_x = (motor1_speed + motor2_speed - 2 * motor3_speed) / 3;
     float v_y = (motor2_speed - motor1_speed) * INV_SQRT3;
     float v_ang = degrees(-(motor1_speed + motor2_speed + motor3_speed) / (3 * CENTER_WHEEL_DISTANCE));
-
-    // println("v_x:",v_x);
-    // println("v_y:",v_y);
-    // println("v_ang:",v_ang);
-    // printVar(v_ang);
 
     otos.acceleration.x = v_x - otos.velocity.x;
     otos.acceleration.y = v_y - otos.velocity.y;
@@ -178,49 +165,15 @@ void updateOdometry()
   robot.location.y = otos.position.y;
   robot.orientation = otos.position.h;
 
-  // Old position
-  // int32 last_lin_position = lin.position.real;
-  // int32 last_ang_position = ang.position.real;
-
-  // Old velocity
-  int32 last_lin_velocity = lin.velocity.real;
-  int32 last_ang_velocity = ang.velocity.real;
-
   lin.position.real = sqrtf(robot.location.x * robot.location.x + robot.location.y * robot.location.y);
   ang.position.real = robot.orientation;
 
   lin.velocity.real = sqrtf(otos.velocity.x * otos.velocity.x + otos.velocity.y * otos.velocity.y);
   ang.velocity.real = otos.velocity.h;
-  // lin.velocity.real = lin.position.real - last_lin_position;
-  // ang.velocity.real = ang.position.real - last_ang_position;
-
+  
   lin.acceleration.real = sqrtf(otos.acceleration.x * otos.acceleration.x + otos.acceleration.y * otos.acceleration.y);
   ang.acceleration.real = otos.acceleration.h;
-  // lin.acceleration.real = lin.velocity.real - last_lin_velocity;
-  // ang.acceleration.real = ang.velocity.real - last_ang_velocity;
-
-  /*
-  // Old position
-    static int last_lin_position = lin.position.real;
-    static int last_ang_position = ang.position.real;
-
-    // Old velocity
-    static int last_lin_velocity = lin.velocity.real;
-    static int last_ang_velocity = ang.velocity.real;
-
-
-    lin.position.real = ?;
-    ang.position.real = ?;
-
-    // Current velocity (derivate from position)
-    lin.velocity.real = lin.position.real - last_lin_position;
-    ang.velocity.real = ang.position.real - last_ang_position;
-
-    // Current acceleration (derivate from velocity)
-    lin.acceleration.real = lin.velocity.real - last_lin_velocity;
-    ang.acceleration.real = ang.velocity.real - last_ang_velocity;
-  */
-}
+  }
 
 //******************************************************* LOOP *****************************************************************/
 
