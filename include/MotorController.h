@@ -6,6 +6,7 @@
 #include "pin.h"
 #include "ESP32_Helper.h"
 using namespace Printer;
+#include "MATH_module.h"
 
 // résolution moteur : 200*8=1600 micro-step/tour, périmètre roue environ 185 mm, soit 8.65 step/mm
 // vitesse max : 1 m/s = 8.65 kHz (step/s)
@@ -77,8 +78,21 @@ const int SPEED_MAX_STEPPER = FREQ_MAX_STEPPER/MOTOR_STEP_PER_MM;
 class MotorController
 {
 public:
-    void Initialisation();
-    void Update();
+
+enum MotorBaseType
+{
+    NONE_0_MOTOR,
+    UNICYCLE_1_MOTOR,
+    DIFFERENTIAL_2_MOTORS,
+    OMNIDIRECTIONAL_3_MOTORS,
+};
+    MotorBaseType motorBaseType = NONE_0_MOTOR;
+    float centerToWheel1=0;
+    float centerToWheel2=0;
+    float centerToWheel3=0;
+
+    void Initialisation(MotorBaseType _motorBaseType);
+    void Update(float lin_speed_mms, float lin_direction_rad, float ang_speed_deg);
     void HandleCommand(Command cmd);
     void PrintCommandHelp();
     

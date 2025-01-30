@@ -56,7 +56,7 @@ using namespace Printer;
 #define ANTI_LOCK_SPEED_LIN 200
 #define ANTI_LOCK_SPEED_ANG 300
 
-//**** Macro de conversion en unité robot ****/ 
+//**** Macro de conversion en unité robot ****/
 // Position => unit
 #define MM_TO_UNIT(mm)      ((mm) * UNIT_PER_MM)
 #define RAD_TO_UNIT(rad)    ((rad) * UNIT_PER_RAD)
@@ -72,7 +72,7 @@ using namespace Printer;
 // Speed unit => vitesse
 #define SPEED_LIN_UNIT_TO_MMS(unit)     (UNIT_TO_MM(unit) * TIMER_ASSERV_FREQ)          // [unit/period] to [mm/s]
 #define SPEED_ANG_UNIT_TO_RADS(unit)    (UNIT_TO_RAD(unit) * TIMER_ASSERV_FREQ)         // [unit/period] to [rad/s]
-#define SPEED_ANG_UNIT_TO_DEGS(unit)    (UNIT_TO_DEG(unit) * TIMER_ASSERV_FREQ)         // [unit/period] to [deg/s] 
+#define SPEED_ANG_UNIT_TO_DEGS(unit)    (UNIT_TO_DEG(unit) * TIMER_ASSERV_FREQ)         // [unit/period] to [deg/s]
 // Acceleration => accel unit
 #define ACCEL_LIN_MMS2_TO_UNIT(mm_s2)   (MM_TO_UNIT(mm_s2) / TIMER_ASSERV_FREQ_SQUARE)  // [mm/s^2] to [unit/period]
 #define ACCEL_ANG_RADS2_TO_UNIT(rad_s2) (RAD_TO_UNIT(rad_s2) / TIMER_ASSERV_FREQ_SQUARE)// [rad/s^2] to [unit/period]
@@ -97,8 +97,5 @@ void timerCallback1(TimerHandle_t xTimer);
 void updateOdometry();
 
 void SetRobotPosition(float x, float y, float theta);
-void SetRobotSpeed(float lin_speed_mms, float lin_orientation_rad, float ang_speed_deg);
-
-void functionChrono(int nbrLoop);
 
 #endif

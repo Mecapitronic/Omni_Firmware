@@ -1,13 +1,14 @@
 #include "MotorController.h"
-//https://lastminuteengineers.com/esp32-pwm-tutorial/
+// https://lastminuteengineers.com/esp32-pwm-tutorial/
 
 ESP32_FAST_PWM *stepper1;
 ESP32_FAST_PWM *stepper2;
 ESP32_FAST_PWM *stepper3;
 
-void MotorController::Initialisation()
+void MotorController::Initialisation(MotorBaseType _motorBaseType)
 {
-    println("Initialisation MotorController");
+    print("Initialisation MotorController : ", _motorBaseType, " Motors");
+    motorBaseType = _motorBaseType;
 
     // Sets the two pins as Outputs
     pinMode(stepPinM1, OUTPUT);
@@ -20,11 +21,13 @@ void MotorController::Initialisation()
     digitalWrite(stepPinM2, LOW);
     digitalWrite(dirPinM2, LOW);
 
-    pinMode(stepPinM3, OUTPUT);
-    pinMode(dirPinM3, OUTPUT);
-    digitalWrite(stepPinM3, LOW);
-    digitalWrite(dirPinM3, LOW);
-
+    if (motorBaseType == OMNIDIRECTIONAL_3_MOTORS)
+    {
+        pinMode(stepPinM3, OUTPUT);
+        pinMode(dirPinM3, OUTPUT);
+        digitalWrite(stepPinM3, LOW);
+        digitalWrite(dirPinM3, LOW);
+    }
     print("Starting ESP32_FAST_PWM: ");
     println(ESP32_FAST_PWM_VERSION);
 
@@ -32,13 +35,61 @@ void MotorController::Initialisation()
     stepper1 = new ESP32_FAST_PWM(stepPinM1, 500, 0, 2, BIT_RESOLUTION);
 
     stepper2 = new ESP32_FAST_PWM(stepPinM2, 500, 0, 4, BIT_RESOLUTION);
-
-    stepper3 = new ESP32_FAST_PWM(stepPinM3, 500, 0, 6, BIT_RESOLUTION);
+    if (motorBaseType == OMNIDIRECTIONAL_3_MOTORS)
+    {
+        stepper3 = new ESP32_FAST_PWM(stepPinM3, 500, 0, 6, BIT_RESOLUTION);
+    }
 }
 
-void MotorController::Update()
+void MotorController::Update(float lin_speed_mms, float lin_direction_rad, float ang_speed_deg)
 {
-    // nothing to do, PWM works on their own
+    if (motorBaseType == DIFFERENTIAL_2_MOTORS)
+    {
+        //    Y
+        //    Î
+        // 2  o  1  ->X
+        //
+    }
+    else if (motorBaseType == OMNIDIRECTIONAL_3_MOTORS)
+    {
+
+        // Set the robot center linear and angular speeds :
+        // - lin_speed_mms : speed of the linear motion, in mm/s
+        // - lin_direction_rad : angle direction of the linear motion, in radians   [direction => where is moving, trajectory]
+        // - ang_speed_deg : speed of the angular motion, in °/s                    [orientation => where is facing]
+        // Polar coordinate for better vectorial control, only one linear PID combining x and y motions.
+        // https://poivron-robotique.fr/Robot-holonome-lois-de-commande.html
+        //    Y
+        //    Î
+        // 2     1
+        //    o     -> X
+        //    3
+        // Global robot speed conversion to x and y components
+        float x_speed = lin_speed_mms * cos(lin_direction_rad);
+        float y_speed = lin_speed_mms * sin(lin_direction_rad);
+
+        // println(">x_speed:", x_speed);
+        // println(">y_speed:", y_speed);
+        // println(">ang_speed:", ang_speed_deg);
+
+        // preliminary calculations
+        // float ang_component = CENTER_WHEEL_DISTANCE * radians(ang_speed_deg); // d*ωz
+        // float x_component = x_speed / 2;                                      // 1/2*x_speed
+        // float y_component = y_speed * SQRT3_2;                                // √3/2*y_speed
+
+        // Speeds calculations for each motor
+        float motor1_speed = x_speed / 2 - y_speed * SQRT3_2 - centerToWheel1 * radians(ang_speed_deg); // V1 = 1/2*x_speed − √3/2*y_speed − d*ωz
+        float motor2_speed = x_speed / 2 + y_speed * SQRT3_2 - centerToWheel2 * radians(ang_speed_deg); // V2 = 1/2*x_speed + √3/2*y_speed − d*ωz
+        float motor3_speed = -x_speed - centerToWheel3 * radians(ang_speed_deg);                        // V3 = -x_speed − d*ωz
+
+        // println(">v1:", motor1_speed);
+        // println(">v2:", motor2_speed);
+        // println(">v3:", motor3_speed);
+
+        SetMotorSpeed(1, motor1_speed);
+        SetMotorSpeed(2, motor2_speed);
+        SetMotorSpeed(3, motor3_speed);
+    }
 }
 
 void MotorController::HandleCommand(Command cmd)
@@ -50,17 +101,17 @@ void MotorController::HandleCommand(Command cmd)
         {
             // Motor:1;1000;50
             // Motor:1;1;50
-            if(cmd.data[2] >= 0 && cmd.data[2] <= 100)
+            if (cmd.data[2] >= 0 && cmd.data[2] <= 100)
             {
                 print("Motor ", cmd.data[0]);
                 print(" with freq ", cmd.data[1], " Hz");
                 println(" with duty ", cmd.data[2], " %");
-                if(cmd.data[0]==1)
-                    stepper1->setPWM(cmd.data[1],cmd.data[2]);
-                if(cmd.data[0]==2)
-                    stepper2->setPWM(cmd.data[1],cmd.data[2]);
-                if(cmd.data[0]==3)
-                    stepper3->setPWM(cmd.data[1],cmd.data[2]);
+                if (cmd.data[0] == 1)
+                    stepper1->setPWM(cmd.data[1], cmd.data[2]);
+                if (cmd.data[0] == 2)
+                    stepper2->setPWM(cmd.data[1], cmd.data[2]);
+                if (cmd.data[0] == 3 && motorBaseType == OMNIDIRECTIONAL_3_MOTORS)
+                    stepper3->setPWM(cmd.data[1], cmd.data[2]);
             }
         }
         else
@@ -82,10 +133,10 @@ void MotorController::SetMotorSpeed(int motor_ID, float speed_mms)
 {
     // convert speed in mm/s to frequency in step/s
     float speed_step_s = speed_mms * MOTOR_STEP_PER_MM;
-    //print("speed_mms:",speed_mms);
-    int freq = (int)fmin(FREQ_MAX_STEPPER,fabs(speed_step_s));
+    // print("speed_mms:",speed_mms);
+    int freq = (int)fmin(FREQ_MAX_STEPPER, fabs(speed_step_s));
     bool direction = (speed_mms > 0.0);
-    //println(" freq:",freq);
+    // println(" freq:",freq);
     if (motor_ID == 1)
     {
         if (freq == 0 || freq < FREQ_MIN_STEPPER)
@@ -114,7 +165,7 @@ void MotorController::SetMotorSpeed(int motor_ID, float speed_mms)
             stepper2->setPWM(freq, 50);
         }
     }
-    else if (motor_ID == 3)
+    else if (motor_ID == 3 && motorBaseType == OMNIDIRECTIONAL_3_MOTORS)
     {
         if (freq == 0 || freq < FREQ_MIN_STEPPER)
         {
@@ -159,7 +210,7 @@ float MotorController::GetMotorSpeed(int motor_ID)
         else
             return -stepper2->getActualFreq() * MM_PER_STEP_MOTOR;
     }
-    else if (motor_ID == 3)
+    else if (motor_ID == 3 && motorBaseType == OMNIDIRECTIONAL_3_MOTORS)
     {
         if (stepper1->getActualDutyCycle() == 0)
             return 0;
@@ -172,7 +223,6 @@ float MotorController::GetMotorSpeed(int motor_ID)
     return 0;
 }
 
-
 void MotorController::test_ledc()
 {
     int PIN = 18;
@@ -182,8 +232,8 @@ void MotorController::test_ledc()
     pinMode(PIN, OUTPUT);
     ledcSetup(channel, 1000, 14);
     ledcAttachPin(PIN, channel);
-    //ledc_set_duty(0, 0, _dutycycle);
-    
+    // ledc_set_duty(0, 0, _dutycycle);
+
     uint32_t min_frequency;
     uint32_t max_frequency;
     uint32_t frequency;
@@ -194,7 +244,7 @@ void MotorController::test_ledc()
     // Find Max Frequency
     for (uint8_t resolution = 1; resolution <= SOC_LEDC_TIMER_BIT_WIDTH; ++resolution)
     {
-        
+
         ledcSetup(channel, 1000, resolution);
         max_freq_array[resolution - 1] = 0;
         min_frequency = 0;
@@ -203,9 +253,9 @@ void MotorController::test_ledc()
         while (min_frequency != max_frequency && min_frequency + 1 != max_frequency)
         {
             frequency = min_frequency + ((max_frequency - min_frequency) / 2);
-            println("frequency max ",frequency);
+            println("frequency max ", frequency);
             if (ledcChangeFrequency(channel, frequency, resolution))
-            //if(ledc_set_freq((ledc_mode_t)0, (ledc_timer_t) 0, frequency) == ESP_OK)
+            // if(ledc_set_freq((ledc_mode_t)0, (ledc_timer_t) 0, frequency) == ESP_OK)
             {
                 min_frequency = frequency;
                 successful_frequency = frequency;
@@ -229,9 +279,9 @@ void MotorController::test_ledc()
         while (min_frequency != max_frequency && min_frequency + 1 != max_frequency)
         {
             frequency = min_frequency + ((max_frequency - min_frequency) / 2);
-            println("frequency min ",frequency);
+            println("frequency min ", frequency);
             if (ledcChangeFrequency(channel, frequency, resolution))
-            //if(ledc_set_freq((ledc_mode_t)0, (ledc_timer_t) 0, frequency) == ESP_OK)
+            // if(ledc_set_freq((ledc_mode_t)0, (ledc_timer_t) 0, frequency) == ESP_OK)
             {
                 max_frequency = frequency;
                 successful_frequency = frequency;
@@ -256,8 +306,6 @@ void MotorController::test_ledc()
     ledcDetachPin(PIN);
 }
 
-
-
 void MotorController::test_ledc2()
 {
     ESP32_FAST_PWM *stepper0;
@@ -267,12 +315,12 @@ void MotorController::test_ledc2()
     int freq = 500;
     uint8_t pin = 20;
     uint8_t channel = 0;
-    
+
     stepper0 = new ESP32_FAST_PWM(pin, freq, dutycycle, channel, resolution);
     for (uint32_t freq = 1; freq <= 20; freq++)
     {
-      stepper0->setPWM(freq, 50);
-      delay(1);
+        stepper0->setPWM(freq, 50);
+        delay(1);
     }
     println();
 }

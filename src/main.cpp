@@ -7,16 +7,13 @@ t_robot robot;
 Motion lin; // linear motion in system unit
 Motion ang; // angular motion in system unit => radians
 PointF2D goTo = {500, 500, 0};
-float motor1_speed_ret = 0;
-float motor2_speed_ret = 0;
-float motor3_speed_ret = 0;
 
 // Timer Settings
 static const TickType_t timer_delay_1 = (1000 / TIMER_ASSERV_FREQ) / portTICK_PERIOD_MS; // period of robot motion asserv = TIMER_ASSERV_FREQ Hz
 static TimerHandle_t timer_handle_1 = NULL;
 static bool timer_enable_1 = false;
 
-bool simulation = false;
+const bool simulation = false;
 
 const int anticipation_mm = 1;
 const int anticipation_unit = MM_TO_UNIT(anticipation_mm);
@@ -27,7 +24,6 @@ const int anticipation_deg_unit = DEG_TO_UNIT(anticipation_deg);
 void setup()
 {
   ESP32_Helper::Initialisation();
-  Wifi_Helper::EnableWifi(ENABLE_FALSE);
   println("Board : ", String(ARDUINO_BOARD));
   print("Arduino Version : ", ESP_ARDUINO_VERSION_MAJOR);
   print(".", ESP_ARDUINO_VERSION_MINOR);
@@ -42,7 +38,10 @@ void setup()
 
   rgb.Initialisation();
   otos.Initialisation();
-  motor.Initialisation();
+  motor.Initialisation(MotorController::OMNIDIRECTIONAL_3_MOTORS);
+motor.centerToWheel1 = CENTER_WHEEL_DISTANCE;
+  motor.centerToWheel2 = CENTER_WHEEL_DISTANCE;
+  motor.centerToWheel3 = CENTER_WHEEL_DISTANCE;
 
   // Init start zone => team color ?
   robot.location.x = goTo.x;
@@ -118,12 +117,12 @@ void timerCallback1(TimerHandle_t xTimer)
       ang.Reset_Ramp();
     }
 
-    SetRobotSpeed(lin.velocity.command, robot.direction, ang.velocity.command);
+    motor.Update(lin.velocity.command, robot.direction, ang.velocity.command);
 
     // else
     //{
     //! RESET ASSERV ?
-    // SetRobotSpeed(0,0,0);
+    // motor.Update(0,0,0);
     //}
   }
 }
@@ -137,9 +136,9 @@ void updateOdometry()
   }
   else
   {
-        float motor1_speed = motor1_speed_ret;
-    float motor2_speed = motor2_speed_ret;
-    float motor3_speed = motor3_speed_ret;
+        float motor1_speed = motor.GetMotorSpeed(1);
+    float motor2_speed = motor.GetMotorSpeed(2);
+    float motor3_speed = motor.GetMotorSpeed(3);
 
     // Simulation Calcul Vitesse OK
     // Calcul des composantes x, y et ang à partir des vitesses des moteurs
@@ -275,71 +274,4 @@ void SetRobotPosition(float x, float y, float theta)
 
   // aller en θ => ça c'est l'orientation du robot, différent de la direction de déplacement pour un holonome !
   ang.position.setpoint = DEG_TO_UNIT(theta - robot.orientation); // orientation absolu en degrés = 0°
-}
-
-// Set the robot center linear and angular speeds :
-// - lin_speed_mms : speed of the linear motion, in mm/s
-// - lin_direction_rad : angle direction of the linear motion, in radians   [direction => where is moving, trajectory]
-// - ang_speed_deg : speed of the angular motion, in °/s                    [orientation => where is facing]
-// Polar coordinate for better vectorial control, only one linear PID combining x and y motions.
-// https://poivron-robotique.fr/Robot-holonome-lois-de-commande.html
-// 2  Y  1
-//    o  X
-//    3
-void SetRobotSpeed(float lin_speed_mms, float lin_direction_rad, float ang_speed_deg)
-{
-  // Global robot speed conversion to x and y components
-  float x_speed = lin_speed_mms * cos(lin_direction_rad);
-  float y_speed = lin_speed_mms * sin(lin_direction_rad);
-
-  // println(">x_speed:", x_speed);
-  // println(">y_speed:", y_speed);
-  // println(">ang_speed:", ang_speed_deg);
-
-  // preliminary calculations
-  // float ang_component = CENTER_WHEEL_DISTANCE * radians(ang_speed_deg); // d*ωz
-  // float x_component = x_speed / 2;                                      // 1/2*x_speed
-  // float y_component = y_speed * SQRT3_2;                                // √3/2*y_speed
-
-  // Speeds calculations for each motor
-  float motor1_speed = x_speed / 2 - y_speed * SQRT3_2 - CENTER_WHEEL_DISTANCE * radians(ang_speed_deg); // V1 = 1/2*x_speed − √3/2*y_speed − d*ωz
-  float motor2_speed = x_speed / 2 + y_speed * SQRT3_2 - CENTER_WHEEL_DISTANCE * radians(ang_speed_deg); // V2 = 1/2*x_speed + √3/2*y_speed − d*ωz
-  float motor3_speed = -x_speed - CENTER_WHEEL_DISTANCE * radians(ang_speed_deg);                        // V3 = -x_speed − d*ωz
-
-  // println(">v1:", motor1_speed);
-  // println(">v2:", motor2_speed);
-  // println(">v3:", motor3_speed);
-
-  motor.SetMotorSpeed(1, motor1_speed);
-  motor.SetMotorSpeed(2, motor2_speed);
-  motor.SetMotorSpeed(3, motor3_speed);
-
-  motor1_speed_ret = motor1_speed;
-  motor2_speed_ret = motor2_speed;
-  motor3_speed_ret = motor3_speed;
-}
-
-void functionChrono(int nbrLoop)
-{
-  unsigned long startChrono = micros();
-  for (int i = 0; i < nbrLoop; i++)
-  {
-    // function or code to loop
-  }
-  unsigned long endChrono = micros();
-  unsigned long deltaChrono = endChrono - startChrono;
-
-  unsigned long chrono = deltaChrono / nbrLoop;
-  Serial.print("Chrono from ");
-  Serial.print(nbrLoop);
-  Serial.print(" loop is : ");
-  Serial.print(deltaChrono);
-  Serial.print(" µs total or ");
-  Serial.print(deltaChrono / 1000);
-  Serial.print(" ms total.    ");
-  Serial.print(chrono);
-  Serial.print(" µs/func or ");
-  Serial.print(chrono / 1000);
-  Serial.print(" ms/func.");
-  Serial.println();
 }
