@@ -48,7 +48,7 @@ void setup()
   robot.location.x = goTo.x;
   robot.location.y = goTo.y;
   robot.orientation = goTo.h;
-  otos.ChangePosition(robot.location.x, robot.location.y, robot.orientation);
+  otos.SetPosition(robot.location.x, robot.location.y, robot.orientation);
 
   // Init Motion
   lin.Initialisation(speed_lin_max, accel_lin_max, jerk_lin);
