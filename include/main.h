@@ -10,7 +10,7 @@ using namespace Printer;
 #include "Structure.h"
 #include "MATH_module.h"
 #include "OTOS.h"
-#include "Stepper.h"
+#include "MotorController.h"
 #include "Motion.h"
 #include "LedRGB.h"
 

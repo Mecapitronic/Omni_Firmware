@@ -1,5 +1,5 @@
-#ifndef STEPPER_H
-#define STEPPER_H
+#ifndef MOTORCONTROLLER_H
+#define MOTORCONTROLLER_H
 
 #include <ESP32_FastPWM.h>
 
@@ -12,8 +12,9 @@ using namespace Printer;
 #define MOTOR_STEP_PER_MM 8.65
 const float MM_PER_STEP_MOTOR =1/MOTOR_STEP_PER_MM ;//0.11560693641
 
-#define BIT_RESOLUTION 14
+#define BIT_RESOLUTION 13
 
+//Esp32 Wroom
 // Bit resolution | Min Frequency [Hz] | Max Frequency [Hz]
 //              1 |                489 |         40 078 277
 //              2 |                245 |         20 039 138
@@ -32,28 +33,48 @@ const float MM_PER_STEP_MOTOR =1/MOTOR_STEP_PER_MM ;//0.11560693641
 //             15 |                  2 |              2 446
 //             16 |                  1 |              1 223
 
+/* Esp32 S3
+Bit resolution | Min Frequency [Hz] | Max Frequency [Hz]
+             1 |              19532 |           20039138
+             2 |               9766 |           10019569
+             3 |               4883 |            5009784
+             4 |               2442 |            2504892
+             5 |               1221 |            1252446
+             6 |                611 |             626223
+             7 |                306 |             313111
+             8 |                153 |             156555
+             9 |                 77 |              78277
+            10 |                 39 |              39138
+            11 |                 20 |              19569
+            12 |                 10 |               9784
+            13 |                  5 |               4892
+            14 |                  3 |               2446
+            15 |                  0 |                  0
+            16 |                  0 |                  0
+*/
 #if BIT_RESOLUTION == 1
 #define FREQ_MAX_STEPPER 40078277
 #define FREQ_MIN_STEPPER 489
-#elif BIT_RESOLUTION == 12
+#elif BIT_RESOLUTION == 11
 #define FREQ_MAX_STEPPER 19569
-#define FREQ_MIN_STEPPER 1
-#elif BIT_RESOLUTION == 13
+#define FREQ_MIN_STEPPER 20
+#elif BIT_RESOLUTION == 12
 #define FREQ_MAX_STEPPER 9784
 #define FREQ_MIN_STEPPER 10 //! does not work under 10
-#elif BIT_RESOLUTION == 14
+#elif BIT_RESOLUTION == 13
 #define FREQ_MAX_STEPPER 4892
 #define FREQ_MIN_STEPPER 5
-#elif BIT_RESOLUTION == 16
-#define FREQ_MAX_STEPPER 1223
-#define FREQ_MIN_STEPPER 1
+#elif BIT_RESOLUTION == 14
+#define FREQ_MAX_STEPPER 2446
+#define FREQ_MIN_STEPPER 3
 #else
 #error "Incorrect Bit Resolution value !"
 #endif
 
 const int SPEED_MAX_STEPPER = FREQ_MAX_STEPPER/MOTOR_STEP_PER_MM;
+// const int var_duty_resolution =  (int) log2 (APB_CLK_FREQ / FREQ_MAX_STEPPER); //test
 
-class Stepper
+class MotorController
 {
 public:
     void Initialisation();
@@ -61,7 +82,7 @@ public:
     void HandleCommand(Command cmd);
     void PrintCommandHelp();
     
-    void SetMotorsSpeed(float speed_1_mms,float speed_2_mms,float speed_3_mms);
+    //void SetMotorsSpeed(float speed_1_mms,float speed_2_mms,float speed_3_mms);
     void SetMotorSpeed(int motor_ID, float speed_mms);
     float GetMotorSpeed(int motor_ID);
     void test_ledc(void);

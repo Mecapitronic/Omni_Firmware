@@ -1,13 +1,13 @@
-#include "Stepper.h"
+#include "MotorController.h"
 //https://lastminuteengineers.com/esp32-pwm-tutorial/
 
 ESP32_FAST_PWM *stepper1;
 ESP32_FAST_PWM *stepper2;
 ESP32_FAST_PWM *stepper3;
 
-void Stepper::Initialisation()
+void MotorController::Initialisation()
 {
-    println("Initialisation Stepper");
+    println("Initialisation MotorController");
 
     // Sets the two pins as Outputs
     pinMode(stepPinM1, OUTPUT);
@@ -25,46 +25,34 @@ void Stepper::Initialisation()
     digitalWrite(stepPinM3, LOW);
     digitalWrite(dirPinM3, LOW);
 
-    print("Starting ESP32_PWM_StepperControl : ");
+    print("Starting ESP32_FAST_PWM: ");
     println(ESP32_FAST_PWM_VERSION);
 
-    // pin, frequency = 500 Hz, dutyCycle = 0 %, choose channel with independent timer, resolution = 13 to go up to 8k Hz
+    // pin, frequency = 500 Hz, dutyCycle = 0 %, choose channel with independent timer, resolution to go up to desire frequency
     stepper1 = new ESP32_FAST_PWM(stepPinM1, 500, 0, 2, BIT_RESOLUTION);
-    if (stepper1)
-    {
-        //stepper1->setPWM();
-    }
 
     stepper2 = new ESP32_FAST_PWM(stepPinM2, 500, 0, 4, BIT_RESOLUTION);
-    if (stepper2)
-    {
-        //stepper2->setPWM();
-    }
 
     stepper3 = new ESP32_FAST_PWM(stepPinM3, 500, 0, 6, BIT_RESOLUTION);
-    if (stepper3)
-    {
-        //stepper3->setPWM();
-    }
 }
 
-void Stepper::Update()
+void MotorController::Update()
 {
     // nothing to do, PWM works on their own
 }
 
-void Stepper::HandleCommand(Command cmd)
+void MotorController::HandleCommand(Command cmd)
 {
 
-    if (cmd.cmd.startsWith("Stepper"))
+    if (cmd.cmd.startsWith("Motor"))
     {
-        if (cmd.cmd == ("StepperMotor") && cmd.size == 3)
+        if (cmd.cmd == ("Motor") && cmd.size == 3)
         {
-            // StepperMotor:1;1000;50
-            // StepperMotor:1;1;50
+            // Motor:1;1000;50
+            // Motor:1;1;50
             if(cmd.data[2] >= 0 && cmd.data[2] <= 100)
             {
-                print("Stepper ", cmd.data[0]);
+                print("Motor ", cmd.data[0]);
                 print(" with freq ", cmd.data[1], " Hz");
                 println(" with duty ", cmd.data[2], " %");
                 if(cmd.data[0]==1)
@@ -77,20 +65,20 @@ void Stepper::HandleCommand(Command cmd)
         }
         else
         {
-            println("Not a Stepper Command ");
+            println("Not a Motor Command ");
         }
     }
 }
 
-void Stepper::PrintCommandHelp()
+void MotorController::PrintCommandHelp()
 {
-    Printer::println("Stepper Command Help :");
-    Printer::println(" > StepperMotor:[int];[int];[int]");
+    Printer::println("MotorController Command Help :");
+    Printer::println(" > Motor:[int];[int];[int]");
     Printer::println("      [int] number of motor, frequency of motor in Hz, duty cycle of motor between 0 and 100");
     Printer::println();
 }
 
-void Stepper::SetMotorSpeed(int motor_ID, float speed_mms)
+void MotorController::SetMotorSpeed(int motor_ID, float speed_mms)
 {
     // convert speed in mm/s to frequency in step/s
     float speed_step_s = speed_mms * MOTOR_STEP_PER_MM;
@@ -140,15 +128,15 @@ void Stepper::SetMotorSpeed(int motor_ID, float speed_mms)
         }
     }
 }
-
-void Stepper::SetMotorsSpeed(float speed_1_mms, float speed_2_mms, float speed_3_mms)
+/*
+void MotorController::SetMotorsSpeed(float speed_1_mms, float speed_2_mms, float speed_3_mms)
 {
     SetMotorSpeed(1, speed_1_mms);
     SetMotorSpeed(2, speed_2_mms);
     SetMotorSpeed(3, speed_3_mms);
-}
+}*/
 
-float Stepper::GetMotorSpeed(int motor_ID)
+float MotorController::GetMotorSpeed(int motor_ID)
 {
     bool direction;
     if (motor_ID == 1)
@@ -185,7 +173,7 @@ float Stepper::GetMotorSpeed(int motor_ID)
 }
 
 
-void Stepper::test_ledc()
+void MotorController::test_ledc()
 {
     int PIN = 18;
     int channel = 0;
@@ -270,9 +258,9 @@ void Stepper::test_ledc()
 
 
 
-void Stepper::test_ledc2()
+void MotorController::test_ledc2()
 {
-ESP32_FAST_PWM *stepper0;
+    ESP32_FAST_PWM *stepper0;
 
     uint8_t resolution = 14;
     int dutycycle = 50;
@@ -281,10 +269,6 @@ ESP32_FAST_PWM *stepper0;
     uint8_t channel = 0;
     
     stepper0 = new ESP32_FAST_PWM(pin, freq, dutycycle, channel, resolution);
-    //if (stepper0)
-    //{
-    //   stepper0->setPWM();
-    //}
     for (uint32_t freq = 1; freq <= 20; freq++)
     {
       stepper0->setPWM(freq, 50);

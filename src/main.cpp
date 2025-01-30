@@ -1,7 +1,7 @@
 #include "main.h"
 
 LedRGB rgb;
-Stepper stepper;
+MotorController motor;
 OpticalTrackingOdometrySensor otos;
 t_robot robot;
 Motion lin; // linear motion in system unit
@@ -42,7 +42,7 @@ void setup()
 
   rgb.Initialisation();
   otos.Initialisation();
-  stepper.Initialisation();
+  motor.Initialisation();
 
   // Init start zone => team color ?
   robot.location.x = goTo.x;
@@ -197,9 +197,9 @@ void loop()
     lin.Teleplot("lin");
     // ang.Teleplot("ang");
 
-    teleplot("v1", stepper.GetMotorSpeed(1));
-    teleplot("v2", stepper.GetMotorSpeed(2));
-    teleplot("v3", stepper.GetMotorSpeed(3));
+    teleplot("v1", motor.GetMotorSpeed(1));
+    teleplot("v2", motor.GetMotorSpeed(2));
+    teleplot("v3", motor.GetMotorSpeed(3));
 
     // println();
   }
@@ -217,10 +217,10 @@ void loop()
     if (cmd.cmd.startsWith("Help"))
     {
       otos.PrintCommandHelp();
-      stepper.PrintCommandHelp();
+      motor.PrintCommandHelp();
     }
     otos.HandleCommand(cmd);
-    stepper.HandleCommand(cmd);
+    motor.HandleCommand(cmd);
 
     if (cmd.cmd == ("RobotPosition") && cmd.size == 3)
     {
@@ -310,9 +310,9 @@ void SetRobotSpeed(float lin_speed_mms, float lin_direction_rad, float ang_speed
   // println(">v2:", motor2_speed);
   // println(">v3:", motor3_speed);
 
-  stepper.SetMotorSpeed(1, motor1_speed);
-  stepper.SetMotorSpeed(2, motor2_speed);
-  stepper.SetMotorSpeed(3, motor3_speed);
+  motor.SetMotorSpeed(1, motor1_speed);
+  motor.SetMotorSpeed(2, motor2_speed);
+  motor.SetMotorSpeed(3, motor3_speed);
 
   motor1_speed_ret = motor1_speed;
   motor2_speed_ret = motor2_speed;
