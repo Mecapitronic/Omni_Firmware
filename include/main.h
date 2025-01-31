@@ -2,7 +2,7 @@
 #define MAIN_H
 
 #define ARDUINO_USB_MODE 1
-#define ARDUINO_USB_CDC_ON_BOOT 1 //define to 0 with wokwi
+#define ARDUINO_USB_CDC_ON_BOOT 1
 
 using namespace std;
 
@@ -95,10 +95,17 @@ const float accel_ang_max = ACCEL_ANG_DEGS2_TO_UNIT(45.0); //45 // acceleration 
 const float jerk_lin = 20; // jerk linéaire en unité robot
 const float jerk_ang = 20; // jerk angulaire en unité robot
 
+const int anticipation_mm = 1;
+const int anticipation_unit = MM_TO_UNIT(anticipation_mm);
+const int anticipation_deg = 1;
+const int anticipation_deg_unit = DEG_TO_UNIT(anticipation_deg);
+
+// Timer Settings
+static const TickType_t timer_delay_1 = (1000 / TIMER_ASSERV_FREQ) / portTICK_PERIOD_MS; // period of robot motion asserv = TIMER_ASSERV_FREQ Hz
+static TimerHandle_t timer_handle_1 = NULL;
+static bool timer_enable_1 = false;
+
 void timerCallback1(TimerHandle_t xTimer);
-
-void updateOdometry();
-
 void SetRobotPosition(float x, float y, float theta);
 
 #endif
