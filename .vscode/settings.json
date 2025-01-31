@@ -74,7 +74,8 @@
         "wifi_no_helper.h": "c",
         "debugger.h": "c",
         "structure_helper.h": "c",
-        "motion.h": "c"
+        "motion.h": "c",
+        "usb.h": "c"
     },
     "launch": {
         "version": "0.2.0",
