@@ -1,6 +1,7 @@
 #include "main.h"
 
 LedRGB rgb;
+LedRGB ring;
 MotorController motor;
 OpticalTrackingOdometrySensor otos;
 t_robot robot;
@@ -36,7 +37,8 @@ void setup()
 
   println("Robot Holonome Firmware");
 
-  rgb.Initialisation();
+  rgb.Initialisation(1, RGB_BUILTIN);
+  ring.Initialisation(36, WS2812_LED);
   otos.Initialisation();
   motor.Initialisation(MotorController::OMNIDIRECTIONAL_3_MOTORS);
 motor.centerToWheel1 = CENTER_WHEEL_DISTANCE;
@@ -207,6 +209,7 @@ void loop()
   {
     rgbChrono = startChrono;
     rgb.Update();
+    ring.Update();
       }
 
   if (ESP32_Helper::HasWaitingCommand())
