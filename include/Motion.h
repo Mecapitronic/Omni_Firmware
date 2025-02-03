@@ -6,6 +6,7 @@
  ****************************************************************************************/
 #include "Structure.h"
 #include "ESP32_Helper.h"
+#include "MATH_module.h"
 using namespace Printer;
 
 class Motion
@@ -24,10 +25,10 @@ public:
   /****************************************************************************************
    * Prototypes fonctions
    ****************************************************************************************/
-  void Initialisation(int32 speedMax, int32 accelMax, int32 jerkMax);
+  void Initialisation(float speedMax, float accelMax, float jerkMax);
   void Update();
   void Reset_Ramp();
-  void Setpoint_Position(int32 position);
+  void Setpoint_Position(float position);
   bool Check_Position();
   void Teleplot(String name);
 };

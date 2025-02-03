@@ -2,6 +2,7 @@
 #define STRUCTURE_H
 
 #include <Arduino.h>
+#include "Structure_Helper.h"
 
 /****************************************************************************************
  * Types de données
@@ -86,76 +87,111 @@ typedef double float64; // about 16 decimal digits
 #define CMD_DONE		2
 #define CMD_FAIL		3
 
+// Team color, A = jaune, B = bleue
+#define TEAM_A          0
+#define TEAM_B          1
+
+#define MODE_MATCH		  0
+#define MODE_TEST		    1
+
 /****************************************************************************************
 * MAPPING
 ****************************************************************************************/
-typedef struct {
-  int32 x;
-  int32 y;
-} t_point;
-
-typedef struct {
-  float32 x;
-  float32 y;
-} t_pointF;
-
+/*
 typedef uint64 t_adjacency; // 64 vertex max
 
-typedef struct {
-  t_point point;
+typedef struct Vertex{
+  Point point;
   t_adjacency adjacency_active;   // high level graph with active obstacle => working graph
   t_adjacency adjacency_passive;  // medium level graph with passive play element
   t_adjacency adjacency_static;   // low level graph with only static map element
-} t_vertex;
+};
 
-typedef struct {
-  t_point p1;
-  t_point p2;
+typedef struct Segment{
+  Point p1;
+  Point p2;
   float32 a;	// slope of the segment : rise/run = (Y2 - Y1) / (X2 - X1)
   int32 b;		// intercept the axis : y = a*x + b
-} t_segment;
+  Segment()
+  {
+    p1.x = 0;
+    p1.y = 0;
+    p2.x = 0;
+    p2.y = 0;
+    a = 0;
+    b = 0;
+  }
+  Segment(Point _p1, Point _p2)
+  {
+    p1 = _p1;
+    p2 = _p2;
+    if (p1.x == p2.x)
+    { 
+      a = 9999;  // infinite slope (vertical line)
+      b = p1.x;
+    }
+    else
+    {
+      a = (p2.y - p1.y);  // slope
+      a /= (p2.x - p1.x);
+      b = (p1.y - (a * p1.x));  // intercept
+    }
+  }
+};
 
-typedef struct {
-  t_point p;
+struct Circle{
+  Point p;
   uint16 r;
-} t_circle;
+  Circle()
+  {
+    p.x = 0;
+    p.y = 0;
+    r = 0;
+  }
+  Circle(int32 _x, int32 _y, uint16 _r)
+  {
+    p.x = _x;
+    p.y = _y;
+    r = _r;
+  }
+};
 
 typedef uint8 t_vertexID;
-
-
+*/
 /****************************************************************************************
 * Path_Finding
 ****************************************************************************************/
-typedef struct {
+/*
+struct t_node{
   uint32 currentCost;
 	uint32 parentCost;
 	t_vertexID parentID;
   t_vertexID currentID;
-} t_node;
+};*/
 
 
 /****************************************************************************************
 * CONTROL SYSTEM
 ****************************************************************************************/
 // paramètres d'un régulateur PID
-typedef struct {
-  //int32 command;
-  int32 error;
-  int32 last_error;
-  int32 sum_error;
-  float32 kP;
-  float32 kI;
-  float32 kD;
-} t_PID;
+// typedef struct {
+//   //int32 command;
+//   int32 error;
+//   int32 last_error;
+//   int32 sum_error;
+//   float32 kP;
+//   float32 kI;
+//   float32 kD;
+// } t_PID;
 
 //                                                 value 
 //                                                   V
 // Paramètres génériques de contrôle : setpoint -> (PID) -> command -> (SYSTEM)
 typedef struct {
-  int32 setpoint;   // consigne, valeur à atteindre définie par l'utilisateur OU relatif pour la position = distance restante
-  int32 command;    // commande, valeur envoyée par le contrôleur au système
-  int32 real;       // valeur actuelle, réelle, mesurée ou estimée
-  int32 pivot;      
+  float setpoint;   // consigne, valeur à atteindre définie par l'utilisateur OU relatif pour la position = distance restante
+  float command;    // commande, valeur envoyée par le contrôleur au système
+  float real;       // valeur actuelle, réelle, mesurée ou estimée
+  float pivot;      
 } t_control;
 
 /****************************************************************************************
@@ -172,9 +208,9 @@ typedef struct {
 */
 // paramètres de cinématique du robot (ajout de la direction (linéaire) pour un holonome)
 typedef struct {
-  t_pointF location;         // coordonnées actuelles x et y en mm
-  float32 direction;        // direction du vecteur déplacement linéaire en radians
-  float32 orientation;      // orientation (du déplacement angulaire) actuelle en degrés => ang.position en radians
+  PointF location;         // coordonnées actuelles x et y en mm
+  float direction;        // direction du vecteur déplacement linéaire en radians
+  float orientation;      // orientation (du déplacement angulaire) actuelle en degrés => ang.position en radians
   /*String teleplot()
   {
     String ret1 = String() + ">robot:" + (int)location.x;
@@ -189,30 +225,32 @@ typedef struct {
 /****************************************************************************************
 * STRATEGY
 ****************************************************************************************/
-typedef struct {
+/*t
+ypedef struct {
   t_vertexID vertexID;
   int8 mission;
   bool possible;
   bool done;
   uint8 iteration;
-  t_point point;
+  Point point;
   bool (* function)(void);
 } t_action;
-
+*/
 
 /****************************************************************************************
 * UART COMMAND
 ****************************************************************************************/
+/*
 typedef struct {
 	char cmd;
 	t_vertexID actionID;
 	t_vertexID vertexID;
 	//boolean available;
-	t_point point;
+	Point point;
 	float32 angle;
 	int32 distance;
 } t_uartCMD;
-
+*/
 // Exemple overriding operator == and !=
 /*
 typedef struct T_t

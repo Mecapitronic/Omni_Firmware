@@ -87,12 +87,10 @@ enum MotorBaseType
     OMNIDIRECTIONAL_3_MOTORS,
 };
     MotorBaseType motorBaseType = NONE_0_MOTOR;
-    float centerToWheel1=0;
-    float centerToWheel2=0;
-    float centerToWheel3=0;
+    float centerToWheel = 0;
 
-    void Initialisation(MotorBaseType _motorBaseType);
-    void Update(float lin_speed_mms, float lin_direction_rad, float ang_speed_deg);
+    void Initialisation(MotorBaseType _motorBaseType, float _centerToWheel);
+    void Update(float lin_speed_mms, float lin_direction_rad, float ang_speed_rad);
     void HandleCommand(Command cmd);
     void PrintCommandHelp();
     

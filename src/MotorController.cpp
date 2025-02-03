@@ -5,10 +5,11 @@ ESP32_FAST_PWM *stepper1;
 ESP32_FAST_PWM *stepper2;
 ESP32_FAST_PWM *stepper3;
 
-void MotorController::Initialisation(MotorBaseType _motorBaseType)
+void MotorController::Initialisation(MotorBaseType _motorBaseType, float _centerToWheel)
 {
-    print("Initialisation MotorController : ", _motorBaseType, " Motors");
+    println("Initialisation MotorController : ", _motorBaseType, " Motors");
     motorBaseType = _motorBaseType;
+    centerToWheel = _centerToWheel;
 
     // Sets the two pins as Outputs
     pinMode(stepPinM1, OUTPUT);
@@ -41,7 +42,7 @@ void MotorController::Initialisation(MotorBaseType _motorBaseType)
     }
 }
 
-void MotorController::Update(float lin_speed_mms, float lin_direction_rad, float ang_speed_deg)
+void MotorController::Update(float lin_speed_mms, float lin_direction_rad, float ang_speed_rad)
 {
     if (motorBaseType == DIFFERENTIAL_2_MOTORS)
     {
@@ -73,18 +74,21 @@ void MotorController::Update(float lin_speed_mms, float lin_direction_rad, float
         // println(">ang_speed:", ang_speed_deg);
 
         // preliminary calculations
-        // float ang_component = CENTER_WHEEL_DISTANCE * radians(ang_speed_deg); // d*ωz
-        // float x_component = x_speed / 2;                                      // 1/2*x_speed
-        // float y_component = y_speed * SQRT3_2;                                // √3/2*y_speed
+         float ang_component = centerToWheel * ang_speed_rad; // d*ωz
+         float x_component = x_speed / 2;                     // 1/2*x_speed
+         float y_component = y_speed * SQRT3_2;               // √3/2*y_speed
 
         // Speeds calculations for each motor
-        float motor1_speed = x_speed / 2 - y_speed * SQRT3_2 - centerToWheel1 * radians(ang_speed_deg); // V1 = 1/2*x_speed − √3/2*y_speed − d*ωz
-        float motor2_speed = x_speed / 2 + y_speed * SQRT3_2 - centerToWheel2 * radians(ang_speed_deg); // V2 = 1/2*x_speed + √3/2*y_speed − d*ωz
-        float motor3_speed = -x_speed - centerToWheel3 * radians(ang_speed_deg);                        // V3 = -x_speed − d*ωz
+        float motor1_speed = x_component - y_component - ang_component;
+        float motor2_speed = x_component + y_component - ang_component;
+        float motor3_speed = -x_component - ang_component;
+        //float motor1_speed = x_speed / 2 - y_speed * SQRT3_2 - centerToWheel * radians(ang_speed_deg); // V1 = 1/2*x_speed − √3/2*y_speed − d*ωz
+        //float motor2_speed = x_speed / 2 + y_speed * SQRT3_2 - centerToWheel * radians(ang_speed_deg); // V2 = 1/2*x_speed + √3/2*y_speed − d*ωz
+        //float motor3_speed = -x_speed - centerToWheel * radians(ang_speed_deg);                        // V3 = -x_speed − d*ωz
 
-        // println(">v1:", motor1_speed);
-        // println(">v2:", motor2_speed);
-        // println(">v3:", motor3_speed);
+        //println(">v1:", motor1_speed);
+        //println(">v2:", motor2_speed);
+        //println(">v3:", motor3_speed);
 
         SetMotorSpeed(1, motor1_speed);
         SetMotorSpeed(2, motor2_speed);
@@ -135,7 +139,7 @@ void MotorController::SetMotorSpeed(int motor_ID, float speed_mms)
     float speed_step_s = speed_mms * MOTOR_STEP_PER_MM;
     // print("speed_mms:",speed_mms);
     int freq = (int)fmin(FREQ_MAX_STEPPER, fabs(speed_step_s));
-    bool direction = (speed_mms > 0.0);
+    bool direction = (speed_mms >= 0.0);
     // println(" freq:",freq);
     if (motor_ID == 1)
     {

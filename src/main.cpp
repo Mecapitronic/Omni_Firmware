@@ -15,6 +15,7 @@ const bool simulation = false;
 void setup()
 {
   ESP32_Helper::Initialisation();
+  delay(3000);
   println("Board : ", String(ARDUINO_BOARD));
   print("Arduino Version : ", ESP_ARDUINO_VERSION_MAJOR);
   print(".", ESP_ARDUINO_VERSION_MINOR);
@@ -27,13 +28,15 @@ void setup()
 
   println("Robot Holonome Firmware");
 
+  pinMode(SWITCH_PIN, INPUT);
+  pinMode(TEAM_PIN, INPUT);
+  pinMode(BAU_PIN, INPUT);
+  pinMode(START_PIN, INPUT);
+
   rgb.Initialisation(1, RGB_BUILTIN);
-  ring.Initialisation(36, WS2812_LED);
+  //ring.Initialisation(36, WS2812_LED);
   otos.Initialisation();
-  motor.Initialisation(MotorController::OMNIDIRECTIONAL_3_MOTORS);
-  motor.centerToWheel1 = CENTER_WHEEL_DISTANCE;
-  motor.centerToWheel2 = CENTER_WHEEL_DISTANCE;
-  motor.centerToWheel3 = CENTER_WHEEL_DISTANCE;
+  motor.Initialisation(MotorController::OMNIDIRECTIONAL_3_MOTORS, CENTER_WHEEL_DISTANCE);
 
   // Init start zone => team color ?
   robot.location.x = goTo.x;
@@ -42,8 +45,8 @@ void setup()
   otos.SetPosition(robot.location.x, robot.location.y, robot.orientation);
 
   // Init Motion
-  lin.Initialisation(speed_lin_max, accel_lin_max, jerk_lin);
-  ang.Initialisation(speed_ang_max, accel_ang_max, jerk_ang);
+  lin.Initialisation(speed_lin_mms_max, accel_lin_mms2_max, jerk_lin);
+  ang.Initialisation(speed_ang_rads_max, accel_ang_rads2_max, jerk_ang);
 
   SetRobotPosition(goTo.x, goTo.y, goTo.h);
 
@@ -105,29 +108,23 @@ void timerCallback1(TimerHandle_t xTimer)
       otos.position.h += v_ang * timer_delay_1 / 1000;
     }
 
-    robot.location.x = otos.position.x;
-    robot.location.y = otos.position.y;
-    robot.orientation = otos.position.h;
+    robot.location.x = otos.position.x; // mm
+    robot.location.y = otos.position.y; // mm
+    robot.orientation = otos.position.h; // deg
 
     lin.position.real = sqrtf(robot.location.x * robot.location.x + robot.location.y * robot.location.y);
-    ang.position.real = robot.orientation;
+    ang.position.real = radians(robot.orientation);
 
     lin.velocity.real = sqrtf(otos.velocity.x * otos.velocity.x + otos.velocity.y * otos.velocity.y);
-    ang.velocity.real = otos.velocity.h;
+    ang.velocity.real = radians(otos.velocity.h);
 
-    lin.acceleration.real = sqrtf(otos.acceleration.x * otos.acceleration.x + otos.acceleration.y * otos.acceleration.y);
-    ang.acceleration.real = otos.acceleration.h;
+    //lin.acceleration.real = sqrtf(otos.acceleration.x * otos.acceleration.x + otos.acceleration.y * otos.acceleration.y);
+    //ang.acceleration.real = radians(otos.acceleration.h);
 
-    //SetRobotPosition(goTo.x, goTo.y, goTo.h);
+    SetRobotPosition(goTo.x, goTo.y, goTo.h);
 
-    if (lin.position.setpoint > anticipation_unit || lin.position.setpoint < -anticipation_unit)
+    if ((lin.position.setpoint > anticipation_mm) || (lin.position.setpoint < -anticipation_mm))
     {
-      // Anti-lock => Restart from the real position if too much speed difference
-      //! DO WE NEED IT ?
-      // if ((abs(lin.velocity.real - lin.velocity.command) > ANTI_LOCK_SPEED_LIN) )
-      //{
-      //   resetRamp(&(lin));
-      // }
       lin.Update();
     }
     else
@@ -135,14 +132,8 @@ void timerCallback1(TimerHandle_t xTimer)
       lin.Reset_Ramp();
     }
 
-    if (ang.position.setpoint > anticipation_deg_unit || ang.position.setpoint < -anticipation_deg_unit)
+    if ((ang.position.setpoint > anticipation_deg) || (ang.position.setpoint < -anticipation_deg))
     {
-      // Anti-lock => Restart from the real position if too much speed difference
-      //! DO WE NEED IT ?
-      // if ((abs(ang.velocity.real - ang.velocity.command) > ANTI_LOCK_SPEED_ANG) )
-      //{
-      //   resetRamp(&(ang));
-      // }
       ang.Update();
     }
     else
@@ -180,7 +171,7 @@ void loop()
   {
     rgbChrono = startChrono;
     rgb.Update();
-    ring.Update();
+    //ring.Update();
   }
 
   if (ESP32_Helper::HasWaitingCommand())
@@ -204,10 +195,29 @@ void loop()
       goTo.x = cmd.data[0];
       goTo.y = cmd.data[1];
       goTo.h = cmd.data[2];
+      SetRobotPosition(goTo.x, goTo.y, goTo.h);
       print("Robot go to x=", goTo.x);
       print(" y=", goTo.y);
       print(" h=", goTo.h);
       println();
+    }
+    if (cmd.cmd == ("SetPosition") && cmd.size == 3)
+    {
+      // SetPosition:500;500;0
+      timer_enable_1 = false;
+      goTo.x = cmd.data[0];
+      goTo.y = cmd.data[1];
+      goTo.h = cmd.data[2];
+      
+      robot.location.x = goTo.x;
+      robot.location.y = goTo.y;
+      robot.orientation = goTo.h;
+      otos.SetPosition(robot.location.x, robot.location.y, robot.orientation);
+      print("Robot set to x=", goTo.x);
+      print(" y=", goTo.y);
+      print(" h=", goTo.h);
+      println();
+      timer_enable_1 = true;
     }
   }
 
@@ -230,22 +240,28 @@ void loop()
 }
 //**************************************************************************************************************************/
 
-// Set the robot center position : linear x and y in mm, angular omega in °
-// TODO: coordonnées absolues, implémenter aussi sur y et theta, gérer correctement les abs et sign pour sens de marche...
-// TODO: en fait, on est un peu en train de refaire les fonctions MOVE...!
-void SetRobotPosition(float x, float y, float theta)
+// Set the robot center position
+// Input : linear x and y in mm, angular heading in °
+// Output : Setpoint, direction
+void SetRobotPosition(float x_mm, float y_mm, float h_deg)
 {
   // println("x : ", x);
   // println("y : ", y);
   // println("theta : ", theta);
 
-  int32 dx = x - robot.location.x;
-  int32 dy = y - robot.location.y;
-  robot.direction = atan2(dy, dx); // en valeurs relatives ! //! WTF ?
-  dx = abs(dx);
-  dy = abs(dy);
-  lin.position.setpoint = MM_TO_UNIT(Approx_Distance(dx, dy)); // en valeurs absolus !
+  float dx = x_mm - robot.location.x;
+  float dy = y_mm - robot.location.y;
+
+  // Sens du vecteur vitesse lineaire
+  robot.direction = atan2(dy, dx); // en valeurs relatives ! 
+
+  // Norme du vecteur vitesse lineaire (toujours positif, distance euclidienne)
+   lin.position.setpoint = sqrtf(dx*dx + dy*dy); 
+  //dx = abs(dx);
+  //dy = abs(dy);
+  //lin.position.setpoint = MM_TO_UNIT(Approx_Distance(dx, dy)); // en valeurs absolus !
 
   // aller en θ => ça c'est l'orientation du robot, différent de la direction de déplacement pour un holonome !
-  ang.position.setpoint = DEG_TO_UNIT(theta - robot.orientation); // orientation absolu en degrés = 0°
+  // /!\ peut être négatif, contrairement à lin.position.setpoint
+  ang.position.setpoint = radians(h_deg - robot.orientation); // orientation absolu en degrés = 0°
 }

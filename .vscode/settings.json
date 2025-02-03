@@ -75,7 +75,9 @@
         "debugger.h": "c",
         "structure_helper.h": "c",
         "motion.h": "c",
-        "usb.h": "c"
+        "usb.h": "c",
+        "list": "cpp",
+        "arduino.h": "c"
     },
     "launch": {
         "version": "0.2.0",

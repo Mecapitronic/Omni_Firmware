@@ -39,7 +39,7 @@ using namespace Printer;
 
 // coefficient multiplicateur de conversion mm => unité interne robot (pour calculs plus précis en entier)
 // valeur arbitraire, une puissance de 2 permettrait d'optimiser les calculs avec des décalages de bits... todo
-#define UNIT_PER_MM 512
+//#define UNIT_PER_MM 512
 
 // fréquence timer asserv en Hz
 #define TIMER_ASSERV_FREQ        200
@@ -47,55 +47,55 @@ using namespace Printer;
 
 // distance du centre du robot au centre de la roue en mm => équivaut à mm/radian
 // TODO: calibrer la valeur en faisant plusieurs rotation et/ou comparer avec le capteur OTOS
-#define CENTER_WHEEL_DISTANCE 100
+#define CENTER_WHEEL_DISTANCE 115.0 // distance centre à bord robot = 130mm
 #define MM_PER_RAD  CENTER_WHEEL_DISTANCE
-#define UNIT_PER_RAD (UNIT_PER_MM * MM_PER_RAD)
+//#define UNIT_PER_RAD (UNIT_PER_MM * MM_PER_RAD)
 
 
 // Anti Lock Speed // TODO: régler le décalage lors de la rotation => ok avec delay entre
-#define ANTI_LOCK_SPEED_LIN 200
-#define ANTI_LOCK_SPEED_ANG 300
+//#define ANTI_LOCK_SPEED_LIN 200
+//#define ANTI_LOCK_SPEED_ANG 300
 
 //**** Macro de conversion en unité robot ****/
 // Position => unit
-#define MM_TO_UNIT(mm)      ((mm) * UNIT_PER_MM)
-#define RAD_TO_UNIT(rad)    ((rad) * UNIT_PER_RAD)
-#define DEG_TO_UNIT(deg)    ((deg) * UNIT_PER_RAD * DEG_TO_RAD) //(RAD_TO_UNIT(radians(deg)))
-// Unit => position
-#define UNIT_TO_MM(unit)    ((unit) / UNIT_PER_MM)
-#define UNIT_TO_RAD(unit)   ((unit) / UNIT_PER_RAD)
-#define UNIT_TO_DEG(unit)   (UNIT_TO_RAD(radians(deg)))
-// Vitesse => speed unit
-#define SPEED_LIN_MMS_TO_UNIT(mm_s)     (MM_TO_UNIT(mm_s) / TIMER_ASSERV_FREQ)          // [mm/s] to [unit/period]
-#define SPEED_ANG_RADS_TO_UNIT(rad_s)   (RAD_TO_UNIT(rad_s) / TIMER_ASSERV_FREQ)        // [rad/s] to [unit/period]
-#define SPEED_ANG_DEGS_TO_UNIT(deg_s)   (DEG_TO_UNIT(deg_s) / TIMER_ASSERV_FREQ)        // [deg/s] to [unit/period]
-// Speed unit => vitesse
-#define SPEED_LIN_UNIT_TO_MMS(unit)     (UNIT_TO_MM(unit) * TIMER_ASSERV_FREQ)          // [unit/period] to [mm/s]
-#define SPEED_ANG_UNIT_TO_RADS(unit)    (UNIT_TO_RAD(unit) * TIMER_ASSERV_FREQ)         // [unit/period] to [rad/s]
-#define SPEED_ANG_UNIT_TO_DEGS(unit)    (UNIT_TO_DEG(unit) * TIMER_ASSERV_FREQ)         // [unit/period] to [deg/s]
-// Acceleration => accel unit
-#define ACCEL_LIN_MMS2_TO_UNIT(mm_s2)   (MM_TO_UNIT(mm_s2) / TIMER_ASSERV_FREQ_SQUARE)  // [mm/s^2] to [unit/period]
-#define ACCEL_ANG_RADS2_TO_UNIT(rad_s2) (RAD_TO_UNIT(rad_s2) / TIMER_ASSERV_FREQ_SQUARE)// [rad/s^2] to [unit/period]
-#define ACCEL_ANG_DEGS2_TO_UNIT(deg_s2) (DEG_TO_UNIT(deg_s2) / TIMER_ASSERV_FREQ_SQUARE)// [deg/s^2] to [unit/period]
-// Accel unit => acceleration
-#define ACCEL_LIN_UNIT_TO_MMS2(unit)    (UNIT_TO_MM(unit) * TIMER_ASSERV_FREQ_SQUARE)   // [unit/period] to [mm/s^2]
-#define ACCEL_ANG_UNIT_TO_RADS2(unit)   (UNIT_TO_RAD(unit) * TIMER_ASSERV_FREQ_SQUARE)  // [unit/period] to [rad/s^2]
-#define ACCEL_ANG_UNIT_TO_DEGS2(unit)   (UNIT_TO_DEG(unit) * TIMER_ASSERV_FREQ_SQUARE)  // [unit/period] to [deg/s^2]
+// #define MM_TO_UNIT(mm)      ((mm) * UNIT_PER_MM)
+// #define RAD_TO_UNIT(rad)    ((rad) * UNIT_PER_RAD)
+// #define DEG_TO_UNIT(deg)    (((deg) * DEG_TO_RAD) * UNIT_PER_RAD) //(RAD_TO_UNIT(radians(deg)))
+// // Unit => position
+// #define UNIT_TO_MM(unit)    ((unit) / UNIT_PER_MM)
+// #define UNIT_TO_RAD(unit)   ((unit) / UNIT_PER_RAD)
+// #define UNIT_TO_DEG(unit)   (((unit) / UNIT_PER_RAD) * RAD_TO_DEG)
+// // Vitesse => speed unit
+// #define SPEED_LIN_MMS_TO_UNIT(mm_s)     (MM_TO_UNIT(mm_s) / TIMER_ASSERV_FREQ)          // [mm/s] to [unit/period]
+// #define SPEED_ANG_RADS_TO_UNIT(rad_s)   (RAD_TO_UNIT(rad_s) / TIMER_ASSERV_FREQ)        // [rad/s] to [unit/period]
+// #define SPEED_ANG_DEGS_TO_UNIT(deg_s)   (DEG_TO_UNIT(deg_s) / TIMER_ASSERV_FREQ)        // [deg/s] to [unit/period]
+// // Speed unit => vitesse
+// #define SPEED_LIN_UNIT_TO_MMS(unit)     (UNIT_TO_MM(unit) * TIMER_ASSERV_FREQ)          // [unit/period] to [mm/s]
+// #define SPEED_ANG_UNIT_TO_RADS(unit)    (UNIT_TO_RAD(unit) * TIMER_ASSERV_FREQ)         // [unit/period] to [rad/s]
+// #define SPEED_ANG_UNIT_TO_DEGS(unit)    (UNIT_TO_DEG(unit) * TIMER_ASSERV_FREQ)         // [unit/period] to [deg/s]
+// // Acceleration => accel unit
+// #define ACCEL_LIN_MMS2_TO_UNIT(mm_s2)   (MM_TO_UNIT(mm_s2) / TIMER_ASSERV_FREQ_SQUARE)  // [mm/s^2] to [unit/period]
+// #define ACCEL_ANG_RADS2_TO_UNIT(rad_s2) (RAD_TO_UNIT(rad_s2) / TIMER_ASSERV_FREQ_SQUARE)// [rad/s^2] to [unit/period]
+// #define ACCEL_ANG_DEGS2_TO_UNIT(deg_s2) (DEG_TO_UNIT(deg_s2) / TIMER_ASSERV_FREQ_SQUARE)// [deg/s^2] to [unit/period]
+// // Accel unit => acceleration
+// #define ACCEL_LIN_UNIT_TO_MMS2(unit)    (UNIT_TO_MM(unit) * TIMER_ASSERV_FREQ_SQUARE)   // [unit/period] to [mm/s^2]
+// #define ACCEL_ANG_UNIT_TO_RADS2(unit)   (UNIT_TO_RAD(unit) * TIMER_ASSERV_FREQ_SQUARE)  // [unit/period] to [rad/s^2]
+// #define ACCEL_ANG_UNIT_TO_DEGS2(unit)   (UNIT_TO_DEG(unit) * TIMER_ASSERV_FREQ_SQUARE)  // [unit/period] to [deg/s^2]
 
 // paramètres de déplacement max pour le trapèze => directement en unité robot
-const float speed_lin_max = SPEED_LIN_MMS_TO_UNIT(2000.0); //1000 // vitesse linéaire max en mm/s = x * 2.56
-const float speed_ang_max = SPEED_ANG_DEGS_TO_UNIT(200.0); //200 // vitesse angulaire max en °/s = x * 4.46804288511
+const float speed_lin_mms_max = 1000.0; // vitesse linéaire max en mm/s
+const float speed_ang_rads_max = radians(200.0); // vitesse angulaire max en rad/s (deg converti en rad)
 
-const float accel_lin_max = ACCEL_LIN_MMS2_TO_UNIT(200.0);  //80 // acceleration linéaire max en mm/s2 = x * 0.0128
-const float accel_ang_max = ACCEL_ANG_DEGS2_TO_UNIT(45.0); //45 // acceleration angulaire max en °/s2 = x * 0.02234021442
+const float accel_lin_mms2_max = 500.0;  // acceleration linéaire max en mm/s2
+const float accel_ang_rads2_max = 200.0; // acceleration angulaire max en °/s2
 
 const float jerk_lin = 20; // jerk linéaire en unité robot
 const float jerk_ang = 20; // jerk angulaire en unité robot
 
-const int anticipation_mm = 1;
-const int anticipation_unit = MM_TO_UNIT(anticipation_mm);
+const int anticipation_mm = 5;
+//const int anticipation_unit = MM_TO_UNIT(anticipation_mm);
 const int anticipation_deg = 1;
-const int anticipation_deg_unit = DEG_TO_UNIT(anticipation_deg);
+//const int anticipation_deg_unit = DEG_TO_UNIT(anticipation_deg);
 
 // Timer Settings
 static const TickType_t timer_delay_1 = (1000 / TIMER_ASSERV_FREQ) / portTICK_PERIOD_MS; // period of robot motion asserv = TIMER_ASSERV_FREQ Hz
@@ -103,6 +103,6 @@ static TimerHandle_t timer_handle_1 = NULL;
 static bool timer_enable_1 = false;
 
 void timerCallback1(TimerHandle_t xTimer);
-void SetRobotPosition(float x, float y, float theta);
+void SetRobotPosition(float x_mm, float y_mm, float h_deg);
 
 #endif

@@ -1,11 +1,3 @@
-/****************************************************************************************
- * Fichier     : MATH_module.h
- * Description : Fonctions et constantes mathématiques.
- * Auteur      : Christopher BUREL
- * Version     : 2016.11.26
- * Compilation : MPLAB X IDE (v3.45), compiler XC16 (v1.26) Lite
- ****************************************************************************************/
-
 #ifndef MATH_MODULE_H
 #define	MATH_MODULE_H
 
