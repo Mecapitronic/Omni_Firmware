@@ -18,7 +18,7 @@ using namespace Printer;
 #ifndef ARDUINO_USB_MODE
     #warning /*error*/ This ESP32 SoC has no Native USB interface
 #elif  ARDUINO_USB_MODE == 1
-    #warning USB is in device mode
+    //#warning USB is in device mode
 #else
     #warning USB is in OTG mode
     #include "USB.h"
