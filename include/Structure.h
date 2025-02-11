@@ -184,14 +184,16 @@ struct t_node{
 //   float32 kD;
 // } t_PID;
 
-//                                                 value 
+//                                                 actual <-
 //                                                   V
-// Paramètres génériques de contrôle : setpoint -> (PID) -> command -> (SYSTEM)
-typedef struct {
-  float setpoint;   // consigne, valeur à atteindre définie par l'utilisateur OU relatif pour la position = distance restante
-  float command;    // commande, valeur envoyée par le contrôleur au système
-  float real;       // valeur actuelle, réelle, mesurée ou estimée
-  float pivot;      
+// Paramètres génériques de contrôle : setpoint -> error -> (CONTROLLER) -> command -> (SYSTEM) ^
+typedef struct { // TODO: inverser l'ordre des struct? ex: lin.max.acceleration ?
+  float setpoint;   // consigne, valeur à atteindre, objectif
+  float error;      // erreur, écart entre consigne et valeur actuelle, reste à parcourir
+  float command;    // commande, valeur envoyée par le contrôleur au système pour compenser l'erreur
+  float actual;     // valeur actuelle, réelle, mesurée ou estimée, pour évaluer l'erreur
+  float deceleration;  // valeur "pivot" où il faut commencer à ralentir pour arriver à la vitesse finale voulue ("distance" de freinage)
+  float max;      // valeur maximale, limite haute (vitesse max, accel max)
 } t_control;
 
 /****************************************************************************************
@@ -208,13 +210,13 @@ typedef struct {
 */
 // paramètres de cinématique du robot (ajout de la direction (linéaire) pour un holonome)
 typedef struct {
-  PointF location;         // coordonnées actuelles x et y en mm
+  PointF position;         // coordonnées actuelles x et y en mm
   float direction;        // direction du vecteur déplacement linéaire en radians
   float orientation;      // orientation (du déplacement angulaire) actuelle en degrés => ang.position en radians
   /*String teleplot()
   {
-    String ret1 = String() + ">robot:" + (int)location.x;
-    String ret2 = ":" + (int)location.y;
+    String ret1 = String() + ">robot:" + (int)position.x;
+    String ret2 = ":" + (int)position.y;
     String ret3 = ":" + (int)(orientation*100);
     String ret4 = "|xy";
     return ret1+ret2+ret3+ret4;

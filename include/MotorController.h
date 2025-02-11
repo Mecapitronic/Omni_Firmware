@@ -90,7 +90,7 @@ enum MotorBaseType
     float centerToWheel = 0;
 
     void Initialisation(MotorBaseType _motorBaseType, float _centerToWheel);
-    void Update(float lin_speed_mms, float lin_direction_rad, float ang_speed_rad);
+    void Update(float x_speed_mms, float y_speed_mms, float ang_speed_rad);
     void HandleCommand(Command cmd);
     void PrintCommandHelp();
     

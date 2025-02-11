@@ -5,11 +5,12 @@ void OpticalTrackingOdometrySensor::Initialisation()
     println("Init QwiicOTOS");
 
     Wire.setPins(SDA, SCL);
-    Wire.begin();
+    //Wire.begin();
+    Wire.begin(SDA, SCL, 400000UL);
 
     // Normal speed is 100 000
     // With higher speed, instructions on I2C take less time
-    Wire.setClock(400000UL);
+    //Wire.setClock(400000UL);
 
     int retryConnect = 0;
     // Attempt to begin the sensor
@@ -56,8 +57,8 @@ void OpticalTrackingOdometrySensor::Initialisation()
         // multiple speeds to get an average, then set the linear scalar to the
         // inverse of the error. For example, if you move the robot 100 inches and
         // the sensor reports 103 inches, set the linear scalar to 100/103 = 0.971
-        myOtos.setLinearScalar(0.934);
-        myOtos.setAngularScalar(0.990);
+        myOtos.setAngularScalar(0.992);
+        myOtos.setLinearScalar(1.035);
 
         // Set the desired units for linear and angular measurements. Can be either
         // meters or inches for linear, and radians or degrees for angular. If not
@@ -80,7 +81,7 @@ void OpticalTrackingOdometrySensor::Initialisation()
         // clockwise (negative rotation) from the robot's orientation, the offset
         // would be {-5, 10, -90}. These can be any value, even the angle can be
         // tweaked slightly to compensate for imperfect mounting (eg. 1.3 degrees).
-        sfe_otos_pose2d_t offset = {0, 0, -120};
+        sfe_otos_pose2d_t offset = {0, 0, 0};
         myOtos.setOffset(offset);
 
         // Reset the tracking algorithm - this resets the position to the origin,
@@ -171,6 +172,7 @@ void OpticalTrackingOdometrySensor::PrintCommandHelp()
 
 void OpticalTrackingOdometrySensor::SetPosition(float x, float y, float h)
 {
+    sfeTkError_t error;
     // Reset the tracking algorithm - this resets the position to the origin,
     // but can also be used to recover from some rare tracking errors
     myOtos.resetTracking();
@@ -180,14 +182,18 @@ void OpticalTrackingOdometrySensor::SetPosition(float x, float y, float h)
     // another source of location information (eg. vision odometry), you can set
     // the OTOS location to match and it will continue to track from there.
     sfe_otos_pose2d_t currentPosition = {x/1000, y/1000, h};
-    myOtos.setPosition(currentPosition);
+    error = myOtos.setPosition(currentPosition);
+    if (error != 0) 
+        error = myOtos.setPosition(currentPosition); // retry
+    if (error != 0)
+        print("Error SetPosition : ", error);
 }
 
 void OpticalTrackingOdometrySensor::Teleplot()
 {
-    teleplot("X", myPosition.x*1000);
-    teleplot("Y", myPosition.y*1000);
-    teleplot("H", myPosition.h);
+    //teleplot("X", myPosition.x*1000);
+    //teleplot("Y", myPosition.y*1000);
+    //teleplot("H", myPosition.h);
 
     teleplot("VX", myVelocity.x*1000);
     teleplot("VY", myVelocity.y*1000);

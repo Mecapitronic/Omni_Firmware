@@ -42,8 +42,8 @@ using namespace Printer;
 //#define UNIT_PER_MM 512
 
 // fréquence timer asserv en Hz
-#define TIMER_ASSERV_FREQ        200
-#define TIMER_ASSERV_FREQ_SQUARE (TIMER_ASSERV_FREQ * TIMER_ASSERV_FREQ)
+//#define TIMER_ASSERV_FREQ        200
+//#define TIMER_ASSERV_FREQ_SQUARE (TIMER_ASSERV_FREQ * TIMER_ASSERV_FREQ)
 
 // distance du centre du robot au centre de la roue en mm => équivaut à mm/radian
 // TODO: calibrer la valeur en faisant plusieurs rotation et/ou comparer avec le capteur OTOS
@@ -82,23 +82,18 @@ using namespace Printer;
 // #define ACCEL_ANG_UNIT_TO_RADS2(unit)   (UNIT_TO_RAD(unit) * TIMER_ASSERV_FREQ_SQUARE)  // [unit/period] to [rad/s^2]
 // #define ACCEL_ANG_UNIT_TO_DEGS2(unit)   (UNIT_TO_DEG(unit) * TIMER_ASSERV_FREQ_SQUARE)  // [unit/period] to [deg/s^2]
 
-// paramètres de déplacement max pour le trapèze => directement en unité robot
-const float speed_lin_mms_max = 1000.0; // vitesse linéaire max en mm/s
-const float speed_ang_rads_max = radians(200.0); // vitesse angulaire max en rad/s (deg converti en rad)
 
-const float accel_lin_mms2_max = 500.0;  // acceleration linéaire max en mm/s2
-const float accel_ang_rads2_max = 200.0; // acceleration angulaire max en °/s2
 
 const float jerk_lin = 20; // jerk linéaire en unité robot
 const float jerk_ang = 20; // jerk angulaire en unité robot
 
-const int anticipation_mm = 5;
-//const int anticipation_unit = MM_TO_UNIT(anticipation_mm);
-const int anticipation_deg = 1;
+//const float lin_position_tolerance = 2;
+//const int anticipation_unit = MM_TO_UNIT(lin_position_tolerance);
+//const float ang_position_tolerance = radians(1);
 //const int anticipation_deg_unit = DEG_TO_UNIT(anticipation_deg);
 
 // Timer Settings
-static const TickType_t timer_delay_1 = (1000 / TIMER_ASSERV_FREQ) / portTICK_PERIOD_MS; // period of robot motion asserv = TIMER_ASSERV_FREQ Hz
+static const TickType_t timer_delay_1 = (1000 * dt_asserv) / portTICK_PERIOD_MS; // period of robot motion asserv
 static TimerHandle_t timer_handle_1 = NULL;
 static bool timer_enable_1 = false;
 

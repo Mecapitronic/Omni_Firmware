@@ -8,228 +8,124 @@
  ****************************************************************************************/
 void Motion::Initialisation(float speedMax, float accelMax, float jerkMax)
 {
-  jerk.setpoint = jerkMax;
+  isRunning = false;
+
+  jerk.setpoint = 0;
+  jerk.error = 0;
   jerk.command = 0;
-  jerk.real = 0;
-  jerk.pivot = 0;
+  jerk.actual = 0;
+  jerk.deceleration = 0;
+  jerk.max = jerkMax;
 
   acceleration.setpoint = accelMax;
+  acceleration.error = 0;
   acceleration.command = 0;
-  acceleration.real = 0;
-  acceleration.pivot = 0;
+  acceleration.actual = 0;
+  acceleration.deceleration = 0;
+  acceleration.max = accelMax;
 
-  velocity.setpoint = speedMax;
+  velocity.setpoint = 0;
+  velocity.error = 0;
   velocity.command = 0;
-  velocity.real = 0;
-  velocity.pivot = 0;
+  velocity.actual = 0;
+  velocity.deceleration = 0;
+  velocity.max = speedMax;
 
   position.setpoint = 0;
+  position.error = 0;
   position.command = 0;
-  position.real = 0;
-  position.pivot = 0;
+  position.actual = 0;
+  position.deceleration = 0;
+  position.max = 0;
 }
 
 /****************************************************************************************
- * Filter the motion setpoint to get trapezoidal acceleration command
+ * Adaptative trapezoidal controller //TODO: fonction plus générique avec x, dérivée et dérivée seconde
+ // ref : https://poivron-robotique.fr/Consigne-de-vitesse.html
  ****************************************************************************************/
 void Motion::Update()
 {
+  isRunning = true;
   float speed_final = 0; // vitesse à atteindre à la fin du trapèze, pas forcément nulle !
-  float position_setpoint = position.setpoint; // distance restante
-  float velocity_setpoint = velocity.setpoint;
-  float acceleration_setpoint = acceleration.setpoint;
+  //acceleration.setpoint = acceleration.max; // peut être simplifier, si l'accel ne varie pas
+  //float position_setpoint = position.setpoint; // distance restante
+  //float velocity_setpoint = velocity.setpoint;
+  //float acceleration_setpoint = acceleration.setpoint;
 
-  //****************** Nouvelle méthode : trapèze adaptatif (chatGPT) *************************
-  // Étape 1 : Calcul de la distance restante
-    //distance_remaining <- calculate_distance(current_position, target_position)
+  // Vérification de l'arrivée
+  if (fabsf(position.error) >= tolerance)
+  {/*
+      // Étape 1 : Calcul de la distance de décélération
+      // Distance de décélération, point de bascule de la vitesse |Vreal^2-Vfinal^2|/(2*accel_max) (attention: l'acceleration doit être non nulle !)
+      if (acceleration.max != 0)
+      {
+        position.deceleration = fabsf((velocity.actual * velocity.actual) - (speed_final * speed_final)) / (2 * acceleration.max); // toujours positif
 
-    // Étape 2 : Calcul de la distance de décélération
-    //deceleration_distance <- (current_velocity^2) / (2 * max_acceleration)
-    // Distance de décélération, point de bascule de la vitesse |Vfinal^2-Vreal^2|/2Amax (attention: l'acceleration doit être non nulle !)
-    if (acceleration_setpoint != 0)
-    {
-      position.pivot = fabsf((speed_final * speed_final) - (velocity.real * velocity.real)) / (2 * acceleration_setpoint);
+        //if (jerk.setpoint != 0) // normally var set to a const <> 0
+        //{
+        // position.deceleration += (abs(velocity.actual) * acceleration_setpoint) / (2 * jerk.setpoint);
+        //}
+      }
+      else
+      {
+        position.deceleration = INFINITY; // théoriquement = l'infinie
+      }
 
-      //if (jerk.setpoint != 0) // normally var set to a const <> 0
-      //{
-       // position.pivot += (abs(velocity.real) * acceleration_setpoint) / (2 * jerk.setpoint);
-      //}
-    }
-    else
-    {
-      position.pivot = 0;
-    }
+      // Étape 2 : Calcul de la vitesse cible
+      if (fabsf(position.error) < position.deceleration) // comparaison en distance absolue (norme du vecteur)
+      {
+        // Décélération nécessaire : consigne vitesse = sqrt(Vfinal^2 + 2 * acceleration_max * distance_restante)
+        velocity.setpoint = sqrtf((speed_final * speed_final) + 2 * acceleration.max * fabsf(position.error)); // toujours positif
+        //velocity.setpoint = speed_final;
+      }
+      else
+      {
+        // Accélération ou vitesse constante : consigne = max
+        velocity.setpoint = velocity.max; // toujours positif
+      }*/
+      // formule simplifiée 
+      velocity.setpoint = fmin(sqrtf((speed_final * speed_final) + 2 * acceleration.max * fabsf(position.error)), velocity.max);
 
-    // Étape 3 : Calcul de la vitesse cible
-    //if distance_remaining <= deceleration_distance:
-        // Décélération nécessaire
-      //  target_velocity <- sqrt(2 * max_acceleration * distance_remaining)
-    //else:
-        // Accélération ou vitesse constante
-      //  target_velocity <- max_velocity
-    if (fabsf(position_setpoint) <= position.pivot) 
-    {
-      velocity_setpoint = sqrt(2 * acceleration_setpoint * fabsf(position_setpoint));
-    }
+      // la consigne de vitesse prend le même signe que l'erreur de position, pour compenser dans le bon sens
+      velocity.setpoint = copysignf(velocity.setpoint, position.error); 
 
-    // Étape 4 : Ajustement de la vitesse
-    //if target_velocity > current_velocity:
+      // Étape 3 : Ajustement / lissage de la vitesse / intégration de l'accélération
+      // on va dans la direction de la consigne dans tous les cas
+      if (velocity.actual < velocity.setpoint)
+      {
         // Augmentation de la vitesse
-        //new_velocity <- min(current_velocity + max_acceleration * dt, target_velocity)
-    //else:
+        //velocity.command = fmin(velocity.actual + (acceleration.max * dt_asserv), velocity.setpoint);
+        velocity.command = fmin(velocity.command + (acceleration.max * dt_asserv), velocity.setpoint);
+      }
+      else
+      {
         // Réduction de la vitesse
-        //new_velocity <- max(current_velocity - max_acceleration * dt, target_velocity)
-
-    if (velocity_setpoint > velocity.real)
-    {
-      //l'accélération appliquée est trop faible par rapport aux frottements ou autres résistances (inertie, seuil minimum du moteur, etc.). 
-      //Comme la vitesse initiale est nulle, la vitesse commandée reste trop basse pour provoquer un mouvement.
-         // Étape 4.1 : Appliquer un boost temporaire si la vitesse est trop faible
-      //if (velocity.real < 1000 && acceleration_setpoint > 0) {
-        //  acceleration_setpoint = 500;
-      //}
-      // Étape 4.2 : Calculer la nouvelle vitesse commandée
-      //if (velocity.real <= 0) acceleration_setpoint = acceleration_setpoint * 10;
-      velocity.command = fmin(velocity.real + acceleration_setpoint, velocity_setpoint);
-
-      // Étape 4.3 : Imposer une vitesse minimale pour initier le mouvement
-      //if (velocity.command > 0 && velocity.command < 700) {
-        //  velocity.command = 700;
-      //}
-    }
-    else
-    {
-      velocity.command = fmax(velocity.real - acceleration_setpoint, velocity_setpoint);
-    }
-    // prise en compte d'une consigne négative => changer la direction de la vitesse
-    if (position_setpoint < 0) velocity.command = -velocity.command;
-
-    // Étape 5 : Calcul de la nouvelle position
-    //direction <- normalize_vector(subtract_vectors(target_position, current_position))
-    //displacement <- multiply_vector(direction, new_velocity * dt)
-    //new_position <- add_vectors(current_position, displacement)
-
-    // Étape 6 : Mise à jour des états
-    //current_velocity <- new_velocity
-    //current_position <- new_position
-
-    // Étape 7 : Vérification de l'arrivée
-    //if distance_remaining < TOLERANCE:
-      //  current_velocity <- 0  // Arrêter le robot
-       // stop_timer()           // Désactiver l'asservissement si nécessaire
-
-/* //****************** Ancienne méthode : point pivot (Microb Technology) *************************
-  //? https://wiki.droids-corp.org/articles/a/v/e/Aversive/Modules/Control_system/Filters/Quadramp_derivate.html
-  //************************** consigne position => commande vitesse ***************************
-  // Distance de décélération, point de bascule de la vitesse |Vfinal^2-Vreal^2|/2Amax (attention: l'acceleration doit être non nulle !)
-  if (acceleration_setpoint != 0)
-  {
-    position.pivot = abs((speed_final * speed_final) - (velocity.real * velocity.real)) / (2 * acceleration_setpoint);
-
-    if (jerk.setpoint != 0) // normally var set to a const <> 0
-    {
-      position.pivot += (abs(velocity.real) * acceleration_setpoint) / (2 * jerk.setpoint);
-    }
+        //velocity.command = fmax(velocity.actual - (acceleration.max * dt_asserv), velocity.setpoint);
+        velocity.command = fmax(velocity.command - (acceleration.max * dt_asserv), velocity.setpoint);
+      }
+  //     // Limitation pour éviter un saut trop brutal //TODO: pourcentage
+  //     float ecart_command_actual = velocity.command - velocity.actual;
+  //     if (abs(ecart_command_actual) > 20) // seuil ecart vitesse mm/s
+  //     {
+  //       velocity.command  = velocity.actual + copysign(20, ecart_command_actual);
+  //     }
   }
-  else
+  else // Arrivée à destination
   {
-    position.pivot = 0;
+    Stop();
   }
-  // changement de consigne de vitesse => vitesse finale
-  if (abs(position.setpoint - position.command) <= position.pivot)
-  {
-    velocity_setpoint = speed_final;
-  }
-
-  // Sens de la vitesse
-  if (position.setpoint < position.command)
-  {
-    velocity_setpoint = -velocity_setpoint;
-  }
-
-  //************************** consigne vitesse => commande acceleration ***************************
-  // Vitesse de "décélération", point de bascule de l'accélération
-  if (jerk.setpoint != 0)
-  {
-    velocity.pivot = abs(acceleration.real * acceleration.real) / (2 * jerk.setpoint);
-  }
-  // Changement de consigne d'acceleration => acceleration nulle
-  if (abs(velocity_setpoint - velocity.command) <= velocity.pivot)
-  {
-    acceleration_setpoint = 0;
-  }
-
-  // Sens de l'acceleration
-  if (velocity.setpoint < velocity.command)
-  {
-    acceleration.setpoint = -acceleration_setpoint;
-  }
-
-  // Acceleration = jerk integration
-  if (acceleration.command < acceleration_setpoint)
-  {
-    acceleration.command += jerk.setpoint;
-    if (acceleration.command > acceleration_setpoint)
-    {
-      acceleration.command = acceleration_setpoint;
-    }
-  }
-  else if (acceleration.command > acceleration_setpoint)
-  {
-    acceleration.command -= jerk.setpoint;
-    if (acceleration.command < acceleration_setpoint)
-    {
-      acceleration.command = acceleration_setpoint;
-    }
-  }
-
-  // velocity = acceleration integration
-  if (velocity.command < velocity_setpoint)
-  {
-    velocity.command += acceleration.command;
-    if (velocity.command > velocity_setpoint)
-    {
-      velocity.command = velocity_setpoint;
-    }
-  }
-  else if (velocity.command > velocity_setpoint)
-  {
-    velocity.command -= acceleration.command;
-    if (velocity.command < velocity_setpoint)
-    {
-      velocity.command = velocity_setpoint;
-    }
-  }
-
-  // Position = velocity integration
-  if (position.command < position.setpoint)
-  {
-    position.command += velocity.command;
-    if (position.command > position.setpoint)
-    {
-      position.command = position.setpoint;
-    }
-  }
-  else if (position.command > position.setpoint)
-  {
-    position.command += velocity.command; // plus *(1)
-    if (position.command < position.setpoint)
-    {
-      position.command = position.setpoint;
-    }
-  }
-*/
 }
 
 /****************************************************************************************
- * Re-initialize command position, speed and acc
+ * Stop motion : Reset commands
  ****************************************************************************************/
-void Motion::Reset_Ramp()
+void Motion::Stop()
 {
-  position.command = position.real;
+  isRunning = false;
+  //position.command = position.actual; // not used
   velocity.command = 0;
   acceleration.command = 0;
-  jerk.command = 0; // not used
+  //jerk.command = 0; // not used
 }
 
 /****************************************************************************************
@@ -238,6 +134,14 @@ void Motion::Reset_Ramp()
 void Motion::Setpoint_Position(float newPosition)
 {
   position.setpoint = newPosition;
+}
+
+/****************************************************************************************
+ * Set position tolerance, in mm for lin, in rad for ang
+ ****************************************************************************************/
+void Motion::SetTolerance(float mm_or_rad)
+{
+  tolerance = mm_or_rad;
 }
 
 /****************************************************************************************
@@ -254,20 +158,22 @@ boolean Motion::Check_Position()
 
 void Motion::Teleplot(String name)
 {
-  teleplot(name + " pos.setP", position.setpoint);
-  teleplot(name + " pos.com", position.command);
-  teleplot(name + " pos.real", position.real);
-  teleplot(name + " pos.piv", position.pivot);
+  //teleplot(name + " pos.setP", position.setpoint);
+  teleplot(name + " pos.error", position.error);
+  //teleplot(name + " pos.com", position.command);
+  //teleplot(name + " pos.actual", position.actual);
+  teleplot(name + " pos.decel", position.deceleration);
 
   teleplot(name + " vel.setP", velocity.setpoint);
+  //teleplot(name + " vel.error", velocity.error);
   teleplot(name + " vel.com", velocity.command);
-  teleplot(name + " vel.real", velocity.real);
-  teleplot(name + " vel.piv", velocity.pivot);
+  teleplot(name + " vel.actual", velocity.actual);
+  //teleplot(name + " vel.decel", velocity.deceleration);
 
   //teleplot(name + " acc.setP", acceleration.setpoint);
   //teleplot(name + " acc.com", acceleration.command);
-  //teleplot(name + " acc.real", acceleration.real);
-  //teleplot(name + " acc.piv", acceleration.pivot);
+  //teleplot(name + " acc.actual", acceleration.actual);
+  //teleplot(name + " acc.piv", acceleration.deceleration);
 
   //teleplot(name + " jerk.setP",jerk.setpoint);
   //teleplot(name + " jerk.com",jerk.command);

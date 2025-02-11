@@ -42,7 +42,8 @@ void MotorController::Initialisation(MotorBaseType _motorBaseType, float _center
     }
 }
 
-void MotorController::Update(float lin_speed_mms, float lin_direction_rad, float ang_speed_rad)
+
+void MotorController::Update(float x_speed_mms, float y_speed_mms, float ang_speed_rad)
 {
     if (motorBaseType == DIFFERENTIAL_2_MOTORS)
     {
@@ -53,42 +54,26 @@ void MotorController::Update(float lin_speed_mms, float lin_direction_rad, float
     }
     else if (motorBaseType == OMNIDIRECTIONAL_3_MOTORS)
     {
-
-        // Set the robot center linear and angular speeds :
-        // - lin_speed_mms : speed of the linear motion, in mm/s
-        // - lin_direction_rad : angle direction of the linear motion, in radians   [direction => where is moving, trajectory]
-        // - ang_speed_deg : speed of the angular motion, in °/s                    [orientation => where is facing]
-        // Polar coordinate for better vectorial control, only one linear PID combining x and y motions.
+        // Vitesses dans le référentiel du robot :
+        // - x_speed_mms : vitesse en x (mm/s)
+        // - y_speed_mms : vitesse en y (mm/s)
+        // - ang_speed_rad : vitesse de rotation (rad/s)
         // https://poivron-robotique.fr/Robot-holonome-lois-de-commande.html
         //    Y
         //    Î
         // 2     1
         //    o     -> X
         //    3
-        // Global robot speed conversion to x and y components
-        float x_speed = lin_speed_mms * cos(lin_direction_rad);
-        float y_speed = lin_speed_mms * sin(lin_direction_rad);
-
-        // println(">x_speed:", x_speed);
-        // println(">y_speed:", y_speed);
-        // println(">ang_speed:", ang_speed_deg);
 
         // preliminary calculations
-         float ang_component = centerToWheel * ang_speed_rad; // d*ωz
-         float x_component = x_speed / 2;                     // 1/2*x_speed
-         float y_component = y_speed * SQRT3_2;               // √3/2*y_speed
+        float ang_component = centerToWheel * ang_speed_rad; // d*ωz
+        float x_component = x_speed_mms / 2;                 // 1/2*x_speed
+        float y_component = y_speed_mms * SQRT3_2;           // √3/2*y_speed
 
         // Speeds calculations for each motor
-        float motor1_speed = x_component - y_component - ang_component;
-        float motor2_speed = x_component + y_component - ang_component;
-        float motor3_speed = -x_component - ang_component;
-        //float motor1_speed = x_speed / 2 - y_speed * SQRT3_2 - centerToWheel * radians(ang_speed_deg); // V1 = 1/2*x_speed − √3/2*y_speed − d*ωz
-        //float motor2_speed = x_speed / 2 + y_speed * SQRT3_2 - centerToWheel * radians(ang_speed_deg); // V2 = 1/2*x_speed + √3/2*y_speed − d*ωz
-        //float motor3_speed = -x_speed - centerToWheel * radians(ang_speed_deg);                        // V3 = -x_speed − d*ωz
-
-        //println(">v1:", motor1_speed);
-        //println(">v2:", motor2_speed);
-        //println(">v3:", motor3_speed);
+        float motor1_speed = x_component - y_component - ang_component; // V1 = 1/2*x_speed − √3/2*y_speed − d*ωz
+        float motor2_speed = x_component + y_component - ang_component; // V2 = 1/2*x_speed + √3/2*y_speed − d*ωz
+        float motor3_speed = -x_component - ang_component;              // V3 = -x_speed − d*ωz       
 
         SetMotorSpeed(1, motor1_speed);
         SetMotorSpeed(2, motor2_speed);
