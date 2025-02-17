@@ -120,5 +120,9 @@
                 "miDebuggerServerAddress": "localhost:3333"
             }
         ]
+    },
+    "sonarlint.connectedMode.project": {
+        "connectionId": "mecapitronic",
+        "projectKey": "Mecapitronic_Omni_Firmware"
     }
 }
