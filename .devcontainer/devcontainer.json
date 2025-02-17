@@ -1,0 +1,36 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/cpp
+{
+    "name": "C++",    
+    // specify to build docker image
+    "build": {
+        "dockerfile": "Dockerfile"
+    },
+    // uncomment to access USB
+    // "runArgs": [
+    //     "--privileged"
+    // ],
+    // "postAttachCommand": "sudo service udev restart",
+    // // to access USB devices via /dev
+    // "mounts": [
+    //     "source=/dev/,target=/dev/,type=bind,consistency=consistent"
+    // ]
+    // uncomment to display applications GUI
+    // "containerEnv": {
+    //     "DISPLAY": ":0",
+    //     "XDG_RUNTIME_DIR": "/tmp",
+    //     "WAYLAND_DISPLAY": "${localEnv:WAYLAND_DISPLAY}"
+    // }
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "eamodio.gitlens",
+                "GitHub.vscode-github-actions",
+                "llvm-vs-code-extensions.vscode-clangd",
+                "platformio.platformio-ide",
+                "Wokwi.wokwi-vscode",
+                "xaver.clang-format"
+            ]
+        }
+    }
+}
