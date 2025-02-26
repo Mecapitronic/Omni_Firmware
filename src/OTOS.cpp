@@ -57,8 +57,8 @@ void OpticalTrackingOdometrySensor::Initialisation()
         // multiple speeds to get an average, then set the linear scalar to the
         // inverse of the error. For example, if you move the robot 100 inches and
         // the sensor reports 103 inches, set the linear scalar to 100/103 = 0.971
-        myOtos.setAngularScalar(0.992);
-        myOtos.setLinearScalar(1.035);
+        myOtos.setAngularScalar(0.992);//0.992
+        myOtos.setLinearScalar(1.00);//1.035
 
         // Set the desired units for linear and angular measurements. Can be either
         // meters or inches for linear, and radians or degrees for angular. If not
@@ -67,8 +67,8 @@ void OpticalTrackingOdometrySensor::Initialisation()
         // start of all your programs.
         myOtos.setLinearUnit(kSfeOtosLinearUnitMeters);
         // myOtos.setLinearUnit(kSfeOtosLinearUnitInches);
-        // myOtos.setAngularUnit(kSfeOtosAngularUnitRadians);
-        myOtos.setAngularUnit(kSfeOtosAngularUnitDegrees);
+        myOtos.setAngularUnit(kSfeOtosAngularUnitRadians); // /!\ OTOS in radians !
+        //myOtos.setAngularUnit(kSfeOtosAngularUnitDegrees);
 
         // Assuming you've mounted your sensor to a robot and it's not centered,
         // you can specify the offset for the sensor relative to the center of the
@@ -92,8 +92,8 @@ void OpticalTrackingOdometrySensor::Initialisation()
         // the origin. If your robot does not start at the origin, or you have
         // another source of location information (eg. vision odometry), you can set
         // the OTOS location to match and it will continue to track from there.
-        sfe_otos_pose2d_t currentPosition = {0, 0, 0};
-        myOtos.setPosition(currentPosition);
+        sfe_otos_pose2d_t currentPose = {0, 0, 0};
+        myOtos.setPosition(currentPose);
 
         sfeTkError_t error;
         sfe_otos_signal_process_config_t config;
@@ -108,7 +108,6 @@ void OpticalTrackingOdometrySensor::Initialisation()
             //println("enAcc : ", config.enAcc);
             //println("enLut : ", config.enLut);
         }
-        isConnected = true;
     }
 }
 
@@ -170,7 +169,7 @@ void OpticalTrackingOdometrySensor::PrintCommandHelp()
     //Printer::println();
 }
 
-void OpticalTrackingOdometrySensor::SetPosition(float x, float y, float h)
+void OpticalTrackingOdometrySensor::SetPose(float x, float y, float h)
 {
     sfeTkError_t error;
     // Reset the tracking algorithm - this resets the position to the origin,
@@ -181,12 +180,13 @@ void OpticalTrackingOdometrySensor::SetPosition(float x, float y, float h)
     // the origin. If your robot does not start at the origin, or you have
     // another source of location information (eg. vision odometry), you can set
     // the OTOS location to match and it will continue to track from there.
-    sfe_otos_pose2d_t currentPosition = {x/1000, y/1000, h};
-    error = myOtos.setPosition(currentPosition);
+    sfe_otos_pose2d_t currentPose = {x/1000, y/1000, h};
+    error = myOtos.setPosition(currentPose);
     if (error != 0) 
-        error = myOtos.setPosition(currentPosition); // retry
+        error = myOtos.setPosition(currentPose); // retry
     if (error != 0)
-        print("Error SetPosition : ", error);
+        print("Error SetPose : ", error);
+    Update();
 }
 
 void OpticalTrackingOdometrySensor::Teleplot()

@@ -18,7 +18,7 @@ public:
     void HandleCommand(Command cmd);
     void PrintCommandHelp();
     
-    void SetPosition(float x, float y, float h);
+    void SetPose(float x, float y, float h);
     void Teleplot();
 
     PoseF position;

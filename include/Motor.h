@@ -1,12 +1,12 @@
-#ifndef MOTORCONTROLLER_H
-#define MOTORCONTROLLER_H
+#ifndef MOTOR_H
+#define MOTOR_H
 
 #include <ESP32_FastPWM.h>
 
 #include "pin.h"
 #include "ESP32_Helper.h"
 using namespace Printer;
-#include "MATH_module.h"
+#include "GeoMathTools.h"
 
 // résolution moteur : 200*8=1600 micro-step/tour, périmètre roue environ 185 mm, soit 8.65 step/mm
 // vitesse max : 1 m/s = 8.65 kHz (step/s)
@@ -75,7 +75,7 @@ Bit resolution | Min Frequency [Hz] | Max Frequency [Hz]
 const int SPEED_MAX_STEPPER = FREQ_MAX_STEPPER/MOTOR_STEP_PER_MM;
 // const int var_duty_resolution =  (int) log2 (APB_CLK_FREQ / FREQ_MAX_STEPPER); //test
 
-class MotorController
+class Motor
 {
 public:
 
@@ -90,7 +90,7 @@ enum MotorBaseType
     float centerToWheel = 0;
 
     void Initialisation(MotorBaseType _motorBaseType, float _centerToWheel);
-    void Update(float x_speed_mms, float y_speed_mms, float ang_speed_rad);
+    void Update(float linear_speed_mms, float linear_direction_rad, float angular_speed_rad);
     void HandleCommand(Command cmd);
     void PrintCommandHelp();
     

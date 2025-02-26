@@ -4,115 +4,87 @@
 #include "Motion.h"
 
 /****************************************************************************************
- * Initialize setpoint
+ * Initialize
  ****************************************************************************************/
-void Motion::Initialisation(float speedMax, float accelMax, float jerkMax)
+void Motion::Initialisation(float speedMax, float accelMax)
 {
   isRunning = false;
 
-  jerk.setpoint = 0;
-  jerk.error = 0;
-  jerk.command = 0;
-  jerk.actual = 0;
-  jerk.deceleration = 0;
-  jerk.max = jerkMax;
-
-  acceleration.setpoint = accelMax;
-  acceleration.error = 0;
-  acceleration.command = 0;
-  acceleration.actual = 0;
-  acceleration.deceleration = 0;
-  acceleration.max = accelMax;
-
-  velocity.setpoint = 0;
-  velocity.error = 0;
-  velocity.command = 0;
-  velocity.actual = 0;
-  velocity.deceleration = 0;
-  velocity.max = speedMax;
-
-  position.setpoint = 0;
-  position.error = 0;
-  position.command = 0;
-  position.actual = 0;
-  position.deceleration = 0;
-  position.max = 0;
+  accel_max = accelMax;
+  speed_max = speedMax;
+  speed_limit = speed_max;
+  speed_final = 0;
+  velocity_actual = 0;
+  velocity_command = 0;
+  position_error = 0;
+  position_margin = 0;
 }
 
 /****************************************************************************************
- * Adaptative trapezoidal controller //TODO: fonction plus générique avec x, dérivée et dérivée seconde
- // ref : https://poivron-robotique.fr/Consigne-de-vitesse.html
+ * Motion Update : Must be called on every speed control loop => motion timer
  ****************************************************************************************/
 void Motion::Update()
 {
   isRunning = true;
-  float speed_final = 0; // vitesse à atteindre à la fin du trapèze, pas forcément nulle !
-  //acceleration.setpoint = acceleration.max; // peut être simplifier, si l'accel ne varie pas
-  //float position_setpoint = position.setpoint; // distance restante
-  //float velocity_setpoint = velocity.setpoint;
-  //float acceleration_setpoint = acceleration.setpoint;
 
-  // Vérification de l'arrivée
-  if (fabsf(position.error) >= tolerance)
-  {/*
-      // Étape 1 : Calcul de la distance de décélération
-      // Distance de décélération, point de bascule de la vitesse |Vreal^2-Vfinal^2|/(2*accel_max) (attention: l'acceleration doit être non nulle !)
-      if (acceleration.max != 0)
-      {
-        position.deceleration = fabsf((velocity.actual * velocity.actual) - (speed_final * speed_final)) / (2 * acceleration.max); // toujours positif
-
-        //if (jerk.setpoint != 0) // normally var set to a const <> 0
-        //{
-        // position.deceleration += (abs(velocity.actual) * acceleration_setpoint) / (2 * jerk.setpoint);
-        //}
-      }
-      else
-      {
-        position.deceleration = INFINITY; // théoriquement = l'infinie
-      }
-
-      // Étape 2 : Calcul de la vitesse cible
-      if (fabsf(position.error) < position.deceleration) // comparaison en distance absolue (norme du vecteur)
-      {
-        // Décélération nécessaire : consigne vitesse = sqrt(Vfinal^2 + 2 * acceleration_max * distance_restante)
-        velocity.setpoint = sqrtf((speed_final * speed_final) + 2 * acceleration.max * fabsf(position.error)); // toujours positif
-        //velocity.setpoint = speed_final;
-      }
-      else
-      {
-        // Accélération ou vitesse constante : consigne = max
-        velocity.setpoint = velocity.max; // toujours positif
-      }*/
-      // formule simplifiée 
-      velocity.setpoint = fmin(sqrtf((speed_final * speed_final) + 2 * acceleration.max * fabsf(position.error)), velocity.max);
-
-      // la consigne de vitesse prend le même signe que l'erreur de position, pour compenser dans le bon sens
-      velocity.setpoint = copysignf(velocity.setpoint, position.error); 
-
-      // Étape 3 : Ajustement / lissage de la vitesse / intégration de l'accélération
-      // on va dans la direction de la consigne dans tous les cas
-      if (velocity.actual < velocity.setpoint)
-      {
-        // Augmentation de la vitesse
-        //velocity.command = fmin(velocity.actual + (acceleration.max * dt_asserv), velocity.setpoint);
-        velocity.command = fmin(velocity.command + (acceleration.max * dt_asserv), velocity.setpoint);
-      }
-      else
-      {
-        // Réduction de la vitesse
-        //velocity.command = fmax(velocity.actual - (acceleration.max * dt_asserv), velocity.setpoint);
-        velocity.command = fmax(velocity.command - (acceleration.max * dt_asserv), velocity.setpoint);
-      }
-  //     // Limitation pour éviter un saut trop brutal //TODO: pourcentage
-  //     float ecart_command_actual = velocity.command - velocity.actual;
-  //     if (abs(ecart_command_actual) > 20) // seuil ecart vitesse mm/s
-  //     {
-  //       velocity.command  = velocity.actual + copysign(20, ecart_command_actual);
-  //     }
+  // Check end of motion
+  if (fabsf(position_error) >= position_margin)
+  {
+    TrapezoidalProfile();
+    AntiOverspeed();
   }
-  else // Arrivée à destination
+  else
   {
     Stop();
+  }
+}
+
+/****************************************************************************************
+ * Trapezoidal velocity controller for smoothly motion profile, based on kinematic motion laws : 
+ * distance_deceleration = |velocity_real^2 - velocity_final^2| / (2 * accel_max) 
+ * -OR- velocity_setpoint = sqrt(velocity_final^2 + 2 * accel_max * distance_remaining)
+ ****************************************************************************************/
+void Motion::TrapezoidalProfile()
+{
+  // Speed setpoint
+  float velocity_setpoint = sqrtf((speed_final * speed_final) + 2 * accel_max * fabsf(position_error));
+
+  // Speed limitation (in any case, setpoint is limited by the absolute speed max)
+  velocity_setpoint = fmin(velocity_setpoint, fmin(speed_limit, speed_max));
+
+  // Velocity (speed with sign)
+  velocity_setpoint = copysignf(velocity_setpoint, position_error); 
+
+  // Velocity smoothing by integration of acceleration
+  if (velocity_actual < velocity_setpoint)
+  {
+    // Velocity increase
+    velocity_command = fmin(velocity_command + (accel_max * dt_motion), velocity_setpoint);
+  }
+  else
+  {
+    // Velocity decrease
+    velocity_command = fmax(velocity_command - (accel_max * dt_motion), velocity_setpoint);
+  }
+}
+
+/****************************************************************************************
+ * Anti Overspeed : Limit the velocity command to avoid overspeed or runaway
+ ****************************************************************************************/
+void Motion::AntiOverspeed()
+{
+  // TODO : sortir les variables et ajuster la fonction...
+  float delta_v_min = 50.0;   // Augmentation minimale par cycle (mm/s)
+  float k = 0.5;              // Facteur d’augmentation relative
+
+  // Max velocity delta
+  float seuil_vit = fabsf(velocity_actual * k) + delta_v_min;
+  float delta_vit = velocity_command - velocity_actual;
+
+  // Velocity command limitation
+  if (fabsf(delta_vit) > seuil_vit) 
+  {
+      velocity_command = velocity_actual + copysign(seuil_vit, delta_vit);
   }
 }
 
@@ -122,59 +94,31 @@ void Motion::Update()
 void Motion::Stop()
 {
   isRunning = false;
-  //position.command = position.actual; // not used
-  velocity.command = 0;
-  acceleration.command = 0;
-  //jerk.command = 0; // not used
+  velocity_command = 0;
 }
 
 /****************************************************************************************
- * Setup position setpoint
+ * Set end position tolerance : in mm for linear, in radian for angular
  ****************************************************************************************/
-void Motion::Setpoint_Position(float newPosition)
+void Motion::SetMargin(float margin_mm_or_rad)
 {
-  position.setpoint = newPosition;
-}
-
-/****************************************************************************************
- * Set position tolerance, in mm for lin, in rad for ang
- ****************************************************************************************/
-void Motion::SetTolerance(float mm_or_rad)
-{
-  tolerance = mm_or_rad;
+  position_margin = margin_mm_or_rad;
 }
 
 /****************************************************************************************
  * Return OK if position setpoint is reached
  ****************************************************************************************/
-boolean Motion::Check_Position()
-{
-  return ((position.command == position.setpoint) ? OK : NOK);
-}
+// boolean Motion::Check_Position()
+// {
+//   return ((position.command == true) ? OK : NOK);
+// }
 
 /****************************************************************************************
  * Teleplot motion
  ****************************************************************************************/
-
 void Motion::Teleplot(String name)
 {
-  //teleplot(name + " pos.setP", position.setpoint);
-  teleplot(name + " pos.error", position.error);
-  //teleplot(name + " pos.com", position.command);
-  //teleplot(name + " pos.actual", position.actual);
-  teleplot(name + " pos.decel", position.deceleration);
-
-  teleplot(name + " vel.setP", velocity.setpoint);
-  //teleplot(name + " vel.error", velocity.error);
-  teleplot(name + " vel.com", velocity.command);
-  teleplot(name + " vel.actual", velocity.actual);
-  //teleplot(name + " vel.decel", velocity.deceleration);
-
-  //teleplot(name + " acc.setP", acceleration.setpoint);
-  //teleplot(name + " acc.com", acceleration.command);
-  //teleplot(name + " acc.actual", acceleration.actual);
-  //teleplot(name + " acc.piv", acceleration.deceleration);
-
-  //teleplot(name + " jerk.setP",jerk.setpoint);
-  //teleplot(name + " jerk.com",jerk.command);
+  teleplot(name + " pos.error", position_error);
+  teleplot(name + " vel.com", velocity_command);
+  teleplot(name + " vel.actual", velocity_actual);
 }

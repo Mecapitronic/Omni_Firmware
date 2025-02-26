@@ -1,13 +1,13 @@
-#include "MotorController.h"
+#include "Motor.h"
 // https://lastminuteengineers.com/esp32-pwm-tutorial/
 
 ESP32_FAST_PWM *stepper1;
 ESP32_FAST_PWM *stepper2;
 ESP32_FAST_PWM *stepper3;
 
-void MotorController::Initialisation(MotorBaseType _motorBaseType, float _centerToWheel)
+void Motor::Initialisation(MotorBaseType _motorBaseType, float _centerToWheel)
 {
-    println("Initialisation MotorController : ", _motorBaseType, " Motors");
+    println("Initialisation Motor : ", _motorBaseType, " Motors");
     motorBaseType = _motorBaseType;
     centerToWheel = _centerToWheel;
 
@@ -43,7 +43,7 @@ void MotorController::Initialisation(MotorBaseType _motorBaseType, float _center
 }
 
 
-void MotorController::Update(float x_speed_mms, float y_speed_mms, float ang_speed_rad)
+void Motor::Update(float linear_speed_mms, float linear_direction_rad, float angular_speed_rad)
 {
     if (motorBaseType == DIFFERENTIAL_2_MOTORS)
     {
@@ -65,8 +65,12 @@ void MotorController::Update(float x_speed_mms, float y_speed_mms, float ang_spe
         //    o     -> X
         //    3
 
+        // Get speeds components from linear speed and direction => /!\ Must be in local robot reference !
+        float x_speed_mms = linear_speed_mms * cos(linear_direction_rad); 
+        float y_speed_mms = linear_speed_mms * sin(linear_direction_rad);
+
         // preliminary calculations
-        float ang_component = centerToWheel * ang_speed_rad; // d*ωz
+        float ang_component = centerToWheel * angular_speed_rad; // d*ωz
         float x_component = x_speed_mms / 2;                 // 1/2*x_speed
         float y_component = y_speed_mms * SQRT3_2;           // √3/2*y_speed
 
@@ -81,7 +85,7 @@ void MotorController::Update(float x_speed_mms, float y_speed_mms, float ang_spe
     }
 }
 
-void MotorController::HandleCommand(Command cmd)
+void Motor::HandleCommand(Command cmd)
 {
 
     if (cmd.cmd.startsWith("Motor"))
@@ -110,15 +114,15 @@ void MotorController::HandleCommand(Command cmd)
     }
 }
 
-void MotorController::PrintCommandHelp()
+void Motor::PrintCommandHelp()
 {
-    Printer::println("MotorController Command Help :");
+    Printer::println("Motor Command Help :");
     Printer::println(" > Motor:[int];[int];[int]");
     Printer::println("      [int] number of motor, frequency of motor in Hz, duty cycle of motor between 0 and 100");
     Printer::println();
 }
 
-void MotorController::SetMotorSpeed(int motor_ID, float speed_mms)
+void Motor::SetMotorSpeed(int motor_ID, float speed_mms)
 {
     // convert speed in mm/s to frequency in step/s
     float speed_step_s = speed_mms * MOTOR_STEP_PER_MM;
@@ -169,14 +173,14 @@ void MotorController::SetMotorSpeed(int motor_ID, float speed_mms)
     }
 }
 /*
-void MotorController::SetMotorsSpeed(float speed_1_mms, float speed_2_mms, float speed_3_mms)
+void Motor::SetMotorsSpeed(float speed_1_mms, float speed_2_mms, float speed_3_mms)
 {
     SetMotorSpeed(1, speed_1_mms);
     SetMotorSpeed(2, speed_2_mms);
     SetMotorSpeed(3, speed_3_mms);
 }*/
 
-float MotorController::GetMotorSpeed(int motor_ID)
+float Motor::GetMotorSpeed(int motor_ID)
 {
     bool direction;
     if (motor_ID == 1)
@@ -212,7 +216,7 @@ float MotorController::GetMotorSpeed(int motor_ID)
     return 0;
 }
 
-void MotorController::test_ledc()
+void Motor::test_ledc()
 {
     int PIN = 18;
     int channel = 0;
@@ -295,7 +299,7 @@ void MotorController::test_ledc()
     ledcDetachPin(PIN);
 }
 
-void MotorController::test_ledc2()
+void Motor::test_ledc2()
 {
     ESP32_FAST_PWM *stepper0;
 
