@@ -77,6 +77,11 @@ void setup()
   // Init trajectory
   Trajectory::Initialisation(&linear, &angular, &robot);
 
+  // Init Path Planning
+  Mapping::Initialize_Map(TEAM_A);
+  Obstacle::Initialize_Obstacle();
+  Mapping::Initialize_Passability_Graph();
+  
   // Create a timer => for motion
   timer_handle_1 = xTimerCreate(
       "Timer 1",       // Name of timer
@@ -130,6 +135,8 @@ void timerCallback1(TimerHandle_t xTimer)
 
     // Actual position update
     robot.SetPose(otos.position.x, otos.position.y, otos.position.h);
+
+    Mapping::Update_Start_Vertex((int16_t)robot.x, (int16_t)robot.y);
 
     // Actual velocity update, in global field reference
     linear.velocity_actual = Norm2D(otos.velocity.x, otos.velocity.y);
@@ -227,6 +234,40 @@ void loop()
       println();
       EnableTimerMotion();
     }
+    if(cmd.cmd == ("PF") && cmd.size == 1)
+    {
+      // PathFinding
+      // PF:5
+      Mapping::Set_End_Vertex(cmd.data[0]);
+      if (PathFinding::Path_Planning())
+      {
+        println("PF Found");
+      }
+      else
+      {
+        print("PF Not Found");
+      }
+    }
+    
+    if(cmd.cmd == ("VertexList") && cmd.size == 0)
+    {
+      Mapping::PrintVertexList();
+    }
+    if(cmd.cmd == ("SegmentList") && cmd.size == 0)
+    {
+      Mapping::PrintSegmentList();
+    }
+    if(cmd.cmd == ("CircleList") && cmd.size == 0)
+    {
+      Mapping::PrintCircleList();
+    }
+    if(cmd.cmd == ("MappingList") && cmd.size == 0)
+    {
+      Mapping::PrintVertexList();
+      Mapping::PrintSegmentList();
+      Mapping::PrintCircleList();
+    }
+
   }
 
   endChrono = micros();

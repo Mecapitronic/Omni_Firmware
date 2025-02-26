@@ -1,6 +1,8 @@
 #ifndef STRUCTURE_H
 #define STRUCTURE_H
 
+#define SERIAL_PRINT // TODO : remove this line
+
 #include <Arduino.h>
 #include "Structure_Helper.h"
 
@@ -97,17 +99,17 @@ typedef double float64; // about 16 decimal digits
 /****************************************************************************************
 * MAPPING
 ****************************************************************************************/
-/*
+
 typedef uint64 t_adjacency; // 64 vertex max
 
-typedef struct Vertex{
+struct Vertex{
   Point point;
   t_adjacency adjacency_active;   // high level graph with active obstacle => working graph
   t_adjacency adjacency_passive;  // medium level graph with passive play element
   t_adjacency adjacency_static;   // low level graph with only static map element
 };
 
-typedef struct Segment{
+struct Segment{
   Point p1;
   Point p2;
   float32 a;	// slope of the segment : rise/run = (Y2 - Y1) / (X2 - X1)
@@ -157,78 +159,21 @@ struct Circle{
 };
 
 typedef uint8 t_vertexID;
-*/
+
 /****************************************************************************************
 * Path_Finding
 ****************************************************************************************/
-/*
 struct t_node{
   uint32 currentCost;
 	uint32 parentCost;
 	t_vertexID parentID;
   t_vertexID currentID;
-};*/
-
-
-/****************************************************************************************
-* CONTROL SYSTEM
-****************************************************************************************/
-// paramètres d'un régulateur PID
-// typedef struct {
-//   //int32 command;
-//   int32 error;
-//   int32 last_error;
-//   int32 sum_error;
-//   float32 kP;
-//   float32 kI;
-//   float32 kD;
-// } t_PID;
-
-//                                                 actual <-
-//                                                   V
-// Paramètres génériques de contrôle : setpoint -> error -> (CONTROLLER) -> command -> (SYSTEM) ^
-typedef struct { // TODO: inverser l'ordre des struct? ex: lin.max.acceleration ?
-  float setpoint;   // consigne, valeur à atteindre, objectif
-  float error;      // erreur, écart entre consigne et valeur actuelle, reste à parcourir
-  float command;    // commande, valeur envoyée par le contrôleur au système pour compenser l'erreur
-  float actual;     // valeur actuelle, réelle, mesurée ou estimée, pour évaluer l'erreur
-  float deceleration;  // valeur "pivot" où il faut commencer à ralentir pour arriver à la vitesse finale voulue ("distance" de freinage)
-  float max;      // valeur maximale, limite haute (vitesse max, accel max)
-} t_control;
-
-/****************************************************************************************
-* MOTION
-****************************************************************************************/
-// paramètres d'un mouvement avec asservissement PID sur une des composantes (par exemple vitesse)
-/*typedef struct {
-  t_control position;      // déplacement
-  t_control velocity;      // vitesse
-  t_control acceleration;  // acceleration
-  t_control jerk;          // à-coup
-  //t_PID PID;               // régulateur PID
-} t_motion;
-*/
-// paramètres de cinématique du robot (ajout de la direction (linéaire) pour un holonome)
-typedef struct {
-  PointF position;         // coordonnées actuelles x et y en mm
-  float direction;        // direction du vecteur déplacement linéaire en radians
-  float orientation;      // orientation (du déplacement angulaire) actuelle en degrés => ang.position en radians
-  /*String teleplot()
-  {
-    String ret1 = String() + ">robot:" + (int)position.x;
-    String ret2 = ":" + (int)position.y;
-    String ret3 = ":" + (int)(orientation*100);
-    String ret4 = "|xy";
-    return ret1+ret2+ret3+ret4;
-  }*/
-} t_robot;
-
+};
 
 /****************************************************************************************
 * STRATEGY
 ****************************************************************************************/
-/*t
-ypedef struct {
+/*typedef struct {
   t_vertexID vertexID;
   int8 mission;
   bool possible;
