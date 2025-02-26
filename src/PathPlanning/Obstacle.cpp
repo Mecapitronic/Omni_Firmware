@@ -13,7 +13,7 @@ Circle obstacle[MAX_OBSTACLE];
 uint8 obs_cursor = 0;
 uint16 obstacleFading[MAX_OBSTACLE];
 Circle false_obstacle[MAX_FALSE_OBSTACLE];
-boolean obstacle_enable = NO;
+boolean obstacle_enable = false;
 
 /****************************************************************************************
  * Return the pointer address of obstacle (circle) from obstacle ID
@@ -53,7 +53,7 @@ void Initialize_Obstacle(void)
     }
     
   // enable obstacle detection
-  obstacle_enable = YES;
+  obstacle_enable = true;
 }
 
 /****************************************************************************************
@@ -171,7 +171,7 @@ void Add_Obstacle_Polar(uint8 id)
 	uint16 distance = 0;
 	Circle obs;
 	uint8 i = 0;
-	boolean newObs = TRUE;
+	boolean newObs = true;
 
 	if (obstacle_enable)
 	{
@@ -187,7 +187,7 @@ void Add_Obstacle_Polar(uint8 id)
 				{
 					if (abs(obstacle[i].p.x - obs.p.x) < 100 && abs(obstacle[i].p.y - obs.p.y) < 100)
 					{
-						newObs = FALSE;
+						newObs = false;
 						obstacle[i] = obs;
 						break;
 					}

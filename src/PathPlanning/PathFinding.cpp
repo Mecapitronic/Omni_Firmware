@@ -21,11 +21,9 @@ uint32 timeout_pf = 0;
 boolean Path_Planning(void)
 {
   boolean result;
-  //LED = !LED;
   //Update_Obstacles(BRAKE_DISTANCE);
   Update_Passability_Graph();
   result = Path_Finding();
-  //LED = OFF;
   return result;
 }
 
@@ -89,7 +87,7 @@ boolean Path_Finding()
 			ListPrint(close , "close");
 			ListVertexPrint(solution);
 #endif
-			return TRUE;
+			return true;
 		}
 		// on ajoute le noeud évalué à la liste close
 		ListAddEnd(close, best);
@@ -112,7 +110,7 @@ boolean Path_Finding()
 #ifdef SERIAL_PRINT
 	printf("No solution founded !\n");
 #endif
-	return FALSE;
+	return false;
 
 
 }

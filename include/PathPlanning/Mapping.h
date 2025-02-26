@@ -14,7 +14,6 @@
 //using namespace NodeList;
 //using namespace Obstacle;
 
-
 namespace Mapping
 {
 /****************************************************************************************
@@ -30,8 +29,8 @@ namespace Mapping
 #define MAP_X_MAX 3000 // Attention: format paysage
 #define MAP_Y_MAX 2000
 
-#define MAP_FILE_TEAM_A      "Map2024Jaune.cpp"
-#define MAP_FILE_TEAM_B      "Map2024Bleue.cpp"
+//#define MAP_FILE_TEAM_A      "Map2024Jaune.cpp"
+//#define MAP_FILE_TEAM_B      "Map2024Bleue.cpp"
 
 /****************************************************************************************
 * Global Variables
@@ -43,7 +42,7 @@ namespace Mapping
 /****************************************************************************************
 * Prototypes
 ****************************************************************************************/
-void Initialize_Map(uint8 team);
+void Initialize_Map(Team team);
 
 void Set_Adjacent(t_vertexID id1, t_vertexID id2);
 void Clear_Adjacent(t_vertexID id1, t_vertexID id2);

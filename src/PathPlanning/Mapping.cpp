@@ -22,9 +22,9 @@ t_vertexID end_vertex_ID;
 /****************************************************************************************
 * Initialize all map with defined segment, circle, vertex and potential false obstacle
 ****************************************************************************************/
-void Initialize_Map(uint8 team)
+void Initialize_Map(Team team)
 {
-  if (team == TEAM_A)
+  if (team == Team::Jaune)
   {
     //#include MAP_FILE_TEAM_A
     // Segment
@@ -48,7 +48,7 @@ void Initialize_Map(uint8 team)
     vertex[7].point = Point(2175, 1600);
     vertex[8].point = Point(2625, 1750);
   }
-  else if (team == TEAM_B)
+  else if (team == Team::Bleue)
   {
     //#include MAP_FILE_TEAM_B
     // Segment

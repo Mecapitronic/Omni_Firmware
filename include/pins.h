@@ -52,7 +52,7 @@
 #define RGB_BRIGHTNESS 64
 
 //******************** Pins IN
-#define SWITCH_PIN  14
+#define MODE_PIN    14
 #define TEAM_PIN    13
 #define BAU_PIN     15
 #define START_PIN   16

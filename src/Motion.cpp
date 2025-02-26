@@ -110,7 +110,7 @@ void Motion::SetMargin(float margin_mm_or_rad)
  ****************************************************************************************/
 // boolean Motion::Check_Position()
 // {
-//   return ((position.command == true) ? OK : NOK);
+//   return (position.command == true);
 // }
 
 /****************************************************************************************

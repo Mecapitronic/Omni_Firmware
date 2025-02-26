@@ -15,9 +15,11 @@ Robot robot;
 
 OpticalTrackingOdometrySensor otos;
 
+Team team;
+Mode mode;
+
 PoseF goTo = {500, 500, 0}; // TODO: pourquoi parfois il démarre en 0;0 ? c'est réinitialisé à 0 par défaut au lieu de ces valeurs ?
 
-bool mode_test = false;
 
 unsigned long startChrono = 0;
 unsigned long endChrono = 0;
@@ -44,12 +46,14 @@ void setup()
   println("Robot Holonome Firmware");
 
   // Init IHM
-  pinMode(SWITCH_PIN, INPUT);
+  pinMode(MODE_PIN, INPUT);
   pinMode(TEAM_PIN, INPUT);
   pinMode(BAU_PIN, INPUT);
   pinMode(START_PIN, INPUT);
 
-  mode_test = digitalRead(SWITCH_PIN); // Mode TEST ou OK
+  // TODO : boucle de lecture dans la loop de démarrage
+  digitalRead(MODE_PIN) == LOW ? mode = Mode::Match : mode = Mode::Test;
+  digitalRead(TEAM_PIN) == LOW ? team = Team::Jaune : team = Team::Bleue;
 
   led_builtin.Initialisation(1, RGB_BUILTIN);
   //led_ring.Initialisation(36, WS2812_LED);
@@ -78,7 +82,7 @@ void setup()
   Trajectory::Initialisation(&linear, &angular, &robot);
 
   // Init Path Planning
-  Mapping::Initialize_Map(TEAM_A);
+  Mapping::Initialize_Map(team);
   Obstacle::Initialize_Obstacle();
   Mapping::Initialize_Passability_Graph();
   

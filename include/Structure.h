@@ -61,40 +61,15 @@ typedef double float64; // about 16 decimal digits
 /****************************************************************************************
  * Constantes Génériques
  ****************************************************************************************/
-#define OK          1
-#define NOK         0
+enum class Team {Jaune, Bleue};
+enum class Mode {Match, Test};
 
-#define	ON          1
-#define	OFF         0
-
-#define YES         1
-#define NO          0
-
-//#define HIGH        1
-//#define LOW         0
-
-#define TRUE        1
-#define FALSE       0
-
-#define FOREVER     1
-
-#define EXIT_OK     0
-
-#ifndef NULL
-#define	NULL	   (0)
-#endif
-
+ /*
 #define CMD_FREE		0
 #define CMD_BUSY		1
 #define CMD_DONE		2
 #define CMD_FAIL		3
-
-// Team color, A = jaune, B = bleue
-#define TEAM_A          0
-#define TEAM_B          1
-
-#define MODE_MATCH		  0
-#define MODE_TEST		    1
+*/
 
 /****************************************************************************************
 * MAPPING

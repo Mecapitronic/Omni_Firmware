@@ -69,7 +69,7 @@ namespace NodeList
 	{
 		int i = 0;
 		int j = 0;
-		boolean find = FALSE;
+		boolean find = false;
 
 		// si la liste est vide
 		if (list[0].currentID == INVALID_VERTEX_ID)
@@ -85,14 +85,14 @@ namespace NodeList
 				{
 					if (Node::NodeFCmp(list[i], data) > 0)
 					{
-						find = TRUE;
+						find = true;
 						break;
 					}
 				}
 				else
 					break;
 			}
-			if (find == TRUE)
+			if (find == true)
 			{
 				// on décale toute la liste jusqu'é l'élément trouvé inclus
 				for (j = LIST_LENGTH - 1; j >= i; j--)
