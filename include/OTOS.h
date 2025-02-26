@@ -21,9 +21,9 @@ public:
     void SetPosition(float x, float y, float h);
     void Teleplot();
 
-    PointF2D position;
-    PointF2D velocity;
-    PointF2D acceleration;
+    PoseF position;
+    PoseF velocity;
+    PoseF acceleration;
 
 private:
     sfe_otos_pose2d_t myPosition;

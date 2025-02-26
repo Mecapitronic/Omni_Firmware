@@ -7,7 +7,7 @@ OpticalTrackingOdometrySensor otos;
 t_robot robot;
 Motion lin; // linear motion in system unit
 Motion ang; // angular motion in system unit => radians
-PointF2D goTo = {500, 500, 0}; // TODO: pourquoi parfois il démarre en 0;0 ? c'est réinitialisé à 0 par défaut au lieu de ces valeurs ?
+PoseF goTo = {500, 500, 0}; // TODO: pourquoi parfois il démarre en 0;0 ? c'est réinitialisé à 0 par défaut au lieu de ces valeurs ?
 
 float last_position_x = 0;
 float last_position_y = 0;
