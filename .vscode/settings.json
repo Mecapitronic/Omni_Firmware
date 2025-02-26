@@ -113,10 +113,10 @@
                 "name": "Wokwi GDB Esp32",
                 "type": "cppdbg",
                 "request": "launch",
-                "program": ".pio/build/Esp32_NO_WIFI/firmware.elf",
+                "program": ".pio/build/Esp32_WOKWI/firmware.elf",
                 "cwd": "${workspaceFolder}",
                 "MIMode": "gdb",
-                "miDebuggerPath": "${userHome}/.platformio/packages/toolchain-xtensa-esp32/bin/xtensa-esp32-elf-gdb.exe",
+                "miDebuggerPath": "${userHome}/.platformio/packages/toolchain-xtensa-esp32s3/bin/xtensa-esp32s3-elf-gdb.exe",
                 "miDebuggerServerAddress": "localhost:3333"
             }
         ]
