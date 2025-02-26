@@ -2,29 +2,29 @@
 #define	OBSTACLE_H
 
 /****************************************************************************************
- * Parameters
- ****************************************************************************************/
-#define OBSTACLE_RADIUS    150  // mm
-#define OBSTACLE_MARGIN    40  // mm for false obstacle checking
-
-#define MAX_OBSTACLE       10 // = LIDAR_MAX_SENSOR (one obstacle per sensor)
-#define MAX_FALSE_OBSTACLE 6  // potential false obstacle
-
-
-/****************************************************************************************
  * Includes
  ****************************************************************************************/
 #include "Structure.h"
 #include "Mapping.h"
 #include "Node.h"
 
+/****************************************************************************************
+ * Parameters
+ ****************************************************************************************/
+constexpr size_t OBSTACLE_RADIUS = 150;     // mm
+constexpr size_t OBSTACLE_MARGIN = 40;      // mm for false obstacle checking
+
+constexpr size_t MAX_OBSTACLE = 10;         // = LIDAR_MAX_SENSOR (one obstacle per sensor)
+constexpr size_t MAX_FALSE_OBSTACLE = 6;    // potential false obstacle
+
+
 namespace Obstacle
 {
 /****************************************************************************************
  * Variables Globales
  ****************************************************************************************/
-extern Circle obstacle[MAX_OBSTACLE];
-extern Circle false_obstacle[MAX_FALSE_OBSTACLE];
+extern std::array<Circle, MAX_OBSTACLE> obstacle;
+extern std::array<Circle, MAX_FALSE_OBSTACLE> false_obstacle;
 
 /****************************************************************************************
  * Functions Prototypes

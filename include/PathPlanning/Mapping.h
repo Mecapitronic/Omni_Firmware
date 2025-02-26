@@ -19,18 +19,15 @@ namespace Mapping
 /****************************************************************************************
 * Parameters
 ****************************************************************************************/
-//#define MAX_SEGMENT    8
-//#define MAX_CIRCLE     12
-//#define MAX_VERTEX     24
+constexpr size_t ROBOT_RADIUS = 135;  // mm
+constexpr size_t ROBOT_MARGIN = 30;   // mm
 
-#define ROBOT_RADIUS       135  // mm
-#define ROBOT_MARGIN       30   // mm
+constexpr size_t MAP_X_MAX = 3000; // Attention: format paysage
+constexpr size_t MAP_Y_MAX = 2000; // Updated to constexpr
 
-#define MAP_X_MAX 3000 // Attention: format paysage
-#define MAP_Y_MAX 2000
-
-//#define MAP_FILE_TEAM_A      "Map2024Jaune.cpp"
-//#define MAP_FILE_TEAM_B      "Map2024Bleue.cpp"
+const uint8_t Max_Segment = 8;
+const uint8_t Max_Circle = 8;
+const uint8_t Max_Vertex = 16;
 
 /****************************************************************************************
 * Global Variables

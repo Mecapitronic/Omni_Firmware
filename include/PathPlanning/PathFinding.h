@@ -25,7 +25,7 @@ namespace PathFinding
 
     boolean Path_Planning();
     boolean Path_Finding();
-    void PathFindingAddToOpen(t_node list[]);
+    void PathFindingAddToOpen(std::array<t_node, LIST_LENGTH> &list);
 }
 #endif
 

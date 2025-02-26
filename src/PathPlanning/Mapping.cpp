@@ -9,13 +9,10 @@ namespace Mapping
 /****************************************************************************************
 * Variables
 ****************************************************************************************/
-const uint8_t Max_Segment = 8;
-const uint8_t Max_Circle = 8;
-const uint8_t Max_Vertex = 16;
 
-Segment segment[Max_Segment];
-Circle circle[Max_Circle];
-Vertex vertex[Max_Vertex];
+std::array<Segment, Max_Segment> segment;
+std::array<Circle, Max_Circle> circle;
+std::array<Vertex, Max_Vertex> vertex;
 
 t_vertexID end_vertex_ID;
 

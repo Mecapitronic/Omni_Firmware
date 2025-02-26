@@ -8,7 +8,7 @@ namespace NodeList
 	/****************************************************************************************
 	 * Fonction : Rajoute en tete de la liste pList l'element data.
 	 ****************************************************************************************/
-	void ListAddFirst(t_node list[], t_node data)
+	void ListAddFirst(std::array<t_node, LIST_LENGTH> &list, t_node data)
 	{
 		int i;
 		if (list[0].currentID == INVALID_VERTEX_ID)
@@ -28,7 +28,7 @@ namespace NodeList
 	/****************************************************************************************
 	 * Fonction : Rajoute en queue de la liste pList l'element data.
 	 ****************************************************************************************/
-	void ListAddEnd(t_node list[], t_node data)
+	void ListAddEnd(std::array<t_node, LIST_LENGTH> &list, t_node data)
 	{
 		int i = 0;
 		for (i = 0; i < LIST_LENGTH; i++)
@@ -49,7 +49,7 @@ namespace NodeList
 	/****************************************************************************************
 	 * Fonction : Renvoie le nombre d'element contenu dans la liste.
 	 ****************************************************************************************/
-	uint32 ListLength(t_node list[])
+	uint32 ListLength(std::array<t_node, LIST_LENGTH> &list)
 	{
 		int i = LIST_LENGTH - 1;
 		for (i = LIST_LENGTH - 1; i >= 0; i--)
@@ -65,7 +65,7 @@ namespace NodeList
 	 * Elle doit renvoyer 0 si p1 pointe sur un element equivalent a p2.
 	 * < 0 si p1 est inferieur a p2, >0 si p2 est superieur a p1.
 	 ****************************************************************************************/
-	void ListInsertSorted(t_node list[], t_node data)
+	void ListInsertSorted(std::array<t_node, LIST_LENGTH> &list, t_node data)
 	{
 		int i = 0;
 		int j = 0;
@@ -119,7 +119,7 @@ namespace NodeList
 	 * Fonction : Libere le premier element.
 	 * Renvoi dans data le premier élément enlevé.
 	 ****************************************************************************************/
-	void ListGetFirstItem(t_node list[], t_node *data)
+	void ListGetFirstItem(std::array<t_node, LIST_LENGTH> &list, t_node *data)
 	{
 		int i = 0;
 		/* on fait pointer data vers cet element*/
@@ -138,7 +138,7 @@ namespace NodeList
 	 * Fonction : Recherche l'element de liste qui contient la premiere donnee data.
 	 * Renvoie la position si trouvé, -1 sinon.
 	 ****************************************************************************************/
-	int ListIsDataExist(t_node list[], t_node data)
+	int ListIsDataExist(std::array<t_node, LIST_LENGTH> &list, t_node data)
 	{
 		int i = 0;
 		for (i = 0; i < LIST_LENGTH - 1; i++)
@@ -153,10 +153,9 @@ namespace NodeList
 	/****************************************************************************************
 	 * Fonction : Initialise chaques éléments de la list
 	 ****************************************************************************************/
-	void ListFreeALL(t_node list[])
+	void ListFreeALL(std::array<t_node, LIST_LENGTH> &list)
 	{
-		int i;
-		for (i = 0; i < LIST_LENGTH; i++)
+		for (int i = 0; i < LIST_LENGTH; i++)
 		{
 			list[i].currentCost = 0;
 			list[i].currentID = INVALID_VERTEX_ID;
@@ -168,7 +167,7 @@ namespace NodeList
 	/****************************************************************************************
 	 * Fonction : Initialise chaques éléments de la list
 	 ****************************************************************************************/
-	void ListVertexIDInit(t_vertexID list[])
+	void ListVertexIDInit(std::array<t_vertexID, LIST_LENGTH> &list)
 	{
 		int i;
 		for (i = 0; i < LIST_LENGTH; i++)
@@ -182,7 +181,7 @@ namespace NodeList
 	/****************************************************************************************
 	 * Fonction : Imprime la liste dans UART 1 OUTPUT avec le simulateur.
 	 ****************************************************************************************/
-	void ListPrint(t_node list[],  String str)
+	void ListPrint(std::array<t_node, LIST_LENGTH> &list,  String str)
 	{
 		int i = 0;
 		printf("-------\n");
@@ -203,7 +202,7 @@ namespace NodeList
 	/****************************************************************************************
 	 * Fonction : Imprime la liste dans UART 1 OUTPUT avec le simulateur
 	 ****************************************************************************************/
-	void ListVertexPrint(t_vertexID list[])
+	void ListVertexPrint(std::array<t_vertexID, LIST_LENGTH> &list)
 	{
 		int i = 0;
 		printf("-------\n");

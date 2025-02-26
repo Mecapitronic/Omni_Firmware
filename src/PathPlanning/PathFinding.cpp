@@ -8,10 +8,10 @@ namespace PathFinding
 /****************************************************************************************
 * Variables
 ****************************************************************************************/
-t_node open[LIST_LENGTH];
-t_node close[LIST_LENGTH];
-t_vertexID solution[LIST_LENGTH] = {INVALID_VERTEX_ID}; // /!\ init of first index only !
-t_vertexID solutionInverse[LIST_LENGTH];
+std::array <t_node, LIST_LENGTH> open;
+std::array <t_node, LIST_LENGTH> close;
+std::array<t_vertexID, LIST_LENGTH> solution = {INVALID_VERTEX_ID}; // /!\ init of first index only !
+std::array<t_vertexID, LIST_LENGTH> solutionInverse;
 
 uint32 timeout_pf = 0;
 
@@ -32,7 +32,7 @@ boolean Path_Planning(void)
  ****************************************************************************************/
 boolean Path_Finding()
 {
-	t_node listPossible[LIST_LENGTH];
+	std::array <t_node, LIST_LENGTH> listPossible;
 	t_node startNode;
 	t_node best;
 	//Set_Timeout_PF(PATH_FINDING_TIME_LIMIT);
@@ -118,7 +118,7 @@ boolean Path_Finding()
 /****************************************************************************************
 * Fonction : Add a list of nodes to the open list if needed
 ****************************************************************************************/
-void PathFindingAddToOpen(t_node list[])
+void PathFindingAddToOpen(std::array<t_node, LIST_LENGTH> &list)
 {
 	int i = 0;
 	int pos = 0;

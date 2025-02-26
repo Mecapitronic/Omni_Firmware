@@ -10,8 +10,8 @@ using namespace Printer;
 
 // résolution moteur : 200*8=1600 micro-step/tour, périmètre roue environ 185 mm, soit 8.65 step/mm
 // vitesse max : 1 m/s = 8.65 kHz (step/s)
-#define MOTOR_STEP_PER_MM 8.65
-const float MM_PER_STEP_MOTOR =1/MOTOR_STEP_PER_MM ;//0.11560693641
+constexpr float MOTOR_STEP_PER_MM = 8.65;
+constexpr float MM_PER_STEP_MOTOR = 1.0f / MOTOR_STEP_PER_MM;
 
 #define BIT_RESOLUTION 13
 

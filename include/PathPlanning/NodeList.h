@@ -8,26 +8,26 @@
 #include "Mapping.h"
 #include "Node.h"
 
-#define LIST_LENGTH 24 // TODO !!! Max_Vertex
-#define INVALID_VERTEX_ID  255
+constexpr size_t LIST_LENGTH = 16; // TODO !!! Mapping::Max_Vertex;
+constexpr size_t INVALID_VERTEX_ID = 255;
 
 namespace NodeList
 {
     /****************************************************************************************
-     * Protoypes
+     * Prototypes
      ****************************************************************************************/
-    void ListAddFirst(t_node list[], t_node data);
-    void ListAddEnd(t_node list[], t_node data);
-    uint32 ListLength(t_node list[]);
-    void ListInsertSorted(t_node list[], t_node data);
-    void ListGetFirstItem(t_node list[], t_node *data);
-    int ListIsDataExist(t_node list[], t_node data);
-    void ListFreeALL(t_node list[]);
-    void ListVertexIDInit(t_vertexID list[]);
+    void ListAddFirst(std::array<t_node, LIST_LENGTH> &list, t_node data);
+    void ListAddEnd(std::array<t_node, LIST_LENGTH> &list, t_node data);
+    uint32 ListLength(std::array<t_node, LIST_LENGTH> &list);
+    void ListInsertSorted(std::array<t_node, LIST_LENGTH> &list, t_node data);
+    void ListGetFirstItem(std::array<t_node, LIST_LENGTH> &list, t_node *data);
+    int ListIsDataExist(std::array<t_node, LIST_LENGTH> &list, t_node data);
+    void ListFreeALL(std::array<t_node, LIST_LENGTH> &list);
+    void ListVertexIDInit(std::array<t_vertexID, LIST_LENGTH> &list);
 
 #ifdef SERIAL_PRINT
-    void ListPrint(t_node list[], String str = "");
-    void ListVertexPrint(t_vertexID list[]);
+    void ListPrint(std::array<t_node, LIST_LENGTH> &list, String str = "");
+    void ListVertexPrint(std::array<t_vertexID, LIST_LENGTH> &list);
 #endif
 }
 #endif

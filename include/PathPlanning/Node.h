@@ -8,6 +8,8 @@
 #include "NodeList.h"
 #include "Mapping.h"
 
+constexpr size_t LIST_LENGTH_2 = 16; // TODO !!! Mapping::Max_Vertex;
+
 //using namespace Mapping;
 
 namespace Node
@@ -19,7 +21,7 @@ namespace Node
     uint32 NodeF(t_node node);
     int8 NodeFCmp(t_node p1, t_node p2);
     uint32 NodeCostWillBe(t_node node);
-    void NodeListGetPossibleNode(t_node list[], t_node node);
+    void NodeListGetPossibleNode(std::array<t_node, LIST_LENGTH_2> &list, t_node node);
 
 //ListNode *NodeListSortedAddDichotomic(ListNode * listNode, t_node *node);
 }

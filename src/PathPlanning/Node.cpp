@@ -98,11 +98,11 @@ uint32 NodeCostWillBe(t_node node)
 * Fonction : Get a list of all neigbors from the node
 * if they're not wall and are allowed by the Path
 ****************************************************************************************/
-void NodeListGetPossibleNode(t_node list[], t_node node)
+void NodeListGetPossibleNode(std::array<t_node, LIST_LENGTH_2> &list, t_node node)
 {
   int i =0;
   int j=0;
-  for (i=0; i<LIST_LENGTH; i++)
+  for (i=0; i<LIST_LENGTH_2; i++)
   {
     if (Is_Adjacent(node.currentID, i))
     {

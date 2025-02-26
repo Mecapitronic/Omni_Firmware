@@ -9,10 +9,10 @@ namespace Obstacle
 /****************************************************************************************
  * Variables
  ****************************************************************************************/
-Circle obstacle[MAX_OBSTACLE];
+std::array <Circle, MAX_OBSTACLE> obstacle;
 uint8 obs_cursor = 0;
-uint16 obstacleFading[MAX_OBSTACLE];
-Circle false_obstacle[MAX_FALSE_OBSTACLE];
+std::array <uint16, MAX_OBSTACLE> obstacleFading;
+std::array <Circle, MAX_FALSE_OBSTACLE> false_obstacle;
 boolean obstacle_enable = false;
 
 /****************************************************************************************
