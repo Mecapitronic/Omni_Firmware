@@ -15,7 +15,7 @@ void OpticalTrackingOdometrySensor::Initialisation()
     int retryConnect = 0;
     // Attempt to begin the sensor
     isConnected = myOtos.begin();
-    while(!isConnected && retryConnect < 3) //! TODO define retry to 5 ?
+    while(!isConnected && retryConnect < 3)
     {
         println("OTOS not connected, check your wiring and I2C address!");
         delay(1000);
@@ -181,11 +181,23 @@ void OpticalTrackingOdometrySensor::SetPose(float x, float y, float h)
     // another source of location information (eg. vision odometry), you can set
     // the OTOS location to match and it will continue to track from there.
     sfe_otos_pose2d_t currentPose = {x/1000, y/1000, h};
+    
+    int retrySetPose = 0;
     error = myOtos.setPosition(currentPose);
-    if (error != 0) 
-        error = myOtos.setPosition(currentPose); // retry
-    if (error != 0)
-        print("Error SetPose : ", error);
+    while(error !=0 && retrySetPose < 3)
+    {
+        println("OTOS Error SetPose : ", error);
+        delay(100);
+        error = myOtos.setPosition(currentPose);
+        retrySetPose++;
+    }
+    if(error != 0 || retrySetPose >= 3)
+    {
+        // Force position, but will be override when update occurs
+        myPosition.x = x;
+        myPosition.y = y;
+        myPosition.h = h;
+    }
     Update();
 }
 
