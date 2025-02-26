@@ -12,33 +12,33 @@ void Motor::Initialisation(MotorBaseType _motorBaseType, float _centerToWheel)
     centerToWheel = _centerToWheel;
 
     // Sets the two pins as Outputs
-    pinMode(stepPinM1, OUTPUT);
-    pinMode(dirPinM1, OUTPUT);
-    digitalWrite(stepPinM1, LOW);
-    digitalWrite(dirPinM1, LOW);
+    pinMode(PIN_STEP_M1, OUTPUT);
+    pinMode(PIN_DIR_M1, OUTPUT);
+    digitalWrite(PIN_STEP_M1, LOW);
+    digitalWrite(PIN_DIR_M1, LOW);
 
-    pinMode(stepPinM2, OUTPUT);
-    pinMode(dirPinM2, OUTPUT);
-    digitalWrite(stepPinM2, LOW);
-    digitalWrite(dirPinM2, LOW);
+    pinMode(PIN_STEP_M2, OUTPUT);
+    pinMode(PIN_DIR_M2, OUTPUT);
+    digitalWrite(PIN_STEP_M2, LOW);
+    digitalWrite(PIN_DIR_M2, LOW);
 
     if (motorBaseType == OMNIDIRECTIONAL_3_MOTORS)
     {
-        pinMode(stepPinM3, OUTPUT);
-        pinMode(dirPinM3, OUTPUT);
-        digitalWrite(stepPinM3, LOW);
-        digitalWrite(dirPinM3, LOW);
+        pinMode(PIN_STEP_M3, OUTPUT);
+        pinMode(PIN_DIR_M3, OUTPUT);
+        digitalWrite(PIN_STEP_M3, LOW);
+        digitalWrite(PIN_DIR_M3, LOW);
     }
     print("Starting ESP32_FAST_PWM: ");
     println(ESP32_FAST_PWM_VERSION);
 
     // pin, frequency = 500 Hz, dutyCycle = 0 %, choose channel with independent timer, resolution to go up to desire frequency
-    stepper1 = new ESP32_FAST_PWM(stepPinM1, 500, 0, 2, BIT_RESOLUTION);
+    stepper1 = new ESP32_FAST_PWM(PIN_STEP_M1, 500, 0, 2, BIT_RESOLUTION);
 
-    stepper2 = new ESP32_FAST_PWM(stepPinM2, 500, 0, 4, BIT_RESOLUTION);
+    stepper2 = new ESP32_FAST_PWM(PIN_STEP_M2, 500, 0, 4, BIT_RESOLUTION);
     if (motorBaseType == OMNIDIRECTIONAL_3_MOTORS)
     {
-        stepper3 = new ESP32_FAST_PWM(stepPinM3, 500, 0, 6, BIT_RESOLUTION);
+        stepper3 = new ESP32_FAST_PWM(PIN_STEP_M3, 500, 0, 6, BIT_RESOLUTION);
     }
 }
 
@@ -137,7 +137,7 @@ void Motor::SetMotorSpeed(int motor_ID, float speed_mms)
         else
         {
             //  Set the frequency of the PWM output and a duty cycle of 50%
-            digitalWrite(dirPinM1, direction);
+            digitalWrite(PIN_DIR_M1, direction);
             stepper1->setPWM(freq, 50);
         }
     }
@@ -150,7 +150,7 @@ void Motor::SetMotorSpeed(int motor_ID, float speed_mms)
         else
         {
             //  Set the frequency of the PWM output and a duty cycle of 50%
-            digitalWrite(dirPinM2, direction);
+            digitalWrite(PIN_DIR_M2, direction);
             stepper2->setPWM(freq, 50);
         }
     }
@@ -163,7 +163,7 @@ void Motor::SetMotorSpeed(int motor_ID, float speed_mms)
         else
         {
             //  Set the frequency of the PWM output and a duty cycle of 50%
-            digitalWrite(dirPinM3, direction);
+            digitalWrite(PIN_DIR_M3, direction);
             stepper3->setPWM(freq, 50);
         }
     }
@@ -183,7 +183,7 @@ float Motor::GetMotorSpeed(int motor_ID)
     {
         if (stepper1->getActualDutyCycle() == 0)
             return 0;
-        direction = digitalRead(dirPinM1);
+        direction = digitalRead(PIN_DIR_M1);
         if (direction)
             return stepper1->getActualFreq() * MM_PER_STEP_MOTOR;
         else
@@ -193,7 +193,7 @@ float Motor::GetMotorSpeed(int motor_ID)
     {
         if (stepper1->getActualDutyCycle() == 0)
             return 0;
-        direction = digitalRead(dirPinM2);
+        direction = digitalRead(PIN_DIR_M2);
         if (direction)
             return stepper2->getActualFreq() * MM_PER_STEP_MOTOR;
         else
@@ -203,7 +203,7 @@ float Motor::GetMotorSpeed(int motor_ID)
     {
         if (stepper1->getActualDutyCycle() == 0)
             return 0;
-        direction = digitalRead(dirPinM3);
+        direction = digitalRead(PIN_DIR_M3);
         if (direction)
             return stepper3->getActualFreq() * MM_PER_STEP_MOTOR;
         else

@@ -46,17 +46,17 @@ void setup()
   println("Robot Holonome Firmware");
 
   // Init IHM
-  pinMode(MODE_PIN, INPUT);
-  pinMode(TEAM_PIN, INPUT);
-  pinMode(BAU_PIN, INPUT);
-  pinMode(START_PIN, INPUT);
+  pinMode(PIN_MODE, INPUT);
+  pinMode(PIN_TEAM, INPUT);
+  pinMode(PIN_BAU, INPUT);
+  pinMode(PIN_START, INPUT);
 
   // TODO : boucle de lecture dans la loop de démarrage
-  digitalRead(MODE_PIN) == LOW ? mode = Mode::Match : mode = Mode::Test;
-  digitalRead(TEAM_PIN) == LOW ? team = Team::Jaune : team = Team::Bleue;
+  digitalRead(PIN_MODE) == LOW ? mode = Mode::Match : mode = Mode::Test;
+  digitalRead(PIN_TEAM) == LOW ? team = Team::Jaune : team = Team::Bleue;
 
-  led_builtin.Initialisation(1, RGB_BUILTIN);
-  //led_ring.Initialisation(36, WS2812_LED);
+  led_builtin.Initialisation(1, PIN_RGB_LED);
+  //led_ring.Initialisation(36, PIN_WS2812_LED);
 
   // Init sensors
   otos.Initialisation();
