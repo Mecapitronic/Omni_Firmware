@@ -6,8 +6,11 @@ ARG USER_GID=$USER_UID
 
 # python3-venv is required for PlatformIO
 # nodejs is required for SonarQube
+# clangd for language server
 RUN apt update \
     && DEBIAN_FRONTEND=noninteractive apt -y install --no-install-recommends \
+    clangd \
+    clang-format \
     python3-venv \
     nodejs \
     && apt autopurge -y \

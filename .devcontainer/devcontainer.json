@@ -27,10 +27,15 @@
                 "eamodio.gitlens",
                 "GitHub.vscode-github-actions",
                 "llvm-vs-code-extensions.vscode-clangd",
+                "ms-python.python",
                 "platformio.platformio-ide",
                 "Wokwi.wokwi-vscode",
                 "xaver.clang-format"
-            ]
+            ],
+            "settings": {
+                "python.terminal.activateEnvInCurrentTerminal": true,
+                "python.defaultInterpreterPath": "~/.platformio/penv/bin/python3"
+            }   
         }
     }
 }
