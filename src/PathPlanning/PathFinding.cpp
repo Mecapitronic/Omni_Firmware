@@ -1,7 +1,7 @@
 /****************************************************************************************
 * Includes
 ****************************************************************************************/
-#include "PathPlanning/Path_Finding.h"
+#include "PathPlanning/PathFinding.h"
 
 namespace PathFinding
 {

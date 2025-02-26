@@ -15,7 +15,7 @@ using namespace Printer;
 #include "Trajectory.h"
 #include "LedRGB.h"
 
-#include "PathPlanning/Path_finding.h"
+#include "PathPlanning/PathFinding.h"
 
 #ifndef ARDUINO_USB_MODE
     #warning /*error*/ This ESP32 SoC has no Native USB interface

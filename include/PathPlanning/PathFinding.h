@@ -14,9 +14,9 @@ using namespace Mapping;
 //#define Set_Timeout_PF(time)    do{timeout_pf = current_time + time;}while(0)
 //#define TIMEOUT_PF              (current_time > timeout_pf)
 
-// Condition d'arrét anticipé du calcul de Path_Finding
+// Condition d'arrét anticipé du calcul de PathFinding
 //#define PATH_FINDING_STOP           (TIMEOUT_PF)
-// Durée limite du calcul de Path_Finding en millisecond
+// Durée limite du calcul de PathFinding en millisecond
 //#define PATH_FINDING_TIME_LIMIT     (10000)
 
 namespace PathFinding
