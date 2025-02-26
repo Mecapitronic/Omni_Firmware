@@ -96,9 +96,9 @@ boolean Is_Adjacent(t_vertexID id1, t_vertexID id2)
 { 
   if ((vertex[id1].adjacency_active & ((t_adjacency)1u << id2)) 
    || (vertex[id2].adjacency_active & ((t_adjacency)1u << id1))) 
-    return 1;
+    return true;
 
-  return 0;
+  return false;
 }
 
 /****************************************************************************************
@@ -118,10 +118,10 @@ boolean Is_Intersection_Segment(Segment *s1, Segment *s2)
 
     if ((s1->a == s2->a) && (s1->b == s2->b)) // segments are one the same line (parallel but not distinct)
         if (Is_Point_On_Segment(&s2->p1, s1) && Is_Point_On_Segment(&s2->p2, s1))
-            return 1; 
+            return true; 
 
     if ((s1->a == s2->a) && (s1->b != s2->b)) // segments are parallel and distinct
-        return 0;
+        return false;
 
     if (s1->a == 9999) // segment 1 is vertical
     {
@@ -140,9 +140,9 @@ boolean Is_Intersection_Segment(Segment *s1, Segment *s2)
     }
   
   if (Is_Point_On_Segment(&commun, s1) && Is_Point_On_Segment(&commun, s2))
-    return 1;
+    return true;
 
-  return 0;
+  return false;
 }
 
 /****************************************************************************************
@@ -152,9 +152,9 @@ boolean Is_Point_On_Segment(Point * p, Segment *s)
 {
   if ((p->x <= max(s->p1.x,s->p2.x)) && (p->x >= min(s->p1.x,s->p2.x))
    && (p->y <= max(s->p1.y,s->p2.y)) && (p->y >= min(s->p1.y,s->p2.y)))
-    return 1;
+    return true;
 
-  return 0;
+  return false;
 }
 
 /****************************************************************************************
@@ -205,9 +205,9 @@ Point GePoint_ProjectionOn_Segment(Point *p, Segment *s)
 boolean Is_Equal_Point(Point *p1, Point *p2)
 {
   if ((p1->x == p2->x) && (p1->y == p2->y)) 
-    return 1;
+    return true;
   
-  return 0;
+  return false;
 }
 
 /****************************************************************************************
@@ -226,20 +226,20 @@ boolean Is_Point_CloseTo_Segment(Point *p, Segment *s, uint16 d)
 	Point projected;
 
 //  if (Get_Distance_Point(p, s.p1) <= d) // check distance from first end point
-//    return 1;
+//    return true;
 //
 //  if (Get_Distance_Point(p, s.p2) <= d) // check distance from second end point
-//    return 1;
+//    return true;
     
   projected = GePoint_ProjectionOn_Segment(p, s);
   
   if (Is_Point_On_Segment(&projected, s))
   {
     if (Get_Distance_Point(p, &projected) <= d)  // check distance from line
-      return 1;
+      return true;
   }
   
-  return 0;
+  return false;
 }
 
 /****************************************************************************************
@@ -249,8 +249,8 @@ boolean Is_Circle_CloseTo_Segment(Circle *c, Segment *s, uint16 d)
 {
   d = d + c->r;
   // check distance from each end point to circle
-  if (Get_Distance_Point(&s->p1, &c->p) <= d) return 1;
-  if (Get_Distance_Point(&s->p2, &c->p) <= d) return 1;
+  if (Get_Distance_Point(&s->p1, &c->p) <= d) return true;
+  if (Get_Distance_Point(&s->p2, &c->p) <= d) return true;
   
   return Is_Point_CloseTo_Segment(&c->p, s, d);
 }
@@ -261,21 +261,21 @@ boolean Is_Circle_CloseTo_Segment(Circle *c, Segment *s, uint16 d)
 boolean Is_Segment_CloseTo_Segment(Segment *s1, Segment *s2, uint16 d)
 {
   // check segment intersection
-  if (Is_Intersection_Segment(s1, s2)) return 1;
+  if (Is_Intersection_Segment(s1, s2)) return true;
       
 //  // check distance from each end point to each other       // manually done in excel map
-//  if (Get_Distance_Point(&s1->p1, &s2->p1) <= d) return 1;
-//  if (Get_Distance_Point(&s1->p1, &s2->p2) <= d) return 1;
-//  if (Get_Distance_Point(&s1->p2, &s2->p1) <= d) return 1;
-//  if (Get_Distance_Point(&s1->p2, &s2->p2) <= d) return 1;
+//  if (Get_Distance_Point(&s1->p1, &s2->p1) <= d) return true;
+//  if (Get_Distance_Point(&s1->p1, &s2->p2) <= d) return true;
+//  if (Get_Distance_Point(&s1->p2, &s2->p1) <= d) return true;
+//  if (Get_Distance_Point(&s1->p2, &s2->p2) <= d) return true;
     
 //  // check distance orthogonal from end point               // manually done in excel map
-//  if (Is_Point_CloseTo_Segment(&s1->p1, s2, d)) return 1;
-//  if (Is_Point_CloseTo_Segment(&s1->p2, s2, d)) return 1;
-//  if (Is_Point_CloseTo_Segment(&s2->p1, s1, d)) return 1;
-//  if (Is_Point_CloseTo_Segment(&s2->p2, s1, d)) return 1;
+//  if (Is_Point_CloseTo_Segment(&s1->p1, s2, d)) return true;
+//  if (Is_Point_CloseTo_Segment(&s1->p2, s2, d)) return true;
+//  if (Is_Point_CloseTo_Segment(&s2->p1, s1, d)) return true;
+//  if (Is_Point_CloseTo_Segment(&s2->p2, s1, d)) return true;
 
-  return 0;
+  return false;
 }
 
 /****************************************************************************************
@@ -295,14 +295,14 @@ boolean Is_Passable_Point(Point *source, Point *target, uint16 margin)
   Segment edge;
 
 //  if (Is_Equal_Point(source, target)) // check segment existence
-//    return 0;
+//    return false;
   
   edge = Segment(*source, *target);
 
   for (i=0; i<Max_Segment; i++)
   {
     if (Is_Segment_CloseTo_Segment(&segment[i], &edge, margin)) // check segment proximity
-      return 0;
+      return false;
   }
 
   for (i=0; i<Max_Circle; i++)
@@ -310,11 +310,11 @@ boolean Is_Passable_Point(Point *source, Point *target, uint16 margin)
     if (Is_NotNull_Circle(&circle[i]))
   {
       if (Is_Circle_CloseTo_Segment(&circle[i], &edge, margin)) // check circle proximity
-      return 0;
+      return false;
   }
   }
   
-  return 1; // after all checking
+  return true; // after all checking
 }
 
 /****************************************************************************************
@@ -331,19 +331,19 @@ boolean Is_Passable_Robot(Point *target, uint16 margin)
   for (i=0; i<Max_Segment; i++) // check segment proximity
   {
     // check segment intersection
-    if (Is_Intersection_Segment(&segment[i], &edge)) return 0;
+    if (Is_Intersection_Segment(&segment[i], &edge)) return false;
     
 //    // check distance from each end point to each other
-//    //if (Get_Distance_Point(&edge.p1, &segment[i].p1) <= margin) return 0; // ignore edge.p1 = vertex[0] = robot
-//    //if (Get_Distance_Point(&edge.p1, &segment[i].p2) <= margin) return 0;
-//    if (Get_Distance_Point(&edge.p2, &segment[i].p1) <= margin) return 0;
-//    if (Get_Distance_Point(&edge.p2, &segment[i].p2) <= margin) return 0;
+//    //if (Get_Distance_Point(&edge.p1, &segment[i].p1) <= margin) return false; // ignore edge.p1 = vertex[0] = robot
+//    //if (Get_Distance_Point(&edge.p1, &segment[i].p2) <= margin) return false;
+//    if (Get_Distance_Point(&edge.p2, &segment[i].p1) <= margin) return false;
+//    if (Get_Distance_Point(&edge.p2, &segment[i].p2) <= margin) return false;
       
 //    // check distance orthogonal from end point
-//    if (Is_Point_CloseTo_Segment(&segment[i].p1, &edge, margin)) return 0;
-//    if (Is_Point_CloseTo_Segment(&segment[i].p2, &edge, margin)) return 0;
-//    //if (Is_Point_CloseTo_Segment(edge.p1, segment[i], margin)) return 0;
-//    if (Is_Point_CloseTo_Segment(&edge.p2, &segment[i], margin)) return 0;  // manually done in excel map
+//    if (Is_Point_CloseTo_Segment(&segment[i].p1, &edge, margin)) return false;
+//    if (Is_Point_CloseTo_Segment(&segment[i].p2, &edge, margin)) return false;
+//    //if (Is_Point_CloseTo_Segment(edge.p1, segment[i], margin)) return false;
+//    if (Is_Point_CloseTo_Segment(&edge.p2, &segment[i], margin)) return false;  // manually done in excel map
   }
 
   for (i=0; i<Max_Circle; i++) // check circle proximity
@@ -352,10 +352,10 @@ boolean Is_Passable_Robot(Point *target, uint16 margin)
     {
       margin_temp = margin + circle[i].r;
       // check distance from end point to circle
-      //if (Get_Distance_Point(&edge.p1, &circle[i].p) <= margin_temp) return 0;
-      if (Get_Distance_Point(&edge.p2, &circle[i].p) <= margin_temp) return 0;  // usefull for vertex in circle
+      //if (Get_Distance_Point(&edge.p1, &circle[i].p) <= margin_temp) return false;
+      if (Get_Distance_Point(&edge.p2, &circle[i].p) <= margin_temp) return false;  // usefull for vertex in circle
 
-      if (Is_Point_CloseTo_Segment(&circle[i].p, &edge, margin_temp)) return 0; // most important
+      if (Is_Point_CloseTo_Segment(&circle[i].p, &edge, margin_temp)) return false; // most important
     }
   }
   
@@ -366,14 +366,14 @@ boolean Is_Passable_Robot(Point *target, uint16 margin)
     if (Is_Valid_Obstacle(i))
     {
       if (Get_Distance_Point(&edge.p2, &obstacle[i].p) < margin_temp) 
-        return 0;
+        return false;
 
       if (Is_Point_CloseTo_Segment(&obstacle[i].p, &edge, margin_temp)) 
-        return 0;
+        return false;
     }
   }
   
-  return 1; // after all checking
+  return true; // after all checking
 }
 
 /****************************************************************************************

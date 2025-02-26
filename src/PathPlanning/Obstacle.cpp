@@ -63,27 +63,27 @@ boolean Is_False_Obstacle(Circle circle_obstacle)
 {
 	uint8 i;
 	// check map border limits
-	if (circle_obstacle.p.x < OBSTACLE_MARGIN) return 1;
-  if (circle_obstacle.p.x > (MAP_X_MAX - OBSTACLE_MARGIN)) return 1;
-	if (circle_obstacle.p.y < OBSTACLE_MARGIN) return 1;
-  if (circle_obstacle.p.y > (MAP_Y_MAX - OBSTACLE_MARGIN)) return 1;
+	if (circle_obstacle.p.x < OBSTACLE_MARGIN) return true;
+  if (circle_obstacle.p.x > (MAP_X_MAX - OBSTACLE_MARGIN)) return true;
+	if (circle_obstacle.p.y < OBSTACLE_MARGIN) return true;
+  if (circle_obstacle.p.y > (MAP_Y_MAX - OBSTACLE_MARGIN)) return true;
 	// check some special point
 	for (i = 0; i < MAX_FALSE_OBSTACLE; i++)
 	{
 		if (Get_Distance_Point(&circle_obstacle.p, &false_obstacle[i].p) <= false_obstacle[i].r)
-			return 1;
+			return true;
 	}
-	return 0;
+	return false;
 }
 
 boolean IsInMap(Point p)
 {
     // check map border limits
-	if (p.x < 0) return 0;
-    if (p.x > MAP_X_MAX) return 0;
-	if (p.y < 0) return 0;
-    if (p.y > MAP_Y_MAX) return 0;
-    return 1;
+	if (p.x < 0) return false;
+    if (p.x > MAP_X_MAX) return false;
+	if (p.y < 0) return false;
+    if (p.y > MAP_Y_MAX) return false;
+    return true;
 }
 
 /****************************************************************************************
