@@ -153,7 +153,7 @@ void OpticalTrackingOdometrySensor::Update()
 
 void OpticalTrackingOdometrySensor::HandleCommand(Command cmd)
 {
-    //if (cmd.cmd == ("Otos"))
+    //if (cmd.cmd == "Otos")
     //{
         // Otos:0;0
     //    print("Otos : ", cmd.data[0]);
