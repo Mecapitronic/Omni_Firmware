@@ -4,7 +4,7 @@
 using namespace std;
 
 #include <math.h>
-#include "pin.h"
+#include "pins.h"
 #include "ESP32_Helper.h"
 using namespace Printer;
 #include "Structure.h"

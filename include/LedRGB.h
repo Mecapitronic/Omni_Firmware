@@ -9,7 +9,7 @@
 using namespace Printer;
 
 #include <Adafruit_NeoPixel.h>
-#include "pin.h"
+#include "pins.h"
 
 class LedRGB
 {

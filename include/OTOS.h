@@ -2,7 +2,7 @@
 #define OTOS_H
 
 #include <Arduino.h>
-#include "pin.h"
+#include "pins.h"
 #include "ESP32_Helper.h"
 using namespace Printer;
 
