@@ -87,31 +87,37 @@ void Motor::Update(float linear_speed_mms, float linear_direction_rad, float ang
 
 void Motor::HandleCommand(Command cmd)
 {
-
-    if (cmd.cmd.startsWith("Motor"))
-    {
-        if (cmd.cmd == ("Motor") && cmd.size == 3)
-        {
-            // Motor:1;1000;50
-            // Motor:1;1;50
-            if (cmd.data[2] >= 0 && cmd.data[2] <= 100)
-            {
-                print("Motor ", cmd.data[0]);
-                print(" with freq ", cmd.data[1], " Hz");
-                println(" with duty ", cmd.data[2], " %");
-                if (cmd.data[0] == 1)
-                    stepper1->setPWM(cmd.data[1], cmd.data[2]);
-                if (cmd.data[0] == 2)
-                    stepper2->setPWM(cmd.data[1], cmd.data[2]);
-                if (cmd.data[0] == 3 && motorBaseType == OMNIDIRECTIONAL_3_MOTORS)
-                    stepper3->setPWM(cmd.data[1], cmd.data[2]);
-            }
-        }
-        else
-        {
-            println("Not a Motor Command ");
-        }
+    // maybe this should be handled in a generic commands handler and dispatcher
+    if (!cmd.cmd.startsWith("Motor")){
+        println("Not a Motor Command ");
+        return;
     }
+    
+    // why do we check "Motor" twice?
+    if (cmd.cmd != "Motor" || cmd.size != 3)
+    {
+        println("Invalid Motor Command");
+        return;
+    }
+
+    // Motor:1;1000;50
+    // Motor:1;1;50
+    if (cmd.data[2] < 0 || 100 < cmd.data[2])
+    {
+        println("Invalid Duty Cycle");
+        return;
+    }
+
+    print("Motor ", cmd.data[0]);
+    print(" with freq ", cmd.data[1], " Hz");
+    println(" with duty ", cmd.data[2], " %");
+    
+    if (cmd.data[0] == 1)
+        stepper1->setPWM(cmd.data[1], cmd.data[2]);
+    if (cmd.data[0] == 2)
+        stepper2->setPWM(cmd.data[1], cmd.data[2]);
+    if (cmd.data[0] == 3 && motorBaseType == OMNIDIRECTIONAL_3_MOTORS)
+        stepper3->setPWM(cmd.data[1], cmd.data[2]);
 }
 
 void Motor::PrintCommandHelp()
