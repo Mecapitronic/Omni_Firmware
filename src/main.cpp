@@ -200,15 +200,15 @@ void loop()
   {
     Command cmd = ESP32_Helper::GetCommand();
 
-    if (cmd.cmd.startsWith("Help"))
+    otos.HandleCommand(cmd);
+    motor.HandleCommand(cmd);
+
+    if (cmd.cmd == "Help")
     {
       otos.PrintCommandHelp();
       motor.PrintCommandHelp();
     }
-    otos.HandleCommand(cmd);
-    motor.HandleCommand(cmd);
-
-    if (cmd.cmd == ("GoToPose") && cmd.size == 3)
+    else if (cmd.cmd == "GoToPose" && cmd.size == 3)
     {
       // GoToPose:500;500;0
       // GoToPose:50;50;0
@@ -223,7 +223,7 @@ void loop()
       print(" h=", goTo.h);
       println();
     }
-    if (cmd.cmd == ("SetPose") && cmd.size == 3)
+    else if (cmd.cmd == "SetPose" && cmd.size == 3)
     {
       // SetPose:500;500;0
       DisableTimerMotion();
@@ -238,7 +238,7 @@ void loop()
       println();
       EnableTimerMotion();
     }
-    if(cmd.cmd == ("PF") && cmd.size == 1)
+    else if(cmd.cmd == "PF" && cmd.size == 1)
     {
       // PathFinding
       // PF:5
@@ -251,21 +251,20 @@ void loop()
       {
         print("PF Not Found");
       }
-    }
-    
-    if(cmd.cmd == ("VertexList") && cmd.size == 0)
+    }    
+    else if(cmd.cmd == "VertexList")
     {
       Mapping::PrintVertexList();
     }
-    if(cmd.cmd == ("SegmentList") && cmd.size == 0)
+    else if(cmd.cmd == "SegmentList")
     {
       Mapping::PrintSegmentList();
     }
-    if(cmd.cmd == ("CircleList") && cmd.size == 0)
+    else if(cmd.cmd == "CircleList")
     {
       Mapping::PrintCircleList();
     }
-    if(cmd.cmd == ("MappingList") && cmd.size == 0)
+    else if(cmd.cmd == "MappingList")
     {
       Mapping::PrintVertexList();
       Mapping::PrintSegmentList();
