@@ -1,11 +1,14 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/cpp
 {
-    "name": "C++",    
+    "name": "C++",
     // specify to build docker image
     "build": {
         "dockerfile": "Dockerfile"
     },
+    // for podamn/docker compat. you must wrap docker with 'PODMAN_USERNS=keep-id podman "$@"'
+    "remoteUser": "vscode",
+    "containerUser": "vscode",
     // uncomment to access USB
     // "runArgs": [
     //     "--privileged"
@@ -35,7 +38,7 @@
             "settings": {
                 "python.terminal.activateEnvInCurrentTerminal": true,
                 "python.defaultInterpreterPath": "~/.platformio/penv/bin/python3"
-            }   
+            }
         }
     }
 }
