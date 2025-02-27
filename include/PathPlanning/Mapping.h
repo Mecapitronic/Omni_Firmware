@@ -27,7 +27,7 @@ constexpr size_t MAP_Y_MAX = 2000; // Updated to constexpr
 
 const uint8_t Max_Segment = 8;
 const uint8_t Max_Circle = 8;
-const uint8_t Max_Vertex = 16;
+const uint8_t Max_Vertex = 24;
 
 /****************************************************************************************
 * Global Variables

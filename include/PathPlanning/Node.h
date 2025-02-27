@@ -8,7 +8,7 @@
 #include "NodeList.h"
 #include "Mapping.h"
 
-constexpr size_t LIST_LENGTH_2 = 16; // TODO !!! Mapping::Max_Vertex;
+constexpr size_t LIST_LENGTH_2 = 24; // TODO !!! Mapping::Max_Vertex;
 
 //using namespace Mapping;
 
