@@ -4,10 +4,13 @@
     "recommendations": [
         "github.vscode-github-actions",
         "gruntfuggly.todo-tree",
-        "platformio.platformio-ide",
+        "ms-vscode.cpptools",
+        "platformio.platformio-ide"
         "SonarSource.sonarlint-vscode",
-        "Wokwi.wokwi-vscode",
+        "Wokwi.wokwi-vscode"
     ],
     "unwantedRecommendations": [
+        "ms-vscode.cmake-tools",
+        "ms-vscode.cpptools-extension-pack"
     ]
 }
