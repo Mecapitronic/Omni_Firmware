@@ -1,3 +1,23 @@
+/**
+
+il existe une liste de point d'intéret qui sont devant les actions a effectuer
+on génère le graph de visisbilité ou la liste des autres points accessibles depuis un point donnée
+celà se génère à l'init en regardant s'il existe un obstacle entre les deux points ou non
+Puis lorsque l'on veut atteindre une destination on compose le chemin comme une suite de poins visble de pair en pair
+On peut ajouter des segements qui interdise des zones 
+
+Il ya une liste des points: 
+vertex est composé d'un point et de sa visibilitée vers les autres points. (liste des autres points visibles) 
+actif : avec les obstacles
+passifs : sans les obstacles
+
+Un noued est composé du coup pour aller vers ce noeud + le coups du parents 
+le parents c'est le point avant qui est plus proche du robot. Si y'en a pas le parent c'est le robot
+
+
+TODO: transformer le node en classe
+*/
+
 /****************************************************************************************
 * Includes
 ****************************************************************************************/
