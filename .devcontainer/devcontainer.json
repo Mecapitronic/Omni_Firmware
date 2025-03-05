@@ -28,13 +28,9 @@
         "vscode": {
             "extensions": [
                 "eamodio.gitlens",
-                "GitHub.vscode-github-actions",
-                "llvm-vs-code-extensions.vscode-clangd",
-                "ms-python.python",
-                "platformio.platformio-ide",
-                "Wokwi.wokwi-vscode",
-                "xaver.clang-format"
+                "ms-python.python"
             ],
+            // after devcontainer is up select python interpreter in command palette
             "settings": {
                 "python.terminal.activateEnvInCurrentTerminal": true,
                 "python.defaultInterpreterPath": "~/.platformio/penv/bin/python3"
