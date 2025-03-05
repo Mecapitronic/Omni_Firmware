@@ -5,29 +5,43 @@
  * Includes
  ****************************************************************************************/
 #include "Structure.h"
-#include "Mapping.h"
-#include "Node.h"
-
-constexpr size_t LIST_LENGTH = 24; // TODO !!! Mapping::Max_Vertex;
-constexpr size_t INVALID_VERTEX_ID = 255;
+#include "NodeItem.h"
 
 namespace NodeList
 {
+    constexpr size_t LIST_LENGTH = 24; // TODO !!! Mapping::Max_Vertex;
+    constexpr size_t INVALID_VERTEX_ID = 255;
+
     /****************************************************************************************
      * Prototypes
      ****************************************************************************************/
-    void ListAddFirst(std::array<t_node, LIST_LENGTH> &list, t_node data);
-    void ListAddEnd(std::array<t_node, LIST_LENGTH> &list, t_node data);
-    uint32 ListLength(std::array<t_node, LIST_LENGTH> &list);
-    void ListInsertSorted(std::array<t_node, LIST_LENGTH> &list, t_node data);
-    void ListGetFirstItem(std::array<t_node, LIST_LENGTH> &list, t_node *data);
-    int ListIsDataExist(std::array<t_node, LIST_LENGTH> &list, t_node data);
-    void ListFreeALL(std::array<t_node, LIST_LENGTH> &list);
-    void ListVertexIDInit(std::array<t_vertexID, LIST_LENGTH> &list);
+    template <typename T>
+    void ListAddFirst(std::vector<T> &list, T data);
+
+    template <typename T>
+    void ListAddEnd(std::vector<T> &list, T data);
+    
+    template <typename T>
+    uint32 ListLength(std::vector<T> &list);
+    
+    template <typename T>
+    void ListInsertSorted(std::vector<T> &list, T data);
+    
+    template <typename T>
+    void ListGetFirstItem(std::vector<T> &list, T *data);
+    
+    template <typename T>
+    int ListIsDataExist(std::vector<T> &list, T data);
+    
+    //void ListFreeALL(std::vector<T> &list);
+    
+    void ListVertexIDInit(std::vector<t_vertexID> &list);
 
 #ifdef SERIAL_PRINT
-    void ListPrint(std::array<t_node, LIST_LENGTH> &list, String str = "");
-    void ListVertexPrint(std::array<t_vertexID, LIST_LENGTH> &list);
+    template <typename T>
+    void ListPrint(std::vector<T> &list, String str = "");
+
+    void ListVertexPrint(std::vector<t_vertexID> &list);
 #endif
 }
 #endif

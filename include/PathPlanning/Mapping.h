@@ -4,15 +4,9 @@
 /****************************************************************************************
 * Includes
 ****************************************************************************************/
-#include "Structure.h"
 #include "Obstacle.h"
 #include "GeoMathTools.h"
-#include "Node.h"
 #include "NodeList.h"
-
-//using namespace Node;
-//using namespace NodeList;
-//using namespace Obstacle;
 
 namespace Mapping
 {

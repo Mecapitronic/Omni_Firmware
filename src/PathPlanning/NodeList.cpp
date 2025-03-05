@@ -8,7 +8,8 @@ namespace NodeList
 	/****************************************************************************************
 	 * Fonction : Rajoute en tete de la liste pList l'element data.
 	 ****************************************************************************************/
-	void ListAddFirst(std::array<t_node, LIST_LENGTH> &list, t_node data)
+	template <typename T>
+	void ListAddFirst(std::vector<T> &list, T data)
 	{
 		int i;
 		if (list[0].currentID == INVALID_VERTEX_ID)
@@ -28,7 +29,8 @@ namespace NodeList
 	/****************************************************************************************
 	 * Fonction : Rajoute en queue de la liste pList l'element data.
 	 ****************************************************************************************/
-	void ListAddEnd(std::array<t_node, LIST_LENGTH> &list, t_node data)
+	template <typename T>
+	void ListAddEnd(std::vector<T> &list, T data)
 	{
 		int i = 0;
 		for (i = 0; i < LIST_LENGTH; i++)
@@ -49,7 +51,8 @@ namespace NodeList
 	/****************************************************************************************
 	 * Fonction : Renvoie le nombre d'element contenu dans la liste.
 	 ****************************************************************************************/
-	uint32 ListLength(std::array<t_node, LIST_LENGTH> &list)
+	template <typename T>
+	uint32 ListLength(std::vector<T> &list)
 	{
 		int i = LIST_LENGTH - 1;
 		for (i = LIST_LENGTH - 1; i >= 0; i--)
@@ -65,7 +68,8 @@ namespace NodeList
 	 * Elle doit renvoyer 0 si p1 pointe sur un element equivalent a p2.
 	 * < 0 si p1 est inferieur a p2, >0 si p2 est superieur a p1.
 	 ****************************************************************************************/
-	void ListInsertSorted(std::array<t_node, LIST_LENGTH> &list, t_node data)
+	template <typename T>
+	void ListInsertSorted(std::vector<T> &list, T data)
 	{
 		int i = 0;
 		int j = 0;
@@ -83,7 +87,7 @@ namespace NodeList
 			{
 				if (list[i].currentID != INVALID_VERTEX_ID)
 				{
-					if (Node::NodeFCmp(list[i], data) > 0)
+					if (list[i].FCmp(data) > 0)
 					{
 						find = true;
 						break;
@@ -119,7 +123,8 @@ namespace NodeList
 	 * Fonction : Libere le premier element.
 	 * Renvoi dans data le premier élément enlevé.
 	 ****************************************************************************************/
-	void ListGetFirstItem(std::array<t_node, LIST_LENGTH> &list, t_node *data)
+	template <typename T>
+	void ListGetFirstItem(std::vector<T> &list, T *data)
 	{
 		int i = 0;
 		/* on fait pointer data vers cet element*/
@@ -130,15 +135,16 @@ namespace NodeList
 			if (list[i].currentID != INVALID_VERTEX_ID)
 				list[i] = list[i + 1];
 		}
-
-		Node::NodeNew(&list[LIST_LENGTH - 1]);
+		list[LIST_LENGTH - 1] = T();
+		//NodeNew(&list[LIST_LENGTH - 1]);
 	}
 
 	/****************************************************************************************
 	 * Fonction : Recherche l'element de liste qui contient la premiere donnee data.
 	 * Renvoie la position si trouvé, -1 sinon.
 	 ****************************************************************************************/
-	int ListIsDataExist(std::array<t_node, LIST_LENGTH> &list, t_node data)
+	template <typename T>
+	int ListIsDataExist(std::vector<T> &list, T data)
 	{
 		int i = 0;
 		for (i = 0; i < LIST_LENGTH - 1; i++)
@@ -153,21 +159,22 @@ namespace NodeList
 	/****************************************************************************************
 	 * Fonction : Initialise chaques éléments de la list
 	 ****************************************************************************************/
-	void ListFreeALL(std::array<t_node, LIST_LENGTH> &list)
-	{
-		for (int i = 0; i < LIST_LENGTH; i++)
-		{
-			list[i].currentCost = 0;
-			list[i].currentID = INVALID_VERTEX_ID;
-			list[i].parentCost = 0;
-			list[i].parentID = INVALID_VERTEX_ID;
-		}
-	}
+	////template<size_t LIST_LENGTH>
+	// void ListFreeALL(std::vector<T> &list)
+	// {
+	// 	for (int i = 0; i < LIST_LENGTH; i++)
+	// 	{
+	// 		list[i].currentCost = 0;
+	// 		list[i].currentID = INVALID_VERTEX_ID;
+	// 		list[i].parentCost = 0;
+	// 		list[i].parentID = INVALID_VERTEX_ID;
+	// 	}
+	// }
 
 	/****************************************************************************************
 	 * Fonction : Initialise chaques éléments de la list
 	 ****************************************************************************************/
-	void ListVertexIDInit(std::array<t_vertexID, LIST_LENGTH> &list)
+	void ListVertexIDInit(std::vector<t_vertexID> &list)
 	{
 		int i;
 		for (i = 0; i < LIST_LENGTH; i++)
@@ -181,7 +188,8 @@ namespace NodeList
 	/****************************************************************************************
 	 * Fonction : Imprime la liste dans UART 1 OUTPUT avec le simulateur.
 	 ****************************************************************************************/
-	void ListPrint(std::array<t_node, LIST_LENGTH> &list,  String str)
+	template <typename T>
+	void ListPrint(std::vector<T> &list,  String str)
 	{
 		int i = 0;
 		printf("-------\n");
@@ -191,7 +199,7 @@ namespace NodeList
 			if (list[i].currentID == INVALID_VERTEX_ID)
 				break;
 			printf("%d] ", i);
-			// printf ("Liste 0x%X - Node 0x%X ->",current,current->data);
+			// printf ("Liste 0x%X - NodeItem 0x%X ->",current,current->data);
 			printf("Vertex ID:%d -> ", list[i].currentID);
 			printf("Cost %ld ", list[i].currentCost);
 			// printf("Heuristic %f , Cost %f " , NodeF(current->data) , NodeGetCost(current->data));
@@ -202,7 +210,7 @@ namespace NodeList
 	/****************************************************************************************
 	 * Fonction : Imprime la liste dans UART 1 OUTPUT avec le simulateur
 	 ****************************************************************************************/
-	void ListVertexPrint(std::array<t_vertexID, LIST_LENGTH> &list)
+	void ListVertexPrint(std::vector<t_vertexID> &list)
 	{
 		int i = 0;
 		printf("-------\n");
