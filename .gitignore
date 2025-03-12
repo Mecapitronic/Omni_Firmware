@@ -7,7 +7,7 @@
 .vscode/extensions.json
 .vscode/ipch
 .vscode/launch.json
-#.vscode/settings.json
+.vscode/compile_commands.json
 *.code-workspace
 
 # Python
