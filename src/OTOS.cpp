@@ -6,12 +6,14 @@ void OpticalTrackingOdometrySensor::Initialisation()
 {
     println("Init QwiicOTOS");
 
-    Wire.setPins(SDA, SCL);
-    Wire.begin(SDA, SCL, 400000UL);
-
     // Normal speed is 100 000
     // With higher speed, instructions on I2C take less time
+    Wire.begin(SDA, SCL, 400000UL);
+
+    // Same as :
+    // Wire.setPins(SDA, SCL);
     // Wire.setClock(400000UL);
+    // Wire.begin();
 
     int retryConnect = 0;
     // Attempt to begin the sensor
