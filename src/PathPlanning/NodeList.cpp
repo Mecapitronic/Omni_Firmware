@@ -1,3 +1,11 @@
+/*
+	La liste est parfois triée parfois non, il faut sûrement la remplacée par un vecteur
+	Il faut allouer la mémoire avant avec la tille maximum (le nombre de point max: 32)
+	Comme ça c'est plus efficace
+
+	TODO: A remplacer par un vecteur
+*/
+
 /****************************************************************************************
  * Includes
  ****************************************************************************************/
