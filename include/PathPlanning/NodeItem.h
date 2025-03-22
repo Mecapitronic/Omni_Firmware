@@ -6,9 +6,7 @@
  ****************************************************************************************/
 #include "Structure.h"
 #include "Mapping.h"
-#include "NodeList.h"
 
-constexpr uint8_t LIST_LENGTH_2 = 24; // TODO !!! Mapping::Max_Vertex;
 constexpr uint8_t INVALID_VERTEX_ID = 255;
 
 //using namespace Mapping;
@@ -25,8 +23,8 @@ public:
     //void NodeNew(NodeItem * newNode);
     void SetParent(t_vertexID parentID, uint32 parentCost);
     uint32 GetCost();
-    uint32 GetF();
-    int8 FCmp(NodeItem node);
+    uint32 GetF() const;
+    int8 FCmp(NodeItem node) const;
     uint32 CostWillBe();
     void ListGetPossibleNode(std::vector<NodeItem> &list);
 

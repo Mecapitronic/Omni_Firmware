@@ -26,10 +26,10 @@ TODO: transformer le node en classe
 /****************************************************************************************
 * Fonction : Set a NodeItem with a parent and a vertex ID
 ****************************************************************************************/
-void NodeItem::Set(t_vertexID parent , t_vertexID currentPoint, uint32 parentCost)
+void NodeItem::Set(t_vertexID _parent , t_vertexID _currentPoint, uint32 _parentCost)
 {
-  currentID = currentPoint;
-  SetParent(parent, parentCost);
+  currentID = _currentPoint;
+  SetParent(_parent, _parentCost);
 }
 
 /****************************************************************************************
@@ -46,16 +46,16 @@ void NodeItem::Set(t_vertexID parent , t_vertexID currentPoint, uint32 parentCos
 /****************************************************************************************
 * Fonction : Set the parent
 ****************************************************************************************/
-void NodeItem::SetParent(t_vertexID parent, uint32 parentCost)
+void NodeItem::SetParent(t_vertexID _parentID, uint32 _parentCost)
 {
-  parentID = parent;
-  parentCost = parentCost;
+  parentID = _parentID;
+  parentCost = _parentCost;
   // Refresh the cost : the cost of the parent + the cost of the current point
-  if (parent != INVALID_VERTEX_ID)
+  if (_parentID != INVALID_VERTEX_ID)
   {
 
     uint32 cost = Mapping::Get_Distance_Vertex(currentID, parentID);
-    currentCost = parentCost + cost;
+    currentCost = _parentCost + cost;
   }
   else
     currentCost = 0;
@@ -73,15 +73,15 @@ uint32 NodeItem::GetCost()
 /****************************************************************************************
 * Fonction : Get the F distance (Cost + Heuristic)
 ****************************************************************************************/
-uint32 NodeItem::GetF()
+uint32 NodeItem::GetF() const
 {
-    return (currentCost);
+    return currentCost;
 }
 
 /****************************************************************************************
 * Fonction : Comparaison between 2 node by their Heuristic
 ****************************************************************************************/
-int8 NodeItem::FCmp(NodeItem node)
+int8 NodeItem::FCmp(const NodeItem node) const
 {
   uint32 nodeFp1 = GetF();
   uint32 nodeFp2 = node.GetF();
@@ -118,14 +118,17 @@ uint32 NodeItem::CostWillBe()
 void NodeItem::ListGetPossibleNode(std::vector<NodeItem> &list)
 {
   int i = 0;
-  int j = 0;
-  for (i = 0; i < LIST_LENGTH_2; i++)
+  //int j = 0;
+  for (i = 0; i < Mapping::Max_Vertex; i++)
   {
     if (Mapping::Is_Adjacent(currentID, i))
     {
-      list[j] = NodeItem();
-      list[j].Set(currentID , i, currentCost);
-	    j++;
+      NodeItem node = NodeItem();
+      node.Set(currentID, i, currentCost);
+      list.push_back(node);
+      //list[j] = NodeItem();
+      //list[j].Set(currentID , i, currentCost);
+	    //j++;
     }
   }
 }

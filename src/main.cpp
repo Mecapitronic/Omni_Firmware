@@ -85,6 +85,8 @@ void setup()
   Mapping::Initialize_Map(team);
   Obstacle::Initialize_Obstacle();
   Mapping::Initialize_Passability_Graph();
+  Mapping::Update_Start_Vertex((int16_t)robot.x, (int16_t)robot.y);
+  Mapping::Update_Passability_Graph();
   
   // Create a timer => for motion
   timer_handle_1 = xTimerCreate(
@@ -140,7 +142,8 @@ void timerCallback1(TimerHandle_t xTimer)
     // Actual position update
     robot.SetPose(otos.position.x, otos.position.y, otos.position.h);
 
-    Mapping::Update_Start_Vertex((int16_t)robot.x, (int16_t)robot.y);
+    //Mapping::Update_Start_Vertex((int16_t)robot.x, (int16_t)robot.y);
+    //Mapping::Update_Passability_Graph();
 
     // Actual velocity update, in global field reference
     linear.velocity_actual = Norm2D(otos.velocity.x, otos.velocity.y);
@@ -178,15 +181,16 @@ void loop()
     teleplotChrono = startChrono;
     teleplot("Position", robot);
     teleplot("Orient", robot.h);
-    teleplot("Direction", linear.direction);
+    Mapping::PrintVertex0();
+    //teleplot("Direction", linear.direction);
     //println(">fixeScale:0:0;0:2000;3000:2000;3000:0;|xy");
-    otos.Teleplot();
-    linear.Teleplot("linear");
-    angular.Teleplot("angular");
+    //otos.Teleplot();
+    //linear.Teleplot("linear");
+    //angular.Teleplot("angular");
 
-    teleplot("v1", motor.GetMotorSpeed(1));
-    teleplot("v2", motor.GetMotorSpeed(2));
-    teleplot("v3", motor.GetMotorSpeed(3));
+    //teleplot("v1", motor.GetMotorSpeed(1));
+    //teleplot("v2", motor.GetMotorSpeed(2));
+    //teleplot("v3", motor.GetMotorSpeed(3));
   }
 
   if (startChrono - rgbChrono > 1000 * 100) // Update every 100ms
@@ -243,6 +247,9 @@ void loop()
       // PathFinding
       // PF:5
       Mapping::Set_End_Vertex(cmd.data[0]);
+      Mapping::Update_Start_Vertex((int16_t)robot.x, (int16_t)robot.y);
+      Mapping::Update_Passability_Graph();
+
       if (PathFinding::Path_Planning())
       {
         println("PF Found");
