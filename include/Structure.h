@@ -1,8 +1,6 @@
 #ifndef STRUCTURE_H
 #define STRUCTURE_H
 
-#define SERIAL_PRINT // TODO : remove this line
-
 #include <Arduino.h>
 #include "Structure_Helper.h"
 
