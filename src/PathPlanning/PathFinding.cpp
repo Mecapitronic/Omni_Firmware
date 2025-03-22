@@ -8,10 +8,10 @@ namespace PathFinding
 /****************************************************************************************
 * Variables
 ****************************************************************************************/
-std::array <t_node, LIST_LENGTH> open;
-std::array <t_node, LIST_LENGTH> close;
-std::array<t_vertexID, LIST_LENGTH> solution = {INVALID_VERTEX_ID}; // /!\ init of first index only !
-std::array<t_vertexID, LIST_LENGTH> solutionInverse;
+std::vector <NodeItem> open;
+std::vector <NodeItem> close;
+std::vector <t_vertexID> solution = {INVALID_VERTEX_ID}; // /!\ init of first index only !
+std::vector <t_vertexID> solutionInverse;
 
 uint32_t timeout_pf = 0;
 
@@ -32,50 +32,58 @@ boolean Path_Planning(void)
  ****************************************************************************************/
 boolean Path_Finding()
 {
-	std::array <t_node, LIST_LENGTH> listPossible;
-	t_node startNode;
-	t_node best;
+	std::vector <NodeItem> listPossible;
+	NodeItem startNode;
+	NodeItem best;
 	//Set_Timeout_PF(PATH_FINDING_TIME_LIMIT);
 
 	// Initialisation des list
-	ListFreeALL(open);
-	ListFreeALL(close);
-	ListFreeALL(listPossible);
-
-	NodeNew(&startNode);
-	NodeNew(&best);
+	open.clear();
+	open.reserve(32);
+	close.clear();
+	close.reserve(32);
+	listPossible.clear();
+	listPossible.reserve(32);
 
 	// Création du premier noeud de départ
-	NodeSet(&startNode, INVALID_VERTEX_ID, 0, 0);  // start to vertex 0
+	startNode.currentID = 0;// start to vertex 0
 	// On ajoute le noeud à la liste open
-	ListAddFirst(open, startNode);
+	open.push_back(startNode);
+	//ListAddFirst(open, startNode);
 
-	while (ListLength(open) > 0)
+	while (open.size() > 0)
 	{
 		//on récupére le premier noeud de la liste cad le meilleur
-		ListGetFirstItem(open, &best);
+		best = open.front();
+		pop_front(open);
+		//ListGetFirstItem(open, &best);
 
 		// on regarde si le noeud est le noeud final OU si il y a condition d'arrét anticipé
 		if ((Is_Equal_Vertex(best.currentID, Get_End_Vertex()) ))//|| (PATH_FINDING_STOP))
 		{
 			int i = 0;
 			int pos = 0;
-			t_node dummy;
-			ListVertexIDInit(solutionInverse);
-			NodeNew(&dummy);
+			NodeItem dummy = NodeItem();
+			//ListVertexIDInit(solutionInverse);
+			solutionInverse.clear();
+			solutionInverse.reserve(32);
+			//NodeNew(&dummy);
 			solutionInverse[i++] = best.currentID;
 			dummy.currentID = best.parentID;
 			
 			//A partir du noeud de fin,
 			while (dummy.currentID != INVALID_VERTEX_ID)
 			{
-				pos = ListIsDataExist(close, dummy);
+
+				pos = NodeList::ListIsDataExist(close, dummy);
 				dummy = close[pos];
 				solutionInverse[i++] = dummy.currentID;
 				dummy.currentID = dummy.parentID;
 			}
 			int j=0;
-			ListVertexIDInit(solution);
+			solution.clear();
+			solution.reserve(32);
+			//ListVertexIDInit(solution);
 			for (i = 0; i < LIST_LENGTH; i++)
 			{
 				if(solutionInverse[LIST_LENGTH-1-i] != INVALID_VERTEX_ID)
@@ -83,24 +91,26 @@ boolean Path_Finding()
 						solution[j++] = solutionInverse[LIST_LENGTH-1-i];
 			}
 #ifdef SERIAL_PRINT
-			ListPrint(open , "open");
-			ListPrint(close , "close");
-			ListVertexPrint(solution);
+			NodeList::ListPrint(open , "open");
+			NodeList::ListPrint(close , "close");
+			NodeList::ListVertexPrint(solution);
 #endif
 			return true;
 		}
 		// on ajoute le noeud évalué à la liste close
-		ListAddEnd(close, best);
+		//ListAddEnd(close, best);
+		close.push_back(best);
 
 		// on récupére dans une liste tous les noeuds voisins autour du best
-		ListFreeALL(listPossible);
-		NodeListGetPossibleNode(listPossible, best);
+		listPossible.clear();
+		listPossible.reserve(32);
+		best.ListGetPossibleNode(listPossible);
 
 #ifdef SERIAL_PRINT
 		printf("\n");
-		ListPrint(open, "open");
-		ListPrint(close, "close");
-		ListPrint(listPossible, "best");
+		NodeList::ListPrint(open, "open");
+		NodeList::ListPrint(close, "close");
+		NodeList::ListPrint(listPossible, "best");
 #endif
 
 		// on ajoute cette liste de nodes à open pour que les noeuds soient évalués
@@ -118,7 +128,7 @@ boolean Path_Finding()
 /****************************************************************************************
 * Fonction : Add a list of nodes to the open list if needed
 ****************************************************************************************/
-void PathFindingAddToOpen(std::array<t_node, LIST_LENGTH> &list)
+void PathFindingAddToOpen(std::vector<NodeItem> &list)
 {
 	int i = 0;
 	int pos = 0;
@@ -126,27 +136,27 @@ void PathFindingAddToOpen(std::array<t_node, LIST_LENGTH> &list)
 	while (list[i].currentID != INVALID_VERTEX_ID)
 	{
 		// on vérifie que le noeud n'existe pas déjé dans open
-		pos = ListIsDataExist(open, list[i]);
+		pos = NodeList::ListIsDataExist(open, list[i]);
 		if (pos == -1)
 		{
 			// on vérifie que le noeud n'existe pas déjé dans close
-			pos = ListIsDataExist(close, list[i]);
+			pos = NodeList::ListIsDataExist(close, list[i]);
 			if (pos == -1)
 			{
 				// On ajoute le noeud de faéon trié dans la liste open
-				ListInsertSorted(open, list[i]);
+				NodeList::ListInsertSorted(open, list[i]);
 			}
 			else
 			{
 				// le noeud existe déjé dans close
 				// on regarde si son cout sera meilleur
 				// sinon on affecte le nouveau parent
-				t_node node;
-				NodeNew(&node);
+				NodeItem node = NodeItem();
+				//NodeNew(&node);
 				node = close[pos];
-				if (NodeCostWillBe(list[i]) < NodeGetCost(close[pos]))
+				if (list[i].CostWillBe() < close[pos].GetCost())
 				{
-					NodeSetParent(&close[pos], list[i].parentID, list[i].parentCost);
+					close[pos].SetParent(list[i].parentID, list[i].parentCost);
 				}
 			}
 		}
@@ -155,9 +165,9 @@ void PathFindingAddToOpen(std::array<t_node, LIST_LENGTH> &list)
 			// le noeud existe déjé dans open
 			// on regarde si son cout sera meilleur
 			// sinon on affecte le nouveau parent
-			if (Node::NodeCostWillBe(list[i]) < Node::NodeGetCost(open[pos]))
+			if (list[i].CostWillBe() < open[pos].GetCost())
 			{
-				Node::NodeSetParent(&open[pos], list[i].parentID, list[i].parentCost);
+				open[pos].SetParent(list[i].parentID, list[i].parentCost);
 			}
 		}
 
