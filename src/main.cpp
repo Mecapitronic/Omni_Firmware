@@ -11,7 +11,7 @@ Motion linear;
 Motion angular;
 
 Robot robot;
-//Robot adversaire;
+// Robot adversaire;
 
 OpticalTrackingOdometrySensor otos;
 
@@ -19,7 +19,6 @@ Team team;
 Mode mode;
 
 PoseF goTo = {500, 500, 0}; // TODO: pourquoi parfois il démarre en 0;0 ? c'est réinitialisé à 0 par défaut au lieu de ces valeurs ?
-
 
 unsigned long startChrono = 0;
 unsigned long endChrono = 0;
@@ -56,7 +55,7 @@ void setup()
   digitalRead(PIN_TEAM) == LOW ? team = Team::Jaune : team = Team::Bleue;
 
   led_builtin.Initialisation(1, PIN_RGB_LED);
-  //led_ring.Initialisation(36, PIN_WS2812_LED);
+  led_ring.Initialisation(36, PIN_WS2812_LED);
 
   // Init sensors
   otos.Initialisation();
@@ -68,15 +67,15 @@ void setup()
   linear.Initialisation(1500, 1000);                   // Linear max speed 1500 mm/s and acceleration 1000 mm/s²
   angular.Initialisation(radians(500), radians(1000)); // Angular max speed 500 °/s and acceleration 1000 °/s²
   // Init end position tolerance
-  linear.SetMargin(1);            // 1 mm
-  angular.SetMargin(radians(1));  // 1 deg
+  linear.SetMargin(1);           // 1 mm
+  angular.SetMargin(radians(1)); // 1 deg
 
   // Initial pose
   // Init start zone => team color ?
-  robot.SetPose(500,500,radians(0));
+  robot.SetPose(500, 500, radians(0));
 
   // Reset odometry
-  otos.SetPose(robot.x, robot.y, robot.h); 
+  otos.SetPose(robot.x, robot.y, robot.h);
 
   // Init trajectory
   Trajectory::Initialisation(&linear, &angular, &robot);
@@ -85,7 +84,7 @@ void setup()
   Mapping::Initialize_Map(team);
   Obstacle::Initialize_Obstacle();
   Mapping::Initialize_Passability_Graph();
-  
+
   // Create a timer => for motion
   timer_handle_1 = xTimerCreate(
       "Timer 1",       // Name of timer
@@ -170,7 +169,6 @@ void loop()
   //  delay(5000);
   // //while(linear.isRunning || angular.isRunning) ;//doWhileWaiting();
 
-
   startChrono = micros();
 
   if (startChrono - teleplotChrono > 1000 * 1000) // Update every 100ms
@@ -179,7 +177,7 @@ void loop()
     teleplot("Position", robot);
     teleplot("Orient", robot.h);
     teleplot("Direction", linear.direction);
-    //println(">fixeScale:0:0;0:2000;3000:2000;3000:0;|xy");
+    // println(">fixeScale:0:0;0:2000;3000:2000;3000:0;|xy");
     otos.Teleplot();
     linear.Teleplot("linear");
     angular.Teleplot("angular");
@@ -193,7 +191,7 @@ void loop()
   {
     rgbChrono = startChrono;
     led_builtin.Update();
-    //led_ring.Update();
+    led_ring.Update();
   }
 
   if (ESP32_Helper::HasWaitingCommand())
@@ -217,7 +215,7 @@ void loop()
       goTo.x = cmd.data[0];
       goTo.y = cmd.data[1];
       goTo.h = cmd.data[2];
-      Trajectory::GoToPose(goTo.x, goTo.y, goTo.h ,linear.speed_max , 0);
+      Trajectory::GoToPose(goTo.x, goTo.y, goTo.h, linear.speed_max, 0);
       print("Robot go to x=", goTo.x);
       print(" y=", goTo.y);
       print(" h=", goTo.h);
@@ -230,7 +228,7 @@ void loop()
       goTo.x = cmd.data[0];
       goTo.y = cmd.data[1];
       goTo.h = cmd.data[2];
-      robot.SetPose(goTo.x,goTo.y,goTo.h);
+      robot.SetPose(goTo.x, goTo.y, goTo.h);
       otos.SetPose(robot.x, robot.y, robot.h);
       print("Robot set to x=", goTo.x);
       print(" y=", goTo.y);
@@ -238,7 +236,7 @@ void loop()
       println();
       EnableTimerMotion();
     }
-    else if(cmd.cmd == "PF" && cmd.size == 1)
+    else if (cmd.cmd == "PF" && cmd.size == 1)
     {
       // PathFinding
       // PF:5
@@ -251,26 +249,25 @@ void loop()
       {
         print("PF Not Found");
       }
-    }    
-    else if(cmd.cmd == "VertexList")
+    }
+    else if (cmd.cmd == "VertexList")
     {
       Mapping::PrintVertexList();
     }
-    else if(cmd.cmd == "SegmentList")
+    else if (cmd.cmd == "SegmentList")
     {
       Mapping::PrintSegmentList();
     }
-    else if(cmd.cmd == "CircleList")
+    else if (cmd.cmd == "CircleList")
     {
       Mapping::PrintCircleList();
     }
-    else if(cmd.cmd == "MappingList")
+    else if (cmd.cmd == "MappingList")
     {
       Mapping::PrintVertexList();
       Mapping::PrintSegmentList();
       Mapping::PrintCircleList();
     }
-
   }
 
   endChrono = micros();
@@ -291,6 +288,3 @@ void loop()
   }
 }
 //**************************************************************************************************************************/
-
-
-

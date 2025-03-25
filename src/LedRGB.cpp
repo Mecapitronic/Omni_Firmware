@@ -22,9 +22,9 @@ void LedRGB::Update()
 
 void LedRGB::HandleCommand(Command cmd)
 {
-    //if (cmd.cmd == "RGB")
+    // if (cmd.cmd == "RGB")
     //{
-        // RGB:0;0;0
+    //  RGB:0;0;0
     //    print("RGB : ", cmd.data[0]);
     //    print(" : ", cmd.data[1]);
     //    print(" : ", cmd.data[2]);
