@@ -50,8 +50,7 @@ void setup()
 
   ServoAX12::Initialisation();
 
-  // led_ring.Initialisation(36, PIN_WS2812_LED);
-  Lidar::Initialisation(&robot);
+  led_ring.init(24, PIN_WS2812_LED);
 
   // Init sensors
   otos.Initialisation();
@@ -82,7 +81,7 @@ void setup()
   Mapping::Initialize_Passability_Graph();
   Mapping::Update_Start_Vertex((int16_t)robot.x, (int16_t)robot.y);
   Mapping::Update_Passability_Graph();
-  
+
   // Create a timer => for motion
   timerMotion = TimerThread(timerMotionCallback, "Timer Motion", (1000 * Motion::dt_motion) / portTICK_PERIOD_MS);
   timerMotion.Start();
@@ -150,7 +149,85 @@ void timerMotionCallback(TimerHandle_t xTimer)
     // Motor update => in local robot reference
     motor.Update(linear.velocity_command, linear.direction, angular.velocity_command);
   }
+
   timerMotion.Running(false);
+}
+
+//******************************************************* TASK => LIDAR *************************************************************** */
+//  do NON BLOCKING stuff
+void TaskLidar(void *pvParameters)
+{
+  println("Start TaskLidar");
+  SERIAL_LIDAR.setPins(RX_LIDAR, TX_LIDAR);
+  SERIAL_LIDAR.setRxBufferSize(1024);
+  SERIAL_LIDAR.setTxBufferSize(1024);
+  SERIAL_LIDAR.begin(230400);
+
+  unsigned char trame[7];
+  uint16_t cursor = 0;
+
+  while (1)
+  {
+    PoseF p = robot.GetPoseF();
+    // Starting char : '!'
+    SERIAL_LIDAR.write(0x21);
+
+    // Robot X
+    SERIAL_LIDAR.write((int)p.x % 256);
+    SERIAL_LIDAR.write((int)p.x >> 8);
+
+    // Robot Y
+    SERIAL_LIDAR.write((int)p.y % 256);
+    SERIAL_LIDAR.write((int)p.y >> 8);
+
+    // Robot Angle * 100
+    int angle = (int)(degrees(p.h) * 100);
+    SERIAL_LIDAR.write(angle % 256);
+    SERIAL_LIDAR.write(angle >> 8);
+
+    // Ending char : '\n'
+    SERIAL_LIDAR.write(0x0A);
+    // println("Lidar sent : ", p);
+
+    while (SERIAL_LIDAR.available())
+    {
+      char data = SERIAL_LIDAR.read();
+
+      if (data == 0x21 && cursor == 0)
+      {
+        trame[cursor++] = data;
+      }
+      else if (cursor > 0)
+      {
+        trame[cursor++] = data;
+        if (cursor >= 7)
+        {
+          if (data == 0x0A)
+          {
+            Point p;
+            int header = trame[0];
+            int num = trame[1];
+            p.x = trame[3] << 8 | trame[2];
+            p.y = trame[5] << 8 | trame[4];
+            int footer = trame[6];
+            // I use the radius as the id number
+            Obstacle::queueObstacle.Send(Circle(p, num));
+            // Obstacle::Add_Obstacle(num, p);
+            if (p.x != 0 && p.y != 0)
+            {
+              print("Lidar received : ", num);
+              println(" ", p);
+            }
+            cursor = 0;
+            // break;
+          }
+          cursor = 0;
+        }
+      }
+    }
+    vTaskDelay(10);
+  }
+  println("End TaskLidar");
 }
 
 //******************************************************* LOOP *****************************************************************/
@@ -209,7 +286,7 @@ void loop()
   if (startChrono - rgbChrono > 1000 * 100) // Update every 100ms
   {
     rgbChrono = startChrono;
-    //  led_ring.Update();
+    led_ring.update();
   }
 
   if (ESP32_Helper::HasWaitingCommand())
