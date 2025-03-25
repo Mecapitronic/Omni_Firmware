@@ -16,7 +16,11 @@ RUN mkdir -p /etc/udev/rules.d/ \
     && curl -fsSL https://raw.githubusercontent.com/platformio/platformio-core/develop/platformio/assets/system/99-platformio-udev.rules \
     -o /etc/udev/rules.d/99-platformio-udev.rules \
     && chmod 644 /etc/udev/rules.d/99-platformio-udev.rules \
-    && usermod -a -G dialout $USERNAME \
-    && usermod -a -G plugdev $USERNAME \
+    && usermod -a -G dialout "$USERNAME" \
+    && usermod -a -G plugdev "$USERNAME" \
     && groupadd --system --gid 986 rs232 \
-    && usermod -a -G rs232 $USERNAME 
+    && usermod -a -G rs232 "$USERNAME" 
+
+# fix groups on Fedora host
+RUN groupadd --system --gid 18 serial \
+    && usermod -a -G serial "$USERNAME"
