@@ -22,6 +22,7 @@ public:
 
 private:
   // Private member variables and methods
+  int current_hue = 0;
 };
 
 #endif

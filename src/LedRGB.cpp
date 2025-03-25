@@ -12,12 +12,15 @@ void LedRGB::Initialisation(uint8_t numPixels, uint8_t pin, uint8_t brightness)
 
 void LedRGB::Update()
 {
-    static int i = 0;
-    if (i > color.capacity())
-        i = 0;
-    pixels.fill(color[i++]);
+    int step = 65535 / pixels.numPixels();
+    current_hue += step;
+    if (current_hue > 65535)
+    {
+        current_hue = 0;
+    }
+    pixels.rainbow(current_hue);
     pixels.show();
-    // println("RGB Fill");
+    println("LED Current hue ", current_hue);
 }
 
 void LedRGB::HandleCommand(Command cmd)
