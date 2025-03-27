@@ -8,6 +8,13 @@ using namespace Printer;
 #include <Adafruit_NeoPixel.h>
 #include "pins.h"
 
+struct LEDState
+{
+  uint8_t time;
+  uint16_t color;
+  vector<float32> obstacles;
+  vector<float32> adversaries;
+};
 class LedRGB
 {
 
@@ -20,9 +27,31 @@ public:
   void HandleCommand(Command cmd);
   void PrintCommandHelp();
 
+  /**
+   * @brief display rolling a rainbow
+   *
+   */
+
+  void rainbowRing();
+
+  /**
+   * @brief turn on one pixel that turns around the ring with a little fade out tail
+   * change color after each turn
+   * hold the current pixel in current_state.time
+   * display a fade out tail on the 4 pixels behind the current pixel
+   */
+  void rollingColors();
+  /*
+   * set led color in function of its position on the ring.
+   */
+  void setColorWithPosition(float32 angle_rad, uint32_t color);
+  std::vector<float32> getAdversaryPositions();
+  void displayEnemies();
+
 private:
   // Private member variables and methods
   int current_hue = 0;
+  LEDState current_state;
 };
 
 #endif

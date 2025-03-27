@@ -55,7 +55,7 @@ void setup()
   digitalRead(PIN_TEAM) == LOW ? team = Team::Jaune : team = Team::Bleue;
 
   led_builtin.Initialisation(1, PIN_RGB_LED);
-  led_ring.Initialisation(36, PIN_WS2812_LED);
+  led_ring.Initialisation(24, PIN_WS2812_LED);
 
   // Init sensors
   otos.Initialisation();
