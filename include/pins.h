@@ -2,7 +2,6 @@
 #define PIN_H
 
 #include <pins_arduino.h>
-#include <HardwareSerial.h>
 
 //******************** Pins Undefined
 constexpr size_t PIN_10 = 10;

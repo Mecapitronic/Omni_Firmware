@@ -1,12 +1,13 @@
 #ifndef MOTOR_H
 #define MOTOR_H
 
-#include <ESP32_FastPWM.h>
 
 #include "pins.h"
 #include "ESP32_Helper.h"
 using namespace Printer;
 #include "GeoMathTools.h"
+
+#include <ESP32_FastPWM.h>
 
 // résolution moteur : 200*8=1600 micro-step/tour, périmètre roue environ 185 mm, soit 8.65 step/mm
 // vitesse max : 1 m/s = 8.65 kHz (step/s)
