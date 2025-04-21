@@ -119,6 +119,9 @@ void OpticalTrackingOdometrySensor::Update()
     if (isConnected)
     {
         sfTkError_t error;
+        sfe_otos_pose2d_t myPosition;
+        sfe_otos_pose2d_t myVelocity;
+        sfe_otos_pose2d_t myAcceleration;
         // Get the latest position, which includes the x and y coordinates, plus the
         // heading angle
         // sfe_otos_pose2d_t myPosition;
@@ -185,22 +188,22 @@ void OpticalTrackingOdometrySensor::SetPose(float x, float y, float h)
     // the OTOS location to match and it will continue to track from there.
     sfe_otos_pose2d_t currentPose = {x / 1000, y / 1000, h};
 
-    int retrySetPose = 0;
-    error = myOtos.setPosition(currentPose);
-    while (error != 0 && retrySetPose < 3)
+    if (isConnected)
     {
-        println("OTOS Error SetPose : ", error);
-        delay(100);
+        int retrySetPose = 0;
         error = myOtos.setPosition(currentPose);
-        retrySetPose++;
+        while (error != 0 && retrySetPose < 3)
+        {
+            println("OTOS Error SetPose : ", error);
+            delay(100);
+            error = myOtos.setPosition(currentPose);
+            retrySetPose++;
+        }
     }
-    if (error != 0 || retrySetPose >= 3)
-    {
-        // Force position, but will be override when update occurs
-        myPosition.x = x;
-        myPosition.y = y;
-        myPosition.h = h;
-    }
+    // Force position, but will be override when update occurs
+    position.x = x;
+    position.y = y;
+    position.h = h;
     Update();
 }
 
@@ -210,13 +213,13 @@ void OpticalTrackingOdometrySensor::Teleplot()
     // teleplot("Y", myPosition.y*1000);
     // teleplot("H", myPosition.h);
 
-    teleplot("VX", myVelocity.x * 1000);
-    teleplot("VY", myVelocity.y * 1000);
-    teleplot("VH", myVelocity.h);
+    // teleplot("VX", myVelocity.x * 1000);
+    // teleplot("VY", myVelocity.y * 1000);
+    // teleplot("VH", myVelocity.h);
 
-    teleplot("AX", myAcceleration.x * 1000);
-    teleplot("AY", myAcceleration.y * 1000);
-    teleplot("AH", myAcceleration.h);
+    // teleplot("AX", myAcceleration.x * 1000);
+    // teleplot("AY", myAcceleration.y * 1000);
+    // teleplot("AH", myAcceleration.h);
 
     /*
         // Print measurement

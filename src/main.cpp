@@ -116,7 +116,7 @@ void timerMotionCallback(TimerHandle_t xTimer)
       // Calcul des composantes x, y et angular à partir des vitesses des moteurs
       float v_x = (motor1_speed + motor2_speed - 2 * motor3_speed) / 3;
       float v_y = (motor2_speed - motor1_speed) * INV_SQRT3;
-      float v_ang = degrees(-(motor1_speed + motor2_speed + motor3_speed) / (3 * CENTER_WHEEL_DISTANCE));
+      float v_ang = (-(motor1_speed + motor2_speed + motor3_speed) / (3 * CENTER_WHEEL_DISTANCE));
 
       otos.acceleration.x = v_x - otos.velocity.x;
       otos.acceleration.y = v_y - otos.velocity.y;
@@ -171,7 +171,7 @@ void loop()
   {
     teleplotChrono = startChrono;
     teleplot("Position", robot);
-    teleplot("Orient", robot.h);
+    teleplot("Orient", degrees(robot.h));
     // teleplot("Direction", linear.direction);
     // println(">fixeScale:0:0;0:2000;3000:2000;3000:0;|xy");
     // otos.Teleplot();
@@ -210,12 +210,12 @@ void loop()
       // GoToPose:0;0;0
       goTo.x = cmd.data[0];
       goTo.y = cmd.data[1];
-      goTo.h = cmd.data[2];
-      Trajectory::GoToPose(goTo.x, goTo.y, goTo.h, linear.speed_max, 0);
+      goTo.h = radians(cmd.data[2]);
       print("Robot go to x=", goTo.x);
       print(" y=", goTo.y);
       print(" h=", goTo.h);
       println();
+Trajectory::GoToPose(goTo.x, goTo.y, goTo.h, linear.speed_max, 0);
     }
     else if (cmd.cmd == "SetPose" && cmd.size == 3)
     {
@@ -223,13 +223,13 @@ void loop()
       DisableTimerMotion();
       goTo.x = cmd.data[0];
       goTo.y = cmd.data[1];
-      goTo.h = cmd.data[2];
-      robot.SetPose(goTo.x, goTo.y, goTo.h);
-      otos.SetPose(robot.x, robot.y, robot.h);
+      goTo.h = radians(cmd.data[2]);
       print("Robot set to x=", goTo.x);
       print(" y=", goTo.y);
       print(" h=", goTo.h);
       println();
+robot.SetPose(goTo.x, goTo.y, goTo.h);
+      otos.SetPose(robot.x, robot.y, robot.h);
       EnableTimerMotion();
     }
     else if (cmd.cmd == "PF" && cmd.size == 1)

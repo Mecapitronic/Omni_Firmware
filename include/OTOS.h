@@ -26,9 +26,6 @@ public:
     PoseF acceleration;
 
 private:
-    sfe_otos_pose2d_t myPosition;
-    sfe_otos_pose2d_t myVelocity;
-    sfe_otos_pose2d_t myAcceleration;
     bool isConnected = false;
     QwiicOTOS myOtos;
 };
