@@ -29,16 +29,16 @@ extern std::array<Circle, MAX_FALSE_OBSTACLE> false_obstacle;
 /****************************************************************************************
  * Functions Prototypes
  ****************************************************************************************/
-Circle Get_Obstacle(uint8 obstacleID);
-boolean Is_Valid_Obstacle(uint8 obstacleID);
+Circle Get_Obstacle(uint8_t obstacleID);
+boolean Is_Valid_Obstacle(uint8_t obstacleID);
 void Initialize_Obstacle(void);
 boolean Is_False_Obstacle(Circle circle_obstacle);
 boolean IsInMap(Point p);
-Circle Circle_Obstacle_Polar(float32 angle_rad, float32 distance_mm);
+Circle Circle_Obstacle_Polar(float angle_rad, float distance_mm);
 Circle Circle_Obstacle_Cart(int x, int y);
 void Update_Obstacles(void);
-void Add_Obstacle_Polar(uint8 id);
-void Add_Obstacle_Cart(uint8 id, int x, int y);
+void Add_Obstacle_Polar(uint8_t id);
+void Add_Obstacle_Cart(uint8_t id, int x, int y);
 }
 #endif
 

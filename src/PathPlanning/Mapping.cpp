@@ -188,17 +188,17 @@ boolean Is_Point_On_Segment(Point * p, Segment *s)
 /****************************************************************************************
 * Return the distance (approximated) between points p1 and p2
 ****************************************************************************************/
-uint32 Get_Distance_Point(Point *p1, Point *p2)
+uint32_t Get_Distance_Point(Point *p1, Point *p2)
 {
-  uint32 dx = abs(p1->x - p2->x);
-  uint32 dy = abs(p1->y - p2->y);
+  uint32_t dx = abs(p1->x - p2->x);
+  uint32_t dy = abs(p1->y - p2->y);
   return Approx_Distance(dx,dy);
 }
 
 /****************************************************************************************
 * Return the dot (scalar) product of vectors (points) v1 and v2
 ****************************************************************************************/
-int32 Dot_Product(Point *v1, Point *v2)
+int32_t Dot_Product(Point *v1, Point *v2)
 {
   return ((v1->x * v2->x) + (v1->y * v2->y));
 }
@@ -209,7 +209,7 @@ int32 Dot_Product(Point *v1, Point *v2)
 Point GePoint_ProjectionOn_Segment(Point *p, Segment *s)
 {
   Point u, v;
-  float32 projection;
+  float projection;
   
   u.x = p->x - s->p1.x;
   u.y = p->y - s->p1.y;
@@ -249,7 +249,7 @@ boolean Is_DifferenPoint(Point *p1, Point *p2)
 /****************************************************************************************
 * Return 1 if distance (orthogonal) between point p and segment s is less than d
 ****************************************************************************************/
-boolean Is_Point_CloseTo_Segment(Point *p, Segment *s, uint16 d)
+boolean Is_Point_CloseTo_Segment(Point *p, Segment *s, uint16_t d)
 {
 	Point projected;
 
@@ -273,7 +273,7 @@ boolean Is_Point_CloseTo_Segment(Point *p, Segment *s, uint16 d)
 /****************************************************************************************
 * Return 1 if distance between circle c and segment s is less than d
 ****************************************************************************************/
-boolean Is_Circle_CloseTo_Segment(Circle *c, Segment *s, uint16 d)
+boolean Is_Circle_CloseTo_Segment(Circle *c, Segment *s, uint16_t d)
 {
   d = d + c->r;
   // check distance from each end point to circle
@@ -286,7 +286,7 @@ boolean Is_Circle_CloseTo_Segment(Circle *c, Segment *s, uint16 d)
 /****************************************************************************************
 * Return 1 if distance between segment s1 and segment s2 is less than d
 ****************************************************************************************/
-boolean Is_Segment_CloseTo_Segment(Segment *s1, Segment *s2, uint16 d)
+boolean Is_Segment_CloseTo_Segment(Segment *s1, Segment *s2, uint16_t d)
 {
   // check segment intersection
   if (Is_Intersection_Segment(s1, s2)) return true;
@@ -317,9 +317,9 @@ boolean Is_NotNull_Circle(Circle *c)
 /****************************************************************************************
 * Return 1 if point target is passable from point source, according to distance margin
 ****************************************************************************************/
-boolean Is_Passable_Point(Point *source, Point *target, uint16 margin)
+boolean Is_Passable_Point(Point *source, Point *target, uint16_t margin)
 {
-  uint8 i;
+  uint8_t i;
   Segment edge;
 
 //  if (Is_Equal_Point(source, target)) // check segment existence
@@ -348,11 +348,11 @@ boolean Is_Passable_Point(Point *source, Point *target, uint16 margin)
 /****************************************************************************************
 * Return 1 if point target is passable from robot (vertex[0]), according to distance margin
 ****************************************************************************************/
-boolean Is_Passable_Robot(Point *target, uint16 margin)
+boolean Is_Passable_Robot(Point *target, uint16_t margin)
 {
-  uint8 i;
+  uint8_t i;
   Segment edge;
-  uint16 margin_temp;
+  uint16_t margin_temp;
   
   edge = Segment(vertex[0].point, *target);
 
@@ -409,8 +409,8 @@ boolean Is_Passable_Robot(Point *target, uint16 margin)
 ****************************************************************************************/
 void Initialize_Passability_Graph(void)
 { 
-  uint16 i, j;
-  uint16 margin = ROBOT_RADIUS + ROBOT_MARGIN;
+  uint16_t i, j;
+  uint16_t margin = ROBOT_RADIUS + ROBOT_MARGIN;
   
   for (i=0; i<Max_Vertex; i++)
   {
@@ -446,8 +446,8 @@ void Initialize_Passability_Graph(void)
 ****************************************************************************************/
 void Update_Passability_Robot(void)
 { 
-  uint8 i;
-  uint16 margin = ROBOT_RADIUS + ROBOT_MARGIN;
+  uint8_t i;
+  uint16_t margin = ROBOT_RADIUS + ROBOT_MARGIN;
   //TODO
   //vertex[0].point = robot.mm;
   //vertex[0].adjacency_active = 0;  // clear list
@@ -480,8 +480,8 @@ void Update_Passability_Graph(void)
 ****************************************************************************************/
 void Update_Passability_Obstacle(void)
 {
-  uint16 i, j, k;
-  uint16 margin = ROBOT_RADIUS + ROBOT_MARGIN; 
+  uint16_t i, j, k;
+  uint16_t margin = ROBOT_RADIUS + ROBOT_MARGIN; 
   Segment edge;
 
   for (i=1; i<Max_Vertex; i++)
@@ -524,8 +524,8 @@ void Update_Passability_Obstacle(void)
 ****************************************************************************************/
 //void Update_Passability_Element(void)
 //{ 
-//  uint16 i, j, k;
-//  uint16 margin = ROBOT_RADIUS + ROBOT_MARGIN + OBSTACLE_RADIUS; 
+//  uint16_t i, j, k;
+//  uint16_t margin = ROBOT_RADIUS + ROBOT_MARGIN + OBSTACLE_RADIUS; 
 //  Segment edge;
 //  
 //  for (i=1; i<MAX_VERTEX; i++)
@@ -585,7 +585,7 @@ boolean Is_Equal_Vertex(t_vertexID id1, t_vertexID id2)
 /****************************************************************************************
 * Return 1 if the vertex is valid
 ****************************************************************************************/
-boolean Is_Valid_Vertex(uint8 vertexID)
+boolean Is_Valid_Vertex(uint8_t vertexID)
 {
     return (&vertex[vertexID].point.x !=0 || &vertex[vertexID].point.y != 0);
 }
@@ -593,7 +593,7 @@ boolean Is_Valid_Vertex(uint8 vertexID)
 /****************************************************************************************
 * Return the distance (approximated) between vertex id1 and id2
 ****************************************************************************************/
-uint32 Get_Distance_Vertex(t_vertexID id1, t_vertexID id2)
+uint32_t Get_Distance_Vertex(t_vertexID id1, t_vertexID id2)
 {
   return Get_Distance_Point(&vertex[id1].point, &vertex[id2].point);
 }
@@ -611,7 +611,7 @@ void PrintVertexList()
 {
   String str = "VertexList:";
   String str01 = String(vertex[0].point.x) + ":" + String(vertex[0].point.y);
-  String str02 = ":" + String((uint64)(vertex[0].adjacency_active));
+  String str02 = ":" + String((uint64_t)(vertex[0].adjacency_active));
   str = str + str01 + str02;
   
   for (size_t i = 1; i < Max_Vertex; i++)
@@ -619,7 +619,7 @@ void PrintVertexList()
     if(vertex[i].point.x != 0 || vertex[i].point.y != 0)
     {
       String stri1 = String(vertex[i].point.x) + ":" + String(vertex[i].point.y);
-      String stri2 = ":" + String((uint64)(vertex[i].adjacency_active));
+      String stri2 = ":" + String((uint64_t)(vertex[i].adjacency_active));
       str = str + ";" + stri1 + stri2;  
     }
   }
@@ -669,7 +669,7 @@ void PrintCircleList()
 
 //void Print_Visibility_Graph()
 //{
-//    uint16 i;
+//    uint16_t i;
 //    for (i = 0; i < MAX_VERTEX; i++)
 //    {
 //        printf("vertex[%d].adjacency = %ld",i ,vertex[i].adjacency);        printf(";\n");

@@ -10,15 +10,15 @@ namespace Obstacle
  * Variables
  ****************************************************************************************/
 std::array <Circle, MAX_OBSTACLE> obstacle;
-uint8 obs_cursor = 0;
-std::array <uint16, MAX_OBSTACLE> obstacleFading;
+uint8_t obs_cursor = 0;
+std::array <uint16_t, MAX_OBSTACLE> obstacleFading;
 std::array <Circle, MAX_FALSE_OBSTACLE> false_obstacle;
 boolean obstacle_enable = false;
 
 /****************************************************************************************
  * Return the pointer address of obstacle (circle) from obstacle ID
  ****************************************************************************************/
-Circle Get_Obstacle(uint8 obstacleID)
+Circle Get_Obstacle(uint8_t obstacleID)
 {
 	return obstacle[obstacleID];
 }
@@ -26,7 +26,7 @@ Circle Get_Obstacle(uint8 obstacleID)
 /****************************************************************************************
  * Return 1 if the obstacle is valid (radius NOT zero)
  ****************************************************************************************/
-boolean Is_Valid_Obstacle(uint8 obstacleID)
+boolean Is_Valid_Obstacle(uint8_t obstacleID)
 {
 	return (obstacle[obstacleID].r != 0 ? 1 : 0);
 }
@@ -45,7 +45,7 @@ void Initialize_Obstacle(void)
 	false_obstacle[4] = Circle(1150, 40, 40 + OBSTACLE_MARGIN);   // fusee
 	false_obstacle[5] = Circle(1850, 40, 40 + OBSTACLE_MARGIN);   // fusee 
    */
-    for (uint8 i=0; i<MAX_OBSTACLE; i++)
+    for (uint8_t i=0; i<MAX_OBSTACLE; i++)
     {
         obstacle[i].p.x = 0;
         obstacle[i].p.y = 0;
@@ -61,7 +61,7 @@ void Initialize_Obstacle(void)
 ****************************************************************************************/
 boolean Is_False_Obstacle(Circle circle_obstacle)
 {
-	uint8 i;
+	uint8_t i;
 	// check map border limits
 	if (circle_obstacle.p.x < OBSTACLE_MARGIN) return true;
   if (circle_obstacle.p.x > (MAP_X_MAX - OBSTACLE_MARGIN)) return true;
@@ -89,11 +89,11 @@ boolean IsInMap(Point p)
 /****************************************************************************************
 * Return a circle obstacle at angle and distance from robot center
 ****************************************************************************************/
-Circle Circle_Obstacle_Polar(float32 angle_rad, float32 distance_mm)
+Circle Circle_Obstacle_Polar(float angle_rad, float distance_mm)
 {
 	Circle circle_obstacle;
-	uint16 distance_min;
-  float32 reduction = 1;
+	uint16_t distance_min;
+  float reduction = 1;
 
   distance_mm += OBSTACLE_MARGIN; 
   
@@ -141,7 +141,7 @@ Circle Circle_Obstacle_Cart(int x, int y)
  ****************************************************************************************/
 void Update_Obstacles(void)
 {
-	uint8 i;
+	uint8_t i;
 
   if (obstacle_enable)
 	{
@@ -165,12 +165,12 @@ void Update_Obstacles(void)
 /****************************************************************************************
  * Add circle obstacle for graph, return obstacle presence in margin at move direction
  ****************************************************************************************/
-void Add_Obstacle_Polar(uint8 id)
+void Add_Obstacle_Polar(uint8_t id)
 {
-	float32 angle = 0;
-	uint16 distance = 0;
+	float angle = 0;
+	uint16_t distance = 0;
 	Circle obs;
-	uint8 i = 0;
+	uint8_t i = 0;
 	boolean newObs = true;
 
 	if (obstacle_enable)
@@ -210,7 +210,7 @@ void Add_Obstacle_Polar(uint8 id)
 /****************************************************************************************
  * Add circle obstacle for graph, return obstacle presence in margin at move direction
  ****************************************************************************************/
-void Add_Obstacle_Cart(uint8 id, int x, int y)
+void Add_Obstacle_Cart(uint8_t id, int x, int y)
 {
 	if (obstacle_enable)
 	{

@@ -49,7 +49,7 @@ namespace NodeList
 	/****************************************************************************************
 	 * Fonction : Renvoie le nombre d'element contenu dans la liste.
 	 ****************************************************************************************/
-	uint32 ListLength(std::array<t_node, LIST_LENGTH> &list)
+	uint32_t ListLength(std::array<t_node, LIST_LENGTH> &list)
 	{
 		int i = LIST_LENGTH - 1;
 		for (i = LIST_LENGTH - 1; i >= 0; i--)

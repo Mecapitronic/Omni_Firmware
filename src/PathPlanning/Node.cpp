@@ -9,7 +9,7 @@ namespace Node
 /****************************************************************************************
 * Fonction : Set a Node with a parent and a vertex ID
 ****************************************************************************************/
-void NodeSet(t_node *node , t_vertexID parent , t_vertexID currentPoint, uint32 parentCost)
+void NodeSet(t_node *node , t_vertexID parent , t_vertexID currentPoint, uint32_t parentCost)
 {
   node->currentID = currentPoint;
   Node::NodeSetParent(node , parent, parentCost);
@@ -29,7 +29,7 @@ void NodeNew(t_node * newNode)
 /****************************************************************************************
 * Fonction : Set the parent
 ****************************************************************************************/
-void NodeSetParent(t_node *node , t_vertexID parent, uint32 parentCost)
+void NodeSetParent(t_node *node , t_vertexID parent, uint32_t parentCost)
 {
   node->parentID = parent;
   node->parentCost = parentCost;
@@ -37,7 +37,7 @@ void NodeSetParent(t_node *node , t_vertexID parent, uint32 parentCost)
   if (parent != INVALID_VERTEX_ID)
   {
 
-		  uint32 cost = Get_Distance_Vertex(node->currentID, node->parentID);
+		  uint32_t cost = Get_Distance_Vertex(node->currentID, node->parentID);
 		  node->currentCost = node->parentCost + cost;
   }
   else
@@ -47,7 +47,7 @@ void NodeSetParent(t_node *node , t_vertexID parent, uint32 parentCost)
 /****************************************************************************************
 * Fonction : Get the cost
 ****************************************************************************************/
-uint32 NodeGetCost(t_node node)
+uint32_t NodeGetCost(t_node node)
 {
   return node.currentCost;
 }
@@ -56,7 +56,7 @@ uint32 NodeGetCost(t_node node)
 /****************************************************************************************
 * Fonction : Get the F distance (Cost + Heuristic)
 ****************************************************************************************/
-uint32 NodeF(t_node node)
+uint32_t NodeF(t_node node)
 {
     return (node.currentCost);
 }
@@ -64,10 +64,10 @@ uint32 NodeF(t_node node)
 /****************************************************************************************
 * Fonction : Comparaison between 2 node by their Heuristic
 ****************************************************************************************/
-int8 NodeFCmp(t_node p1 , t_node p2)
+int8_t NodeFCmp(t_node p1 , t_node p2)
 {
-  uint32 nodeFp1 = NodeF(p1);
-  uint32 nodeFp2 = NodeF(p2);
+  uint32_t nodeFp1 = NodeF(p1);
+  uint32_t nodeFp2 = NodeF(p2);
 
   if (nodeFp1 > nodeFp2)
     return (1);
@@ -80,12 +80,12 @@ int8 NodeFCmp(t_node p1 , t_node p2)
 /****************************************************************************************
 * Fonction : Return the cost if you move to this
 ****************************************************************************************/
-uint32 NodeCostWillBe(t_node node)
+uint32_t NodeCostWillBe(t_node node)
 {
   // The cost of the parent + the cost of the current point
   if (node.parentID != INVALID_VERTEX_ID)
   {
-    uint32 cost = Get_Distance_Vertex(node.currentID, node.parentID);
+    uint32_t cost = Get_Distance_Vertex(node.currentID, node.parentID);
     return ( node.parentCost + cost );
   }
   else
