@@ -3,10 +3,12 @@
 
 #include <Arduino.h>
 #include <Wire.h>
-#include <SparkFun_Qwiic_OTOS_Arduino_Library.h>
+#include "SparkFun_Qwiic_OTOS_Arduino_Library.h"
 
 #include "pins.h"
 #include "ESP32_Helper.h"
+
+typedef sfeTkError_t sfTkError_t;
 
 class OpticalTrackingOdometrySensor
 {
