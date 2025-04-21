@@ -63,7 +63,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_VISUAL_STUDIO;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_VISUAL_STUDIO;_DEBUG;_CONSOLE;_CRT_SECURE_NO_WARNINGS;ARDUINO=10812;ESP32=1;ARDUINO_TINYS3=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>$(ProjectDir)pthreads\include;..\lib\ESP32_Helper\include;..\lib\ESP32_Helper\src;..\include;..\src;$(ProjectDir)framework-arduinoespressif32\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -81,16 +81,41 @@
     <ClCompile Include="..\lib\ESP32_Helper\src\Printer.cpp" />
     <ClCompile Include="..\lib\ESP32_Helper\src\Wifi_Helper.cpp" />
     <ClCompile Include="..\lib\ESP32_Helper\src\Wifi_No_Helper.cpp" />
+    <ClCompile Include="..\src\GeoMathTools.cpp" />
+    <ClCompile Include="..\src\LedRGB.cpp" />
     <ClCompile Include="..\src\main.cpp" />
+    <ClCompile Include="..\src\Motion.cpp" />
+    <ClCompile Include="..\src\Motor.cpp" />
+    <ClCompile Include="..\src\OTOS.cpp" />
+    <ClCompile Include="..\src\PathPlanning\Mapping.cpp" />
+    <ClCompile Include="..\src\PathPlanning\Node.cpp" />
+    <ClCompile Include="..\src\PathPlanning\NodeList.cpp" />
+    <ClCompile Include="..\src\PathPlanning\Obstacle.cpp" />
+    <ClCompile Include="..\src\PathPlanning\PathFinding.cpp" />
+    <ClCompile Include="..\src\Trajectory.cpp" />
     <ClCompile Include="Esp32OmniSimulator.cpp" />
     <ClCompile Include="framework-arduinoespressif32\Arduino.cpp" />
     <ClCompile Include="framework-arduinoespressif32\Preferences.cpp" />
     <ClCompile Include="framework-arduinoespressif32\Serial.cpp" />
+    <ClCompile Include="framework-arduinoespressif32\Wire.cpp" />
     <ClCompile Include="framework-arduinoespressif32\stdlib_noniso.c" />
     <ClCompile Include="framework-arduinoespressif32\WString.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\include\GeoMathTools.h" />
+    <ClInclude Include="..\include\LedRGB.h" />
     <ClInclude Include="..\include\main.h" />
+    <ClInclude Include="..\include\Motion.h" />
+    <ClInclude Include="..\include\Motor.h" />
+    <ClInclude Include="..\include\OTOS.h" />
+    <ClInclude Include="..\include\PathPlanning\Mapping.h" />
+    <ClInclude Include="..\include\PathPlanning\Node.h" />
+    <ClInclude Include="..\include\PathPlanning\NodeList.h" />
+    <ClInclude Include="..\include\PathPlanning\Obstacle.h" />
+    <ClInclude Include="..\include\PathPlanning\PathFinding.h" />
+    <ClInclude Include="..\include\pins.h" />
+    <ClInclude Include="..\include\Structure.h" />
+    <ClInclude Include="..\include\Trajectory.h" />
     <ClInclude Include="..\lib\ESP32_Helper\include\Debugger.h" />
     <ClInclude Include="..\lib\ESP32_Helper\include\ESP32_Helper.h" />
     <ClInclude Include="..\lib\ESP32_Helper\include\ModuleTemplate.h" />
@@ -102,12 +127,33 @@
     <ClInclude Include="..\lib\ESP32_Helper\include\Wifi_Helper.h" />
     <ClInclude Include="..\lib\ESP32_Helper\include\Wifi_No_Helper.h" />
     <ClInclude Include="Esp32OmniSimulator.h" />
+    <ClInclude Include="framework-arduinoespressif32\Adafruit_NeoPixel.h" />
     <ClInclude Include="framework-arduinoespressif32\Arduino.h" />
+    <ClInclude Include="framework-arduinoespressif32\brownout_caps.h" />
+    <ClInclude Include="framework-arduinoespressif32\cpu_caps.h" />
+    <ClInclude Include="framework-arduinoespressif32\driver\esp32-hal-ledc.h" />
+    <ClInclude Include="framework-arduinoespressif32\driver\ledc.h" />
+    <ClInclude Include="framework-arduinoespressif32\driver\ledc_types.h" />
+    <ClInclude Include="framework-arduinoespressif32\ESP32_FastPWM.h" />
+    <ClInclude Include="framework-arduinoespressif32\esp_arduino_version.h" />
     <ClInclude Include="framework-arduinoespressif32\esp_err.h" />
     <ClInclude Include="framework-arduinoespressif32\esp_idf_version.h" />
+    <ClInclude Include="framework-arduinoespressif32\i2c_caps.h" />
+    <ClInclude Include="framework-arduinoespressif32\ledc_caps.h" />
+    <ClInclude Include="framework-arduinoespressif32\mpu_caps.h" />
+    <ClInclude Include="framework-arduinoespressif32\pcnt_caps.h" />
+    <ClInclude Include="framework-arduinoespressif32\pins_arduino.h" />
     <ClInclude Include="framework-arduinoespressif32\Preferences.h" />
+    <ClInclude Include="framework-arduinoespressif32\PWM_Generic_Debug.h" />
     <ClInclude Include="framework-arduinoespressif32\Serial.h" />
+    <ClInclude Include="framework-arduinoespressif32\sfDevOTOS.h" />
+    <ClInclude Include="framework-arduinoespressif32\sigmadelta_caps.h" />
+    <ClInclude Include="framework-arduinoespressif32\soc_caps.h" />
+    <ClInclude Include="framework-arduinoespressif32\SparkFun Qwiic OTOS Arduino Library\SparkFun_Qwiic_OTOS_Arduino_Library.h" />
     <ClInclude Include="framework-arduinoespressif32\stdlib_noniso.h" />
+    <ClInclude Include="framework-arduinoespressif32\twai_caps.h" />
+    <ClInclude Include="framework-arduinoespressif32\usb_caps.h" />
+    <ClInclude Include="framework-arduinoespressif32\Wire.h" />
     <ClInclude Include="framework-arduinoespressif32\WString.h" />
     <ClInclude Include="pthreads\include\pthread.h" />
     <ClInclude Include="pthreads\include\sched.h" />
