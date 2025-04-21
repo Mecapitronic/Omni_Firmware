@@ -18,12 +18,12 @@ using namespace Printer;
 #include "PathPlanning/PathFinding.h"
 
 #ifndef ARDUINO_USB_MODE
-    #warning /*error*/ This ESP32 SoC has no Native USB interface
-#elif  ARDUINO_USB_MODE == 1
-    //#warning USB is in device mode
+#warning /*error*/ This ESP32 SoC has no Native USB interface
+#elif ARDUINO_USB_MODE == 1
+// #warning USB is in device mode
 #else
-    #warning USB is in OTG mode
-    #include "USB.h"
+#warning USB is in OTG mode
+#include "USB.h"
 #endif
 
 #ifdef ARDUINO_USB_CDC_ON_BOOT
@@ -36,23 +36,19 @@ const bool simulation = true;
 const bool simulation = false;
 #endif
 
-
 /****************************************************************************************
  * Variables
  ****************************************************************************************/
 
 // distance between center of robot and center of wheel in mm => equal to mm/radian
 #define CENTER_WHEEL_DISTANCE 115.0
-#define MM_PER_RAD  CENTER_WHEEL_DISTANCE
+#define MM_PER_RAD CENTER_WHEEL_DISTANCE
 
-// Timer Settings
-static const TickType_t timer_delay_1 = (1000 * Motion::dt_motion) / portTICK_PERIOD_MS; // period of robot motion asserv
-static TimerHandle_t timer_handle_1 = NULL;
-static bool timer_enable_1 = false;
-#define DisableTimerMotion()    {timer_enable_1 = false;}
-#define EnableTimerMotion()     {timer_enable_1 = true;}
-#define TimerMotionIsEnable()   timer_enable_1
+static bool timerMotionEnable = false;
+#define DisableTimerMotion()    {timerMotionEnable = false;}
+#define EnableTimerMotion()     {timerMotionEnable = true;}
+#define TimerMotionIsEnable()   timerMotionEnable
 
-void timerCallback1(TimerHandle_t xTimer);
+void timerMotionCallback(TimerHandle_t xTimer);
 
 #endif

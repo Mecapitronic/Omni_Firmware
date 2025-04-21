@@ -217,7 +217,7 @@ void Motor::test_ledc()
     int PIN = 18;
     int channel = 0;
     int dutycycle = 4095;
-    int SOC_LEDC_TIMER_BIT_WIDTH = 16;
+    const int SOC_LEDC_TIMER_BIT_WIDTH = 16;
     pinMode(PIN, OUTPUT);
     ledcSetup(channel, 1000, 14);
     ledcAttachPin(PIN, channel);
