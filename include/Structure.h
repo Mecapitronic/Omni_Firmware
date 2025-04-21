@@ -7,58 +7,6 @@
 #include "Structure_Helper.h"
 
 /****************************************************************************************
- * Types de données
- ****************************************************************************************/
-// // boolean (1 byte)
-//typedef unsigned char boolean;
-typedef bool boolean;
-
-// // char (1 byte)
-// #define INT8_MIN 		(-128)
-// #define INT8_MAX 		(127)
-typedef signed char int8;
-// #define UINT8_MAX 		(255)
-typedef unsigned char uint8;
-
-// // int (2 bytes)
-// #define INT16_MIN 		(-32768)
-// #define INT16_MAX 		(32767)
-typedef signed int int16;
-// #define UINT16_MAX 		(65535U)
-typedef unsigned int uint16;
-
-// // long (4 bytes)
-// #define INT32_MIN 		(-2 147 483 648L)
-// #define INT32_MAX 		(2147483647L)
-typedef signed long int int32;
-// #define UINT32_MAX 		(4294967295UL)
-typedef unsigned long int uint32;
-
-// // long long (8 bytes)
-// #define INT64_MIN               (-9223372036854775808LL)
-// #define INT64_MAX               (9223372036854775808LL)
-typedef signed long long int int64;
-// #define UINT64_MAX              (18446744073709551615ULL)
-typedef unsigned long long int uint64;
-
-// // float (4 bytes)
-// #define FLOAT32_MIN             (1.175494351E?38)           // 2e-126
-// #define FLOAT32_MAX             (3.402823466E38)            // 2e128
-typedef float float32; // about 7 decimal digits
-
-// // double (8 bytes)
-// #define FLOAT64_MIN             (2.2250738585072014E?308)   // 2e-1022
-// #define FLOAT64_MAX             (1.7976931348623158E308)    // 2e1024
-typedef double float64; // about 16 decimal digits
-
-// /* SUFFIXES :
-//  * u or U : unsigned
-//  * l or L : long
-//  * f or F or . : float
-//  * E : exponent
-//  */
-
-/****************************************************************************************
  * Constantes Génériques
  ****************************************************************************************/
 enum class Team {Jaune, Bleue};
@@ -75,7 +23,7 @@ enum class Mode {Match, Test};
 * MAPPING
 ****************************************************************************************/
 
-typedef uint64 t_adjacency; // 64 vertex max
+typedef uint64_t t_adjacency; // 64 vertex max
 
 struct Vertex{
   Point point;
@@ -87,8 +35,8 @@ struct Vertex{
 struct Segment{
   Point p1;
   Point p2;
-  float32 a;	// slope of the segment : rise/run = (Y2 - Y1) / (X2 - X1)
-  int32 b;		// intercept the axis : y = a*x + b
+  float a;	// slope of the segment : rise/run = (Y2 - Y1) / (X2 - X1)
+  int32_t b;		// intercept the axis : y = a*x + b
   Segment()
   {
     p1.x = 0;
@@ -118,14 +66,14 @@ struct Segment{
 
 struct Circle{
   Point p;
-  uint16 r;
+  uint16_t r;
   Circle()
   {
     p.x = 0;
     p.y = 0;
     r = 0;
   }
-  Circle(int32 _x, int32 _y, uint16 _r)
+  Circle(int32_t _x, int32_t _y, uint16_t _r)
   {
     p.x = _x;
     p.y = _y;
@@ -133,14 +81,14 @@ struct Circle{
   }
 };
 
-typedef uint8 t_vertexID;
+typedef uint8_t t_vertexID;
 
 /****************************************************************************************
 * PathFinding
 ****************************************************************************************/
 struct t_node{
-  uint32 currentCost;
-	uint32 parentCost;
+  uint32_t currentCost;
+	uint32_t parentCost;
 	t_vertexID parentID;
   t_vertexID currentID;
 };
@@ -150,10 +98,10 @@ struct t_node{
 ****************************************************************************************/
 /*typedef struct {
   t_vertexID vertexID;
-  int8 mission;
+  int8_t mission;
   bool possible;
   bool done;
-  uint8 iteration;
+  uint8_t iteration;
   Point point;
   bool (* function)(void);
 } t_action;
@@ -169,8 +117,8 @@ typedef struct {
 	t_vertexID vertexID;
 	//boolean available;
 	Point point;
-	float32 angle;
-	int32 distance;
+	float angle;
+	int32_t distance;
 } t_uartCMD;
 */
 // Exemple overriding operator == and !=

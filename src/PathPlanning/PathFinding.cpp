@@ -13,7 +13,7 @@ std::array <t_node, LIST_LENGTH> close;
 std::array<t_vertexID, LIST_LENGTH> solution = {INVALID_VERTEX_ID}; // /!\ init of first index only !
 std::array<t_vertexID, LIST_LENGTH> solutionInverse;
 
-uint32 timeout_pf = 0;
+uint32_t timeout_pf = 0;
 
 /****************************************************************************************
  * Path planning
