@@ -14,12 +14,13 @@ constexpr size_t PIN_11 = 11;
 #define SOC_RX0 44
 #undef SOC_TX0
 #define SOC_TX0 43
-
+*/
 #undef RX1
 #define RX1 18
 #undef TX1
 #define TX1 17
-*/
+#define SERIAL_LIDAR Serial1
+
 //******************** Pins Motors - Drivers
 constexpr size_t PIN_STEP_M1 = 7;
 constexpr size_t PIN_DIR_M1 = 6;
@@ -48,6 +49,5 @@ constexpr size_t PIN_MODE = 14;
 constexpr size_t PIN_TEAM = 13;
 constexpr size_t PIN_BAU = 15;
 constexpr size_t PIN_START = 16;
-
 
 #endif

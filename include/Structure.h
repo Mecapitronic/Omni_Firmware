@@ -9,10 +9,18 @@
 /****************************************************************************************
  * Constantes Génériques
  ****************************************************************************************/
-enum class Team {Jaune, Bleue};
-enum class Mode {Match, Test};
+enum class Team
+{
+  Jaune,
+  Bleue
+};
+enum class Mode
+{
+  Match,
+  Test
+};
 
- /*
+/*
 #define CMD_FREE		0
 #define CMD_BUSY		1
 #define CMD_DONE		2
@@ -20,23 +28,25 @@ enum class Mode {Match, Test};
 */
 
 /****************************************************************************************
-* MAPPING
-****************************************************************************************/
+ * MAPPING
+ ****************************************************************************************/
 
 typedef uint64_t t_adjacency; // 64 vertex max
 
-struct Vertex{
+struct Vertex
+{
   Point point;
-  t_adjacency adjacency_active;   // high level graph with active obstacle => working graph
-  t_adjacency adjacency_passive;  // medium level graph with passive play element
-  t_adjacency adjacency_static;   // low level graph with only static map element
+  t_adjacency adjacency_active;  // high level graph with active obstacle => working graph
+  t_adjacency adjacency_passive; // medium level graph with passive play element
+  t_adjacency adjacency_static;  // low level graph with only static map element
 };
 
-struct Segment{
+struct Segment
+{
   Point p1;
   Point p2;
-  float a;	// slope of the segment : rise/run = (Y2 - Y1) / (X2 - X1)
-  int32_t b;		// intercept the axis : y = a*x + b
+  float a;   // slope of the segment : rise/run = (Y2 - Y1) / (X2 - X1)
+  int32_t b; // intercept the axis : y = a*x + b
   Segment()
   {
     p1.x = 0;
@@ -51,20 +61,21 @@ struct Segment{
     p1 = _p1;
     p2 = _p2;
     if (p1.x == p2.x)
-    { 
-      a = 9999;  // infinite slope (vertical line)
+    {
+      a = 9999; // infinite slope (vertical line)
       b = p1.x;
     }
     else
     {
-      a = (p2.y - p1.y);  // slope
+      a = (p2.y - p1.y); // slope
       a /= (p2.x - p1.x);
-      b = (p1.y - (a * p1.x));  // intercept
+      b = (p1.y - (a * p1.x)); // intercept
     }
   }
 };
 
-struct Circle{
+struct Circle
+{
   Point p;
   uint16_t r;
   Circle()
@@ -84,18 +95,19 @@ struct Circle{
 typedef uint8_t t_vertexID;
 
 /****************************************************************************************
-* PathFinding
-****************************************************************************************/
-struct t_node{
+ * PathFinding
+ ****************************************************************************************/
+struct t_node
+{
   uint32_t currentCost;
-	uint32_t parentCost;
-	t_vertexID parentID;
+  uint32_t parentCost;
+  t_vertexID parentID;
   t_vertexID currentID;
 };
 
 /****************************************************************************************
-* STRATEGY
-****************************************************************************************/
+ * STRATEGY
+ ****************************************************************************************/
 /*typedef struct {
   t_vertexID vertexID;
   int8_t mission;
@@ -108,17 +120,17 @@ struct t_node{
 */
 
 /****************************************************************************************
-* UART COMMAND
-****************************************************************************************/
+ * UART COMMAND
+ ****************************************************************************************/
 /*
 typedef struct {
-	char cmd;
-	t_vertexID actionID;
-	t_vertexID vertexID;
-	//boolean available;
-	Point point;
-	float angle;
-	int32_t distance;
+  char cmd;
+  t_vertexID actionID;
+  t_vertexID vertexID;
+  //boolean available;
+  Point point;
+  float angle;
+  int32_t distance;
 } t_uartCMD;
 */
 // Exemple overriding operator == and !=
@@ -153,7 +165,7 @@ struct Robot : PoseF
    * Variables
    ****************************************************************************************/
   // inherit of PoseF : x, y, h
-  
+
   /****************************************************************************************
    * Prototypes fonctions
    ****************************************************************************************/
@@ -163,13 +175,21 @@ struct Robot : PoseF
     y = y_mm;
     h = h_rad;
   }
-  PoseF Pose()
+  PoseF GetPoseF()
   {
     return {x, y, h};
   }
-  PointF Position()
+  Pose GetPose()
+  {
+    return {(int16_t)(x), (int16_t)(y), (int32_t)(h)};
+  }
+  PointF GetPointF()
   {
     return {x, y};
+  }
+  Point GetPoint()
+  {
+    return {(int16_t)(x), (int16_t)(y)};
   }
 };
 

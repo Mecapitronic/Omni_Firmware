@@ -55,7 +55,7 @@ namespace Trajectory
   void TranslateToPosition(float x, float y, float speed_limit, float speed_final)
   {
     // Disable motion timer before updating motion parameters
-    DisableTimerMotion();
+    timerMotion.WaitForDisable();
 
     // Update target position
     target.x = x;
@@ -65,7 +65,7 @@ namespace Trajectory
     linear->speed_limit = speed_limit;
     linear->speed_final = speed_final;
     
-    EnableTimerMotion();
+    timerMotion.Enable();
   }
 
   /****************************************************************************************
@@ -82,7 +82,7 @@ namespace Trajectory
   void RotateToOrientation(float h_rad, float speed_limit, float speed_final)
   {
     // Disable motion timer before updating motion parameters
-    DisableTimerMotion();
+    timerMotion.WaitForDisable();
 
     // Update target orientation
     target.h = h_rad;
@@ -91,7 +91,7 @@ namespace Trajectory
     angular->speed_limit = speed_limit;
     angular->speed_final = speed_final;
     
-    EnableTimerMotion();
+    timerMotion.Enable();
   }
 
   /****************************************************************************************
@@ -116,7 +116,7 @@ namespace Trajectory
   void GoToPose(float x, float y, float h, float speed_limit, float speed_final)
   {
     // Disable motion timer before updating motion parameters
-    DisableTimerMotion();
+    timerMotion.WaitForDisable();
 
     // Update target position
     target.x = x;
@@ -133,6 +133,6 @@ namespace Trajectory
     linear->speed_limit = speed_limit;
     linear->speed_final = speed_final;
     
-    EnableTimerMotion();
+    timerMotion.Enable();
   }
 }

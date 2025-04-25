@@ -44,11 +44,9 @@ const bool simulation = false;
 #define CENTER_WHEEL_DISTANCE 115.0
 #define MM_PER_RAD CENTER_WHEEL_DISTANCE
 
-static bool timerMotionEnable = false;
-#define DisableTimerMotion()    {timerMotionEnable = false;}
-#define EnableTimerMotion()     {timerMotionEnable = true;}
-#define TimerMotionIsEnable()   timerMotionEnable
-
+extern TimerThread timerMotion;
 void timerMotionCallback(TimerHandle_t xTimer);
+
+void TaskLidar(void *pvParameters);
 
 #endif

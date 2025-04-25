@@ -90,7 +90,8 @@ void setup()
   // Create a timer => for motion
   timerMotion = TimerThread(timerMotionCallback, "Timer Motion", (1000 * Motion::dt_motion) / portTICK_PERIOD_MS);
   timerMotion.Start();
-  EnableTimerMotion();
+
+  TaskThread Task1 = TaskThread(TaskLidar, "TaskLidar", 20000, 1, 1);
 
   // Serial.print("FreeRTOS heap remaining ");Serial.print(xPortGetFreeHeapSize());Serial.println(" bytes");
 }
@@ -99,8 +100,9 @@ void setup()
 //  do NON BLOCKING stuff
 void timerMotionCallback(TimerHandle_t xTimer)
 {
-  if (TimerMotionIsEnable())
+  if (timerMotion.IsEnable())
   {
+    timerMotion.Running(true);
     // Odometry Update
     if (!simulation)
     {
@@ -151,6 +153,81 @@ void timerMotionCallback(TimerHandle_t xTimer)
     // Motor update => in local robot reference
     motor.Update(linear.velocity_command, linear.direction, angular.velocity_command);
   }
+  
+  timerMotion.Running(false);
+}
+
+//******************************************************* TASK => LIDAR *************************************************************** */
+//  do NON BLOCKING stuff
+void TaskLidar(void *pvParameters)
+{
+  Serial.println("Start TaskLidar");
+  SERIAL_LIDAR.begin(230400, SERIAL_8N1, RX1, TX1);
+
+  unsigned char trame[7];
+  uint16_t cursor = 0;
+
+  while (1)
+  {
+    PoseF p = robot.GetPoseF();
+    // Starting char : '!'
+    SERIAL_LIDAR.write(0x21);
+
+    // Robot X
+    SERIAL_LIDAR.write((int)p.x % 256);
+    SERIAL_LIDAR.write((int)p.x >> 8);
+
+    // Robot Y
+    SERIAL_LIDAR.write((int)p.y % 256);
+    SERIAL_LIDAR.write((int)p.y >> 8);
+
+    // Robot Angle * 100
+    int angle = (int)(degrees(p.h) * 100);
+    SERIAL_LIDAR.write(angle % 256);
+    SERIAL_LIDAR.write(angle >> 8);
+
+    // Ending char : '\n'
+    SERIAL_LIDAR.write(0x0A);
+    //println("Lidar sent : ", p);
+
+    while (SERIAL_LIDAR.available())
+    {
+      char data = SERIAL_LIDAR.read();
+
+      if (data == 0x21 && cursor == 0)
+      {
+        trame[cursor++] = data;
+      }
+      else if (cursor > 0)
+      {
+        trame[cursor++] = data;
+        if (cursor >= 7)
+        {
+          if (data == 0x0A)
+          {
+            Point p;
+            int header = trame[0];
+            int num = trame[1];
+            p.x = trame[3] << 8 | trame[2];
+            p.y = trame[5] << 8 | trame[4];
+            int footer = trame[6];
+            // if(num>=0 && num<MAX_OBSTACLE && IsInMap(p))
+            //     Add_Obstacle_Cart(num, p.x, p.y);
+            if (p.x != 0 && p.y != 0)
+            {
+              print("Lidar received : ", num);
+              println(" ", p);
+            }
+            cursor = 0;
+            // break;
+          }
+          cursor = 0;
+        }
+      }
+    }
+    vTaskDelay(100);
+  }
+  Serial.println("End TaskLidar");
 }
 
 //******************************************************* LOOP *****************************************************************/
@@ -204,6 +281,7 @@ void loop()
     }
     else if (cmd.cmd == "GoToPose" && cmd.size == 3)
     {
+      // GoToPose:500;500;90
       // GoToPose:500;500;0
       // GoToPose:50;50;0
       // GoToPose:0;0;45
@@ -215,12 +293,14 @@ void loop()
       print(" y=", goTo.y);
       print(" h=", goTo.h);
       println();
-Trajectory::GoToPose(goTo.x, goTo.y, goTo.h, linear.speed_max, 0);
+      Trajectory::GoToPose(goTo.x, goTo.y, goTo.h, linear.speed_max, 0);
     }
     else if (cmd.cmd == "SetPose" && cmd.size == 3)
     {
+      // SetPose:2000:200:9000
       // SetPose:500;500;0
-      DisableTimerMotion();
+      // SetPose:1500;1000;0
+      timerMotion.WaitForDisable();
       goTo.x = cmd.data[0];
       goTo.y = cmd.data[1];
       goTo.h = radians(cmd.data[2]);
@@ -228,9 +308,9 @@ Trajectory::GoToPose(goTo.x, goTo.y, goTo.h, linear.speed_max, 0);
       print(" y=", goTo.y);
       print(" h=", goTo.h);
       println();
-robot.SetPose(goTo.x, goTo.y, goTo.h);
+      robot.SetPose(goTo.x, goTo.y, goTo.h);
       otos.SetPose(robot.x, robot.y, robot.h);
-      EnableTimerMotion();
+      timerMotion.Enable();
     }
     else if (cmd.cmd == "PF" && cmd.size == 1)
     {

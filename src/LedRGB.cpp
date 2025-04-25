@@ -12,19 +12,19 @@ void LedRGB::Initialisation(uint8_t numPixels, uint8_t pin, uint8_t brightness)
 
 void LedRGB::Update()
 {
-    //static int i = 0;
-    //if (i > color.capacity())
-    //    i = 0;
-    //pixels.fill(color[i++]);
+    static int i = 0;
+    if (i > color.capacity())
+        i = 0;
+    pixels.fill(color[i++]);
     pixels.show();
     // println("RGB Fill");
 }
 
 void LedRGB::HandleCommand(Command cmd)
 {
-    //if (cmd.cmd == "RGB")
+    // if (cmd.cmd == "RGB")
     //{
-        // RGB:0;0;0
+    //  RGB:0;0;0
     //    print("RGB : ", cmd.data[0]);
     //    print(" : ", cmd.data[1]);
     //    print(" : ", cmd.data[2]);
