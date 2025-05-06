@@ -73,7 +73,7 @@ uint32_t NodeItem::GetCost()
 /****************************************************************************************
 * Fonction : Get the F distance (Cost + Heuristic)
 ****************************************************************************************/
-uint32_t NodeItem::GetF()
+uint32_t NodeItem::GetF() const
 {
     return currentCost;
 }
@@ -81,7 +81,7 @@ uint32_t NodeItem::GetF()
 /****************************************************************************************
 * Fonction : Comparaison between 2 node by their Heuristic
 ****************************************************************************************/
-int8_t NodeItem::FCmp(NodeItem node)
+int8_t NodeItem::FCmp(NodeItem node) const
 {
   uint32_t nodeFp1 = GetF();
   uint32_t nodeFp2 = node.GetF();

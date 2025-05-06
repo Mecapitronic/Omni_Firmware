@@ -23,8 +23,8 @@ public:
     //void NodeNew(NodeItem * newNode);
     void SetParent(t_vertexID parentID, uint32_t parentCost);
     uint32_t GetCost();
-    uint32_t GetF();
-    int8_t FCmp(NodeItem node);
+    uint32_t GetF() const;
+    int8_t FCmp(NodeItem node) const;
     uint32_t CostWillBe();
     void ListGetPossibleNode(std::vector<NodeItem> &list);
 
