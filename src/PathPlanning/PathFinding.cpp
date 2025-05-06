@@ -237,13 +237,6 @@ void ListVertexPrint(std::vector<t_vertexID> &list, String str)
     }
 }
 
-template <typename T>
-void pop_front(std::vector<T> &vec)
-{
-    assert(!vec.empty());
-    vec.erase(vec.begin());
-}
-
 template <typename T, typename Pred>
 typename std::vector<T>::iterator insert_sorted(std::vector<T> &vec, T const &item, Pred pred)
 {

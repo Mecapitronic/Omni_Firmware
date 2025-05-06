@@ -611,15 +611,6 @@ void PrintVertex0()
 {
   String str = "VertexList:";
   String str01 = String(vertex[0].point.x) + ":" + String(vertex[0].point.y);
-  String str02 = ":" + String((uint64)(vertex[0].adjacency_active));
-  str = str + str01 + str02;
-  Printer::println(str);
-}
-
-void PrintVertex0()
-{
-  String str = "VertexList:";
-  String str01 = String(vertex[0].point.x) + ":" + String(vertex[0].point.y);
   String str02 = ":" + String((uint64_t)(vertex[0].adjacency_active));
   str = str + str01 + str02;
   Printer::println(str);

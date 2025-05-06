@@ -30,9 +30,6 @@ namespace PathFinding
     void NodePrint(NodeItem node, String str);
     void ListVertexPrint(std::vector<t_vertexID> &list, String str);
 
-    template <typename T>
-    void pop_front(std::vector<T> &vec);
-
     template <typename T, typename Pred>
     typename std::vector<T>::iterator insert_sorted(std::vector<T> &vec, T const &item, Pred pred);
 
