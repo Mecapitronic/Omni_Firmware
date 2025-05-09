@@ -351,6 +351,26 @@ void loop()
       Mapping::PrintSegmentList();
       Mapping::PrintCircleList();
     }
+    else if (cmd.cmd == "ObstacleList")
+    {
+      Obstacle::PrintObstacleList();
+    }
+    else if (cmd.cmd == "AddObstacle" && cmd.size == 3)
+    {
+      // AddObstacle:0:500:1000
+      int num = cmd.data[0];
+      Point p;
+      p.x = cmd.data[1];
+      p.y = cmd.data[2];
+      Obstacle::Add_Obstacle_Cart(num, p.x, p.y);
+      Obstacle::PrintObstacleList();
+    }
+    else if (cmd.cmd == "RemoveObstacle" && cmd.size == 1)
+    {
+      int num = cmd.data[0];
+      Obstacle::Add_Obstacle_Cart(num, 0, 0);
+      Obstacle::PrintObstacleList();
+    }
   }
 
   endChrono = micros();

@@ -218,4 +218,24 @@ void Add_Obstacle_Cart(uint8_t id, int x, int y)
         //obstacleFading[id] = 100;	
 	}
 }
+
+void PrintObstacleList()
+{
+	String str = "ObstacleList:";
+	String str01 = String(obstacle[0].p.x) + ":" + String(obstacle[0].p.y);
+	String str02 = ":" + String(obstacle[0].r);
+	str = str + str01 + str02;
+
+	for (size_t i = 1; i < Max_Circle; i++)
+	{
+		if (obstacle[i].p.x != 0 || obstacle[i].p.y != 0 || obstacle[i].r != 0)
+		{
+			String stri1 = String(obstacle[i].p.x) + ":" + String(obstacle[i].p.y);
+			String stri2 = ":" + String(obstacle[i].r);
+			str = str + ";" + stri1 + stri2;
+		}
+	}
+	// str = str + "|xy";
+	Printer::println(str);
+}
 }

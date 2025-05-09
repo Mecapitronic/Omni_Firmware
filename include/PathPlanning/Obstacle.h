@@ -39,6 +39,7 @@ Circle Circle_Obstacle_Cart(int x, int y);
 void Update_Obstacles(void);
 void Add_Obstacle_Polar(uint8_t id);
 void Add_Obstacle_Cart(uint8_t id, int x, int y);
+void PrintObstacleList();
 }
 #endif
 
