@@ -316,6 +316,15 @@ void loop()
       otos.SetPose(robot.x, robot.y, robot.h);
       timerMotion.Enable();
     }
+    else if (cmd.cmd == "UpdateMapping")
+    {
+      Mapping::Update_Start_Vertex((int16_t)robot.x, (int16_t)robot.y);
+      Mapping::Update_Passability_Graph();
+      Mapping::PrintVertexList();
+      Mapping::PrintSegmentList();
+      Mapping::PrintCircleList();
+      Obstacle::PrintObstacleList();
+    }
     else if (cmd.cmd == "PF" && cmd.size == 1)
     {
       // PathFinding
