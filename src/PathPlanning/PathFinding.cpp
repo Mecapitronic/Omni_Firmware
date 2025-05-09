@@ -21,6 +21,7 @@ boolean Path_Planning(void)
 {
   boolean result;
   //Update_Obstacles(BRAKE_DISTANCE);
+
   Update_Passability_Graph();
   result = Path_Finding();
   return result;
@@ -49,6 +50,7 @@ boolean Path_Finding()
 	// On ajoute le noeud à la liste open
 	open.push_back(startNode);
 	//ListAddFirst(open, startNode);
+	int iteration = 0;
 
 	while (open.size() > 0)
 	{		
@@ -59,6 +61,7 @@ boolean Path_Finding()
 		
 		if(PRINT_PF)
 		{
+			Printer::println("Iteration N° ", iteration++);
 			NodePrint(best, "best");
 		}
 		//ListGetFirstItem(open, &best);
@@ -108,7 +111,7 @@ boolean Path_Finding()
 		printf("\n");
 		ListPrint(open, "open");
 		ListPrint(close, "close");
-		ListPrint(listPossible, "best");
+		ListPrint(listPossible, "listPossible");
 		}
 
 		// on ajoute cette liste de nodes à open pour que les noeuds soient évalués
@@ -232,9 +235,8 @@ void ListVertexPrint(std::vector<t_vertexID> &list, String str)
     {
         printf("%d] ", i);
         printf("Vertex id:%d", list[i]);
-        printf("\n");
-        i++;
-    }
+		printf("\n");
+	}
 }
 
 template <typename T, typename Pred>
