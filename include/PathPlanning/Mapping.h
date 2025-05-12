@@ -18,9 +18,9 @@ constexpr size_t ROBOT_MARGIN = 30;   // mm
 constexpr size_t MAP_X_MAX = 3000; // Attention: format paysage
 constexpr size_t MAP_Y_MAX = 2000; // Updated to constexpr
 
-const uint8_t Max_Segment = 8;
-const uint8_t Max_Circle = 8;
-const uint8_t Max_Vertex = 24;
+constexpr uint8_t Max_Segment = 7;
+constexpr uint8_t Max_Circle = 10;
+constexpr uint8_t Max_Vertex = 23;
 
 /****************************************************************************************
 * Global Variables

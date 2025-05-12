@@ -23,18 +23,25 @@ void Initialize_Map(Team team)
 {
   if (team == Team::Jaune)
   {
-    //#include MAP_FILE_TEAM_A
     // Segment
-    segment[0] = Segment(Point(2350, 2000), Point(2350, 1800));
-    segment[1] = Segment(Point(2350, 1800), Point(1950, 1800));
-    segment[2] = Segment(Point(1950, 1800), Point(1950, 1550));
-    segment[3] = Segment(Point(1950, 1550), Point(1050, 1550));
-    segment[4] = Segment(Point(1050, 1550), Point(1050, 1800));
-    segment[5] = Segment(Point(1050, 1800), Point(650, 1800));
-    segment[6] = Segment(Point(650, 1800), Point(650, 2000));
+    segment[0] = Segment(Point(650, 2000), Point(650, 1800));
+    segment[1] = Segment(Point(650, 1800), Point(1050, 1800));
+    segment[2] = Segment(Point(1050, 1800), Point(1050, 1550));
+    segment[3] = Segment(Point(1050, 1550), Point(1950, 1550));
+    segment[4] = Segment(Point(1950, 1550), Point(1950, 1800));
+    segment[5] = Segment(Point(1950, 1800), Point(2350, 1800));
+    segment[6] = Segment(Point(2350, 1800), Point(2350, 2000));
     // Circle
-    circle[0] = Circle(1000, 1000, 300);
-    circle[1] = Circle(2000, 700, 300);
+    circle[0] = Circle(1100, 950, 200);
+    circle[1] = Circle(1900, 950, 200);
+    circle[2] = Circle(75, 1325, 200);
+    circle[3] = Circle(75, 400, 200);
+    circle[4] = Circle(2925, 1325, 200);
+    circle[5] = Circle(2925, 400, 200);
+    circle[6] = Circle(775, 250, 200);
+    circle[7] = Circle(2225, 250, 200);
+    circle[8] = Circle(825, 1725, 200);
+    circle[9] = Circle(2175, 1725, 200);
     // Vertex
     vertex[0].point = Point(0, 0);
     vertex[1].point = Point(1225, 225);
@@ -62,18 +69,25 @@ void Initialize_Map(Team team)
   }
   else if (team == Team::Bleu)
   {
-    //#include MAP_FILE_TEAM_B
     // Segment
-    segment[0] = Segment(Point(650, 2000), Point(650, 1800));
-    segment[1] = Segment(Point(650, 1800), Point(1050, 1800));
-    segment[2] = Segment(Point(1050, 1800), Point(1050, 1550));
-    segment[3] = Segment(Point(1050, 1550), Point(1950, 1550));
-    segment[4] = Segment(Point(1950, 1550), Point(1950, 1800));
-    segment[5] = Segment(Point(1950, 1800), Point(2350, 1800));
-    segment[6] = Segment(Point(2350, 1800), Point(2350, 2000));
+    segment[0] = Segment(Point(2350, 2000), Point(2350, 1800));
+    segment[1] = Segment(Point(2350, 1800), Point(1950, 1800));
+    segment[2] = Segment(Point(1950, 1800), Point(1950, 1550));
+    segment[3] = Segment(Point(1950, 1550), Point(1050, 1550));
+    segment[4] = Segment(Point(1050, 1550), Point(1050, 1800));
+    segment[5] = Segment(Point(1050, 1800), Point(650, 1800));
+    segment[6] = Segment(Point(650, 1800), Point(650, 2000));
     // Circle
-    circle[0] = Circle(1000, 1000, 300);
-    circle[1] = Circle(2000, 700, 300);
+    circle[0] = Circle(1900, 950, 200);
+    circle[1] = Circle(1100, 950, 200);
+    circle[2] = Circle(2925, 1325, 200);
+    circle[3] = Circle(2925, 400, 200);
+    circle[4] = Circle(75, 1325, 200);
+    circle[5] = Circle(75, 400, 200);
+    circle[6] = Circle(2225, 250, 200);
+    circle[7] = Circle(775, 250, 200);
+    circle[8] = Circle(2175, 1725, 200);
+    circle[9] = Circle(825, 1725, 200);
     // Vertex
     vertex[0].point = Point(0, 0);
     vertex[1].point = Point(1775, 225);
@@ -338,10 +352,10 @@ boolean Is_Passable_Point(Point *source, Point *target, uint16_t margin)
   for (i=0; i<Max_Circle; i++)
   {
     if (Is_NotNull_Circle(&circle[i]))
-  {
+    {
       if (Is_Circle_CloseTo_Segment(&circle[i], &edge, margin)) // check circle proximity
-      return false;
-  }
+        return false;
+    }
   }
   
   return true; // after all checking
