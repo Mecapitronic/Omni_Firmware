@@ -14,6 +14,8 @@ using namespace Printer;
 #include "Motion.h"
 #include "Trajectory.h"
 #include "LedRGB.h"
+#include "ihm.h"
+#include "match.h"
 
 #include "PathPlanning/PathFinding.h"
 
@@ -47,6 +49,7 @@ const bool simulation = false;
 extern TimerThread timerMotion;
 void timerMotionCallback(TimerHandle_t xTimer);
 
+void TaskMatch(void *pvParameters);
 void TaskLidar(void *pvParameters);
 
 #endif

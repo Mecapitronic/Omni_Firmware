@@ -5,7 +5,6 @@
  ****************************************************************************************/
 TimerThread timerMotion;
 
-LedRGB led_builtin;
 LedRGB led_ring;
 Motor motor;
 
@@ -16,9 +15,6 @@ Robot robot;
 // Robot adversaire;
 
 OpticalTrackingOdometrySensor otos;
-
-Team team;
-Mode mode;
 
 PoseF goTo = {500, 500, 0}; // TODO: pourquoi parfois il démarre en 0;0 ? c'est réinitialisé à 0 par défaut au lieu de ces valeurs ?
 
@@ -47,16 +43,8 @@ void setup()
   println("Robot Holonome Firmware");
 
   // Init IHM
-  pinMode(PIN_MODE, INPUT);
-  pinMode(PIN_TEAM, INPUT);
-  pinMode(PIN_BAU, INPUT);
-  pinMode(PIN_START, INPUT);
+  IHM::InitIHM();
 
-  // TODO : boucle de lecture dans la loop de démarrage
-  digitalRead(PIN_MODE) == LOW ? mode = Mode::Match : mode = Mode::Test;
-  digitalRead(PIN_TEAM) == LOW ? team = Team::Jaune : team = Team::Bleue;
-
-  led_builtin.Initialisation(1, PIN_RGB_LED);
   // led_ring.Initialisation(36, PIN_WS2812_LED);
 
   // Init sensors
@@ -83,7 +71,7 @@ void setup()
   Trajectory::Initialisation(&linear, &angular, &robot);
 
   // Init Path Planning
-  Mapping::Initialize_Map(team);
+  Mapping::Initialize_Map(IHM::team);
   Obstacle::Initialize_Obstacle();
   Mapping::Initialize_Passability_Graph();
   Mapping::Update_Start_Vertex((int16_t)robot.x, (int16_t)robot.y);
@@ -93,7 +81,8 @@ void setup()
   timerMotion = TimerThread(timerMotionCallback, "Timer Motion", (1000 * Motion::dt_motion) / portTICK_PERIOD_MS);
   timerMotion.Start();
 
-  TaskThread Task1 = TaskThread(TaskLidar, "TaskLidar", 20000, 1, 1);
+  TaskThread Task1 = TaskThread(TaskMatch, "TaskMatch", 20000, 1, 0);
+  TaskThread Task2 = TaskThread(TaskLidar, "TaskLidar", 20000, 1, 1);
 
   // Serial.print("FreeRTOS heap remaining ");Serial.print(xPortGetFreeHeapSize());Serial.println(" bytes");
 }
@@ -236,6 +225,9 @@ void TaskLidar(void *pvParameters)
 //******************************************************* LOOP *****************************************************************/
 void loop()
 {
+  Match::updateMatch();
+  IHM::UpdateBAU();
+  IHM::Blink();
   // delay(3000);
   // // Test trajectoires
   //  goTo.x = 500;
@@ -267,7 +259,6 @@ void loop()
   if (startChrono - rgbChrono > 1000 * 100) // Update every 100ms
   {
     rgbChrono = startChrono;
-    led_builtin.Update();
     // led_ring.Update();
   }
 
@@ -399,4 +390,56 @@ void loop()
     deltaChrono = 0;
   }
 }
+
+//******************************************************* TASK => MATCH *************************************************************** */
+// Note the 1 Tick delay, this is need  so the watchdog doesn't get confused
+void TaskMatch(void *pvParameters)
+{
+  int lastMatchTime = 0;
+  println("Start TaskMatch");
+  while (1)
+  {
+    // Attente du démarrage du match par la tirette
+    if (Match::matchState == State::MATCH_WAIT)
+    {
+      IHM::UpdateHMI();
+      // Update robot position
+      if (IHM::team == Team::Jaune)
+      {
+      }
+      else
+      {
+      }
+    }
+
+    // Match en cours
+    if (Match::matchState == State::MATCH_BEGIN)
+    {
+      // Countdown
+      if (lastMatchTime != (int)(Match::getMatchTimeSec()))
+      {
+        println("Match Time : ", (int)(Match::getMatchTimeSec()));
+        lastMatchTime = (int)(Match::getMatchTimeSec());
+      }
+    }
+
+    // Démarrage du robot
+    if (Match::matchState == State::MATCH_RUN)
+    {
+    }
+
+    // Arrêt du robot
+    if (Match::matchState == State::MATCH_STOP)
+    {
+      // Wait for end of match
+    }
+
+    // Fin du match
+    if (Match::matchState == State::MATCH_END)
+    {
+      IHM::useBlink = false;
+    }
+  }
+}
+
 //**************************************************************************************************************************/
