@@ -200,8 +200,7 @@ void TaskLidar(void *pvParameters)
             p.x = trame[3] << 8 | trame[2];
             p.y = trame[5] << 8 | trame[4];
             int footer = trame[6];
-            // if(num>=0 && num<MAX_OBSTACLE && IsInMap(p))
-            //     Add_Obstacle_Cart(num, p.x, p.y);
+            Obstacle::Add_Obstacle(num, p);
             if (p.x != 0 && p.y != 0)
             {
               print("Lidar received : ", num);
