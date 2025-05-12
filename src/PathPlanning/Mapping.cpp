@@ -59,7 +59,7 @@ void Initialize_Map(Team team)
     vertex[21].point = Point(2750, 1325);
     vertex[22].point = Point(2775, 875);
   }
-  else if (team == Team::Bleue)
+  else if (team == Team::Bleu)
   {
     //#include MAP_FILE_TEAM_B
     // Segment

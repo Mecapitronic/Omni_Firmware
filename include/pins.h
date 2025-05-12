@@ -44,8 +44,8 @@ constexpr size_t PIN_EN_MCU = 3;
 constexpr size_t PIN_RGB_LED = 38;
 constexpr size_t PIN_WS2812_LED = 12;
 
-//******************** Pins IN
-constexpr size_t PIN_MODE = 14;
+//******************** Pins IHM
+constexpr size_t PIN_SWITCH = 14;
 constexpr size_t PIN_TEAM = 13;
 constexpr size_t PIN_BAU = 15;
 constexpr size_t PIN_START = 16;

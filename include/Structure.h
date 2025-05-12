@@ -7,17 +7,25 @@
 #include "Structure_Helper.h"
 
 /****************************************************************************************
- * Constantes Génériques
+ * Enum Class
  ****************************************************************************************/
+// Bleu = 0
+// Jaune = 1
 enum class Team
 {
+  Bleu,
   Jaune,
-  Bleue
+  None
 };
-enum class Mode
+
+// WAIT BEGIN RUN STOP END
+enum class State
 {
-  Match,
-  Test
+  MATCH_WAIT,
+  MATCH_BEGIN,
+  MATCH_RUN,
+  MATCH_STOP,
+  MATCH_END
 };
 
 /*
