@@ -40,24 +40,24 @@ namespace Obstacle
 	/****************************************************************************************
 	 * Return true if the circle obstacle is considered false
 	 ****************************************************************************************/
-	boolean Is_False_Obstacle(Circle circle_obstacle)
+	boolean Is_False_Obstacle(Point obstacle_point)
 	{
 		if (false_obstacle_enable)
 		{
 			uint8_t i;
 			// check map border limits
-			if (circle_obstacle.p.x < OBSTACLE_MARGIN)
+			if (obstacle_point.x < OBSTACLE_MARGIN)
 				return true;
-			if (circle_obstacle.p.x > (MAP_X_MAX - OBSTACLE_MARGIN))
+			if (obstacle_point.x > (MAP_X_MAX - OBSTACLE_MARGIN))
 				return true;
-			if (circle_obstacle.p.y < OBSTACLE_MARGIN)
+			if (obstacle_point.y < OBSTACLE_MARGIN)
 				return true;
-			if (circle_obstacle.p.y > (MAP_Y_MAX - OBSTACLE_MARGIN))
+			if (obstacle_point.y > (MAP_Y_MAX - OBSTACLE_MARGIN))
 				return true;
 			// check some special point
 			for (i = 0; i < MAX_FALSE_OBSTACLE; i++)
 			{
-				if (Get_Distance_Point(&circle_obstacle.p, &false_obstacle[i].p) <= false_obstacle[i].r)
+				if (Get_Distance_Point(&obstacle_point, &false_obstacle[i].p) <= false_obstacle[i].r)
 					return true;
 			}
 		}
@@ -85,17 +85,16 @@ namespace Obstacle
 	{
 		if (obstacle_enable)
 		{
-			Circle circle_obstacle;
-			if (p.x == 0 && p.y == 0 || Is_False_Obstacle(circle_obstacle))
-				circle_obstacle = Circle(0, 0, 0);
+			if (p.x != 0 && p.y != 0 && Is_In_Map(p) && id >= 0 && id < MAX_OBSTACLE && !Is_False_Obstacle(p))
+			{
+				obstacle[id].p.x = p.x;
+				obstacle[id].p.y = p.y;
+				obstacle[id].r = OBSTACLE_RADIUS;
+			}
 			else
 			{
-				circle_obstacle.p.x = p.x;
-				circle_obstacle.p.y = p.y;
-				circle_obstacle.r = OBSTACLE_RADIUS;
+				obstacle[id] = Circle(0, 0, 0);
 			}
-			if (Is_In_Map(circle_obstacle.p) && id > 0 && id < MAX_OBSTACLE)
-				obstacle[id] = circle_obstacle;
 		}
 	}
 

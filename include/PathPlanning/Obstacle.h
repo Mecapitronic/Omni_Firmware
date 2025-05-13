@@ -30,7 +30,7 @@ namespace Obstacle
      ****************************************************************************************/
     void Initialize_Obstacle(void);
     boolean Is_Valid_Obstacle(uint8_t obstacleID);
-    boolean Is_False_Obstacle(Circle circle_obstacle);
+    boolean Is_False_Obstacle(Point obstacle_point);
     boolean Is_In_Map(Point p);
     void Add_Obstacle(uint8_t id, Point p);
     void PrintObstacleList();
