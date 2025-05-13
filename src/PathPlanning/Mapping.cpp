@@ -466,7 +466,7 @@ void Update_Passability_Robot(void)
   uint16_t margin = ROBOT_RADIUS + ROBOT_MARGIN;
   //TODO
   //vertex[0].point = robot.mm;
-  //vertex[0].adjacency_active = 0;  // clear list
+  vertex[0].adjacency_active = 0;  // clear list
   
   for (i=1; i<Max_Vertex; i++)
   {
@@ -477,9 +477,9 @@ void Update_Passability_Robot(void)
     else 
     {
       Clear_Adjacent(0, i);
+    }
   }
-  }
-  //vertex[0].adjacency_passive = vertex[0].adjacency_active; // backup list
+  vertex[0].adjacency_passive = vertex[0].adjacency_active; // backup list
 }
 
 /****************************************************************************************
@@ -621,6 +621,15 @@ void Update_Start_Vertex(int16_t x, int16_t y)
 {
   vertex[0].point.x = x; //robot.mm.x;
   vertex[0].point.y = y; //robot.mm.y;
+}
+
+void PrintVertex0()
+{
+  String str = "VertexList:";
+  String str01 = String(vertex[0].point.x) + ":" + String(vertex[0].point.y);
+  String str02 = ":" + String((uint64_t)(vertex[0].adjacency_active));
+  str = str + str01 + str02;
+  Printer::println(str);
 }
 
 void PrintVertexList()

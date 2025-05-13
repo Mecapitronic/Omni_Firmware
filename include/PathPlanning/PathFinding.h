@@ -3,11 +3,8 @@
 
 #include "Structure.h"
 #include "Mapping.h"
-#include "NodeList.h"
-#include "Node.h"
+#include "NodeItem.h"
 
-using namespace Node;
-using namespace NodeList;
 using namespace Mapping;
 
 // Timeout in millisecond
@@ -22,10 +19,20 @@ using namespace Mapping;
 namespace PathFinding
 {
     //t_vertexID *solution;
+    constexpr uint8_t LIST_LENGTH = Mapping::Max_Vertex;
+    constexpr bool PRINT_PF = true;
 
     boolean Path_Planning();
     boolean Path_Finding();
-    void PathFindingAddToOpen(std::array<t_node, LIST_LENGTH> &list);
+    void PathFindingAddToOpen(std::vector<NodeItem> &list);
+
+    void ListPrint(std::vector<NodeItem> &list, String str);
+    void NodePrint(NodeItem node, String str);
+    void ListVertexPrint(std::vector<t_vertexID> &list, String str);
+
+    template <typename T, typename Pred>
+    typename std::vector<T>::iterator insert_sorted(std::vector<T> &vec, T const &item, Pred pred);
+
 }
 #endif
 

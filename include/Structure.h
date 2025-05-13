@@ -1,8 +1,6 @@
 #ifndef STRUCTURE_H
 #define STRUCTURE_H
 
-#define SERIAL_PRINT // TODO : remove this line
-
 #include <Arduino.h>
 #include "Structure_Helper.h"
 
@@ -103,16 +101,16 @@ struct Circle
 typedef uint8_t t_vertexID;
 
 /****************************************************************************************
- * PathFinding
- ****************************************************************************************/
-struct t_node
-{
+* PathFinding
+****************************************************************************************/
+/*
+struct t_node{
   uint32_t currentCost;
   uint32_t parentCost;
   t_vertexID parentID;
   t_vertexID currentID;
 };
-
+*/
 /****************************************************************************************
  * STRATEGY
  ****************************************************************************************/

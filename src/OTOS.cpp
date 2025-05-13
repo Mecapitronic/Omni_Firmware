@@ -143,17 +143,19 @@ void OpticalTrackingOdometrySensor::Update()
         // If Velocity and Acceleration are not needed, use getPosition to decrease blocking time
         // currently blocking time of getPosVelAcc with 400 000 speed : 600µS
         error = myOtos.getPosVelAcc(myPosition, myVelocity, myAcceleration);
-        position.x = myPosition.x * 1000;
-        position.y = myPosition.y * 1000;
-        position.h = myPosition.h;
-        velocity.x = myVelocity.x * 1000;
-        velocity.y = myVelocity.y * 1000;
-        velocity.h = myVelocity.h;
-        acceleration.x = myAcceleration.x * 1000;
-        acceleration.y = myAcceleration.y * 1000;
-        acceleration.h = myAcceleration.h;
         if (error != 0)
+        {
             print("Error getPosVelAcc : ", error);
+            position.x = myPosition.x * 1000;
+            position.y = myPosition.y * 1000;
+            position.h = myPosition.h;
+            velocity.x = myVelocity.x * 1000;
+            velocity.y = myVelocity.y * 1000;
+            velocity.h = myVelocity.h;
+            acceleration.x = myAcceleration.x * 1000;
+            acceleration.y = myAcceleration.y * 1000;
+            acceleration.h = myAcceleration.h;
+        }
     }
 }
 

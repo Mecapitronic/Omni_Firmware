@@ -6,7 +6,7 @@
  ****************************************************************************************/
 #include "Structure.h"
 #include "Mapping.h"
-#include "Node.h"
+#include "NodeItem.h"
 
 /****************************************************************************************
  * Parameters
@@ -33,5 +33,6 @@ namespace Obstacle
     boolean Is_False_Obstacle(Circle circle_obstacle);
     boolean Is_In_Map(Point p);
     void Add_Obstacle(uint8_t id, Point p);
+    void PrintObstacleList();
 }
 #endif
