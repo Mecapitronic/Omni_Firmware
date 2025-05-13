@@ -84,6 +84,8 @@ void setup()
   TaskThread Task1 = TaskThread(TaskMatch, "TaskMatch", 20000, 1, 0);
   TaskThread Task2 = TaskThread(TaskLidar, "TaskLidar", 20000, 1, 1);
 
+  ESP32_Helper::HandleCommand(Command("UpdateMapping"));
+
   // Serial.print("FreeRTOS heap remaining ");Serial.print(xPortGetFreeHeapSize());Serial.println(" bytes");
 }
 
@@ -314,6 +316,8 @@ void loop()
       Mapping::PrintSegmentList();
       Mapping::PrintCircleList();
       Obstacle::PrintObstacleList();
+      println("RobotRadius:", ROBOT_RADIUS);
+      println("RobotMargin:", ROBOT_MARGIN);
     }
     else if (cmd.cmd == "PF" && cmd.size == 1)
     {

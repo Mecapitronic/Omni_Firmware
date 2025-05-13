@@ -19,7 +19,7 @@ constexpr size_t MAP_X_MAX = 3000; // Attention: format paysage
 constexpr size_t MAP_Y_MAX = 2000; // Updated to constexpr
 
 constexpr uint8_t Max_Segment = 7;
-constexpr uint8_t Max_Circle = 10;
+constexpr uint8_t Max_Circle = 16;
 constexpr uint8_t Max_Vertex = 23;
 
 /****************************************************************************************

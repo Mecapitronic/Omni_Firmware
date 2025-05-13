@@ -32,16 +32,22 @@ void Initialize_Map(Team team)
     segment[5] = Segment(Point(1950, 1800), Point(2350, 1800));
     segment[6] = Segment(Point(2350, 1800), Point(2350, 2000));
     // Circle
-    circle[0] = Circle(1100, 950, 200);
-    circle[1] = Circle(1900, 950, 200);
-    circle[2] = Circle(75, 1325, 200);
-    circle[3] = Circle(75, 400, 200);
-    circle[4] = Circle(2925, 1325, 200);
-    circle[5] = Circle(2925, 400, 200);
-    circle[6] = Circle(775, 250, 200);
-    circle[7] = Circle(2225, 250, 200);
-    circle[8] = Circle(825, 1725, 200);
-    circle[9] = Circle(2175, 1725, 200);
+    circle[0] = Circle(950, 950, 100);
+    circle[1] = Circle(1050, 950, 100);
+    circle[2] = Circle(1150, 950, 100);
+    circle[3] = Circle(1250, 950, 100);
+    circle[4] = Circle(1750, 950, 100);
+    circle[5] = Circle(1850, 950, 100);
+    circle[6] = Circle(1950, 950, 100);
+    circle[7] = Circle(2050, 950, 100);
+    circle[8] = Circle(75, 1325, 400);
+    circle[9] = Circle(75, 400, 400);
+    circle[10] = Circle(2925, 1325, 400);
+    circle[11] = Circle(2925, 400, 400);
+    circle[12] = Circle(775, 250, 400);
+    circle[13] = Circle(2225, 250, 400);
+    circle[14] = Circle(825, 1725, 400);
+    circle[15] = Circle(2175, 1725, 400);
     // Vertex
     vertex[0].point = Point(0, 0);
     vertex[1].point = Point(1225, 225);
@@ -78,16 +84,22 @@ void Initialize_Map(Team team)
     segment[5] = Segment(Point(1050, 1800), Point(650, 1800));
     segment[6] = Segment(Point(650, 1800), Point(650, 2000));
     // Circle
-    circle[0] = Circle(1900, 950, 200);
-    circle[1] = Circle(1100, 950, 200);
-    circle[2] = Circle(2925, 1325, 200);
-    circle[3] = Circle(2925, 400, 200);
-    circle[4] = Circle(75, 1325, 200);
-    circle[5] = Circle(75, 400, 200);
-    circle[6] = Circle(2225, 250, 200);
-    circle[7] = Circle(775, 250, 200);
-    circle[8] = Circle(2175, 1725, 200);
-    circle[9] = Circle(825, 1725, 200);
+    circle[0] = Circle(2050, 950, 100);
+    circle[1] = Circle(1950, 950, 100);
+    circle[2] = Circle(1850, 950, 100);
+    circle[3] = Circle(1750, 950, 100);
+    circle[4] = Circle(1250, 950, 100);
+    circle[5] = Circle(1150, 950, 100);
+    circle[6] = Circle(1050, 950, 100);
+    circle[7] = Circle(950, 950, 100);
+    circle[8] = Circle(2925, 1325, 400);
+    circle[9] = Circle(2925, 400, 400);
+    circle[10] = Circle(75, 1325, 400);
+    circle[11] = Circle(75, 400, 400);
+    circle[12] = Circle(2225, 250, 400);
+    circle[13] = Circle(775, 250, 400);
+    circle[14] = Circle(2175, 1725, 400);
+    circle[15] = Circle(825, 1725, 400);
     // Vertex
     vertex[0].point = Point(0, 0);
     vertex[1].point = Point(1775, 225);
