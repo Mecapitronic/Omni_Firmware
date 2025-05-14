@@ -20,7 +20,7 @@ namespace PathFinding
 {
     //t_vertexID *solution;
     constexpr uint8_t LIST_LENGTH = Mapping::Max_Vertex;
-    constexpr bool PRINT_PF = true;
+    constexpr bool PRINT_PF = false;
 
     boolean Path_Planning();
     boolean Path_Finding();

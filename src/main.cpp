@@ -226,26 +226,27 @@ void TaskLidar(void *pvParameters)
 //******************************************************* LOOP *****************************************************************/
 void loop()
 {
+  startChrono = micros();
   Match::updateMatch();
   IHM::UpdateBAU();
   IHM::Blink();
-  // delay(3000);
-  // // Test trajectoires
-  //  goTo.x = 500;
-  //  goTo.y = 1000; // avance 500
-  //  goTo.h = 0;
-  //  SetRobotPosition(goTo.x, goTo.y, goTo.h);
-  //  delay(5000);
-  // //while(linear.isRunning || angular.isRunning) ;//doWhileWaiting();
+  // functionChrono(1);
+  //  functionChrono(1000);
+  //   delay(3000);
+  //   // Test trajectoires
+  //    goTo.x = 500;
+  //    goTo.y = 1000; // avance 500
+  //    goTo.h = 0;
+  //    SetRobotPosition(goTo.x, goTo.y, goTo.h);
+  //    delay(5000);
+  //   //while(linear.isRunning || angular.isRunning) ;//doWhileWaiting();
 
-  startChrono = micros();
-
-  if (startChrono - teleplotChrono > 1000 * 1000) // Update every 100ms
+  if (startChrono - teleplotChrono > 1000 * 10) // Update time
   {
     teleplotChrono = startChrono;
     teleplot("Position", robot);
     teleplot("Orient", degrees(robot.h));
-    Mapping::PrintVertex0();
+
     //// teleplot("Direction", linear.direction);
     // println(">fixeScale:0:0;0:2000;3000:2000;3000:0;|xy");
     //// otos.Teleplot();
@@ -260,6 +261,10 @@ void loop()
   if (startChrono - rgbChrono > 1000 * 100) // Update every 100ms
   {
     rgbChrono = startChrono;
+    Mapping::Update_Start_Vertex((int16_t)robot.x, (int16_t)robot.y);
+    Mapping::Update_Passability_Graph();
+    // Mapping::PrintVertex0();
+    Mapping::PrintVertexList();
     // led_ring.Update();
   }
 
@@ -358,9 +363,9 @@ void loop()
     {
       Obstacle::PrintObstacleList();
     }
-    else if (cmd.cmd == "AddObstacle" && cmd.size == 3)
+    else if (cmd.cmd == "AddObs" && cmd.size == 3)
     {
-      // AddObstacle:0:500:1000
+      // AddObs:0:500:1000
       int num = cmd.data[0];
       Point p;
       p.x = cmd.data[1];
@@ -382,13 +387,11 @@ void loop()
 
   if (nbrLoop == 1)
   {
-    // Serial.print(deltaChrono);
-    // Serial.println(" µs/func (1)");
+    println("Chrono : ", (float)deltaChrono, " µs/func (1)");
   }
   if (nbrLoop >= 1000)
   {
-    // Serial.print(deltaChrono/1000);
-    // Serial.println(" µs/func (1000)");
+    println("Chrono : ", (float)deltaChrono / 1000, " µs/func (1000)");
     nbrLoop = 0;
     deltaChrono = 0;
   }
@@ -446,3 +449,37 @@ void TaskMatch(void *pvParameters)
 }
 
 //**************************************************************************************************************************/
+
+void functionChrono(int nbrLoop)
+{
+  unsigned long startChrono = micros();
+  for (int i = 0; i < nbrLoop; i++)
+  {
+    // function or code to loop
+    // loop();
+    static int end_vertex = 1;
+    Mapping::Set_End_Vertex(end_vertex);
+    Mapping::Update_Start_Vertex((int16_t)robot.x, (int16_t)robot.y);
+    Mapping::Update_Passability_Graph();
+    PathFinding::Path_Planning();
+    end_vertex++;
+    if (end_vertex >= Max_Vertex)
+      end_vertex = 1;
+  }
+  unsigned long endChrono = micros();
+  unsigned long deltaChrono = endChrono - startChrono;
+
+  unsigned long chrono = deltaChrono / nbrLoop;
+  Serial.print("Chrono from ");
+  Serial.print(nbrLoop);
+  Serial.print(" loop is : ");
+  Serial.print(deltaChrono);
+  Serial.print(" µs total or ");
+  Serial.print(deltaChrono / 1000);
+  Serial.print(" ms total.    ");
+  Serial.print(chrono);
+  Serial.print(" µs/func or ");
+  Serial.print(chrono / 1000);
+  Serial.print(" ms/func.");
+  Serial.println();
+}

@@ -13,13 +13,13 @@ namespace Mapping
 * Parameters
 ****************************************************************************************/
 constexpr size_t ROBOT_RADIUS = 135;  // mm
-constexpr size_t ROBOT_MARGIN = 30;   // mm
+constexpr size_t ROBOT_MARGIN = 20;   // mm
 
 constexpr size_t MAP_X_MAX = 3000; // Attention: format paysage
 constexpr size_t MAP_Y_MAX = 2000; // Updated to constexpr
 
-constexpr uint8_t Max_Segment = 7;
-constexpr uint8_t Max_Circle = 16;
+constexpr uint8_t Max_Segment = 5;
+constexpr uint8_t Max_Circle = 12;
 constexpr uint8_t Max_Vertex = 23;
 
 /****************************************************************************************

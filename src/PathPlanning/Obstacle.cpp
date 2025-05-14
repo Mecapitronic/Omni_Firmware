@@ -24,6 +24,10 @@ namespace Obstacle
 		int i = 0;
 		// false_obstacle[i++] = Circle(0, 0, 0 + OBSTACLE_MARGIN);
 		// false_obstacle_enable = true;
+		for (size_t i = 0; i < MAX_OBSTACLE; i++)
+		{
+			obstacle[i] = Circle(0, 0, 0);
+		}
 
 		// enable obstacle detection
 		obstacle_enable = true;
@@ -105,7 +109,7 @@ namespace Obstacle
 		String str02 = ":" + String(obstacle[0].r);
 		str = str + str01 + str02;
 
-		for (size_t i = 1; i < Max_Circle; i++)
+		for (size_t i = 1; i < MAX_OBSTACLE; i++)
 		{
 			if (obstacle[i].p.x != 0 || obstacle[i].p.y != 0 || obstacle[i].r != 0)
 			{

@@ -52,4 +52,5 @@ void timerMotionCallback(TimerHandle_t xTimer);
 void TaskMatch(void *pvParameters);
 void TaskLidar(void *pvParameters);
 
+void functionChrono(int nbrLoop = 1);
 #endif

@@ -94,7 +94,8 @@ boolean Path_Finding()
 			}
 			if(PRINT_PF)
 			{
-			ListVertexPrint(solution, "solution");
+				printf("Solution founded !\n");
+				ListVertexPrint(solution, "solution");
 			}
 			return true;
 		}
