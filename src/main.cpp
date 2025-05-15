@@ -84,6 +84,7 @@ void setup()
   TaskThread Task1 = TaskThread(TaskMatch, "TaskMatch", 20000, 1, 0);
   TaskThread Task2 = TaskThread(TaskLidar, "TaskLidar", 20000, 1, 1);
 
+  // Send to PC all the mapping data
   ESP32_Helper::HandleCommand(Command("UpdateMapping"));
 
   // Serial.print("FreeRTOS heap remaining ");Serial.print(xPortGetFreeHeapSize());Serial.println(" bytes");
@@ -205,7 +206,9 @@ void TaskLidar(void *pvParameters)
             p.x = trame[3] << 8 | trame[2];
             p.y = trame[5] << 8 | trame[4];
             int footer = trame[6];
-            Obstacle::Add_Obstacle(num, p);
+            // I use the radius as the id number
+            Obstacle::queueObstacle.Send(Circle(p, num));
+            // Obstacle::Add_Obstacle(num, p);
             if (p.x != 0 && p.y != 0)
             {
               print("Lidar received : ", num);
@@ -218,7 +221,7 @@ void TaskLidar(void *pvParameters)
         }
       }
     }
-    vTaskDelay(100);
+    vTaskDelay(10);
   }
   Serial.println("End TaskLidar");
 }
@@ -370,13 +373,17 @@ void loop()
       Point p;
       p.x = cmd.data[1];
       p.y = cmd.data[2];
-      Obstacle::Add_Obstacle(num, p);
+      Obstacle::queueObstacle.Send(Circle(p, num));
+      // Obstacle::Add_Obstacle(num, p);
+      Mapping::Update_Passability_Obstacle();
       Obstacle::PrintObstacleList();
     }
     else if (cmd.cmd == "RemoveObstacle" && cmd.size == 1)
     {
       int num = cmd.data[0];
-      Obstacle::Add_Obstacle(num, {0, 0});
+      Obstacle::queueObstacle.Send(Circle(0, 0, num));
+      // Obstacle::Add_Obstacle(num, {0, 0});
+      Mapping::Update_Passability_Obstacle();
       Obstacle::PrintObstacleList();
     }
   }

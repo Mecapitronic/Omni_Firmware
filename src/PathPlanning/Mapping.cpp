@@ -498,6 +498,14 @@ void Update_Passability_Obstacle(void)
   uint16_t margin = ROBOT_RADIUS + ROBOT_MARGIN; 
   Segment edge;
 
+  while (Obstacle::HasQueueObstacle())
+  {
+    Circle circle = Obstacle::GetQueueObstacle();
+
+    // I use the radius as the id number
+    Obstacle::Add_Obstacle(circle.r, circle.p);
+  }
+
   for (i=1; i<Max_Vertex; i++)
   {
     vertex[i].adjacency_active = vertex[i].adjacency_passive;  // retrieve list without obstacle

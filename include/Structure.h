@@ -84,18 +84,9 @@ struct Circle
 {
   Point p;
   uint16_t r;
-  Circle()
-  {
-    p.x = 0;
-    p.y = 0;
-    r = 0;
-  }
-  Circle(int32_t _x, int32_t _y, uint16_t _r)
-  {
-    p.x = _x;
-    p.y = _y;
-    r = _r;
-  }
+  Circle() : p{0, 0}, r(0) {}
+  Circle(int16_t _x, int16_t _y, uint16_t _r = 0) : p{_x, _y}, r(_r) {}
+  Circle(Point _p, uint16_t _r = 0) : p(_p), r(_r) {}
 };
 
 typedef uint8_t t_vertexID;
