@@ -87,7 +87,7 @@ void setup()
   // Send to PC all the mapping data
   ESP32_Helper::HandleCommand(Command("UpdateMapping"));
 
-  // Serial.print("FreeRTOS heap remaining ");Serial.print(xPortGetFreeHeapSize());Serial.println(" bytes");
+  // print("FreeRTOS heap remaining ");print(xPortGetFreeHeapSize());println(" bytes");
 }
 
 //******************************************************* TIMER 5ms => MOTION **************************************************************** */
@@ -156,8 +156,9 @@ void timerMotionCallback(TimerHandle_t xTimer)
 //  do NON BLOCKING stuff
 void TaskLidar(void *pvParameters)
 {
-  Serial.println("Start TaskLidar");
-  SERIAL_LIDAR.begin(230400, SERIAL_8N1, RX1, TX1);
+  println("Start TaskLidar");
+  SERIAL_LIDAR.setPins(SOC_RX0, SOC_TX0);
+  SERIAL_LIDAR.begin(230400);
 
   unsigned char trame[7];
   uint16_t cursor = 0;
@@ -223,7 +224,7 @@ void TaskLidar(void *pvParameters)
     }
     vTaskDelay(10);
   }
-  Serial.println("End TaskLidar");
+  println("End TaskLidar");
 }
 
 //******************************************************* LOOP *****************************************************************/
@@ -477,16 +478,10 @@ void functionChrono(int nbrLoop)
   unsigned long deltaChrono = endChrono - startChrono;
 
   unsigned long chrono = deltaChrono / nbrLoop;
-  Serial.print("Chrono from ");
-  Serial.print(nbrLoop);
-  Serial.print(" loop is : ");
-  Serial.print(deltaChrono);
-  Serial.print(" µs total or ");
-  Serial.print(deltaChrono / 1000);
-  Serial.print(" ms total.    ");
-  Serial.print(chrono);
-  Serial.print(" µs/func or ");
-  Serial.print(chrono / 1000);
-  Serial.print(" ms/func.");
-  Serial.println();
+  print("Chrono from ", nbrLoop, " loop");
+  print(" is : ", deltaChrono, " µs total");
+  print(" = ", deltaChrono / 1000, " ms total.");
+  print(" or ", chrono, " µs/func ");
+  print(" = ", chrono / 1000, " ms/func.");
+  println();
 }

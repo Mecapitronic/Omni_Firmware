@@ -9,17 +9,44 @@ constexpr size_t PIN_10 = 10;
 constexpr size_t PIN_11 = 11;
 
 //******************** Pins UART - Serial
-/* Do we need this ?
+
+// Serial over USB
+#define SERIAL_DEBUG Serial
+
+// Serial 0
+//  We don't need this redefinition of pin, it's just for information
 #undef SOC_RX0
 #define SOC_RX0 44
 #undef SOC_TX0
 #define SOC_TX0 43
-*/
+
+#define SERIAL_LIDAR Serial0
+
+// Serial 1
+#ifdef RX1
 #undef RX1
+#endif
 #define RX1 18
+
+#ifdef TX1
 #undef TX1
+#endif
 #define TX1 17
-#define SERIAL_LIDAR Serial1
+
+#define SERIAL_XX Serial1
+
+// Serial 2
+// #ifdef RX2
+// #undef RX2
+// #endif
+// #define RX2 xx
+
+// #ifdef TX2
+// #undef TX2
+// #endif
+// #define TX2 xx
+
+// #define SERIAL_XX Serial2
 
 //******************** Pins Motors - Drivers
 constexpr size_t PIN_STEP_M1 = 7;
