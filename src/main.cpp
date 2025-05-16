@@ -458,6 +458,7 @@ void TaskMatch(void *pvParameters)
     {
       IHM::useBlink = false;
     }
+    vTaskDelay(1);
   }
 }
 
