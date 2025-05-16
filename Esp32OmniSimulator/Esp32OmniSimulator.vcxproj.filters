@@ -21,6 +21,18 @@
     <Filter Include="framework-arduinoespressif32">
       <UniqueIdentifier>{e0d68cf9-e62e-4251-a24b-ca2814c4e8cd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="framework-arduinoespressif32\soc">
+      <UniqueIdentifier>{ab4cc75a-4b4e-4289-bea4-7912f0790ae3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="framework-arduinoespressif32\driver">
+      <UniqueIdentifier>{ba6f6e53-8251-4720-99a8-3a418690a617}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\PathPlanning">
+      <UniqueIdentifier>{dc741ba6-f199-4add-a968-6e92ed9234e1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\PathPlanning">
+      <UniqueIdentifier>{b79fc372-6e73-4776-938b-cc4fcf0f6a52}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Esp32OmniSimulator.cpp" />
@@ -58,6 +70,42 @@
       <Filter>framework-arduinoespressif32</Filter>
     </ClCompile>
     <ClCompile Include="framework-arduinoespressif32\Serial.cpp">
+      <Filter>framework-arduinoespressif32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\GeoMathTools.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\LedRGB.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Motion.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Motor.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\OTOS.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Trajectory.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\PathPlanning\Mapping.cpp">
+      <Filter>src\PathPlanning</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\PathPlanning\Node.cpp">
+      <Filter>src\PathPlanning</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\PathPlanning\NodeList.cpp">
+      <Filter>src\PathPlanning</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\PathPlanning\Obstacle.cpp">
+      <Filter>src\PathPlanning</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\PathPlanning\PathFinding.cpp">
+      <Filter>src\PathPlanning</Filter>
+    </ClCompile>
+    <ClCompile Include="framework-arduinoespressif32\Wire.cpp">
       <Filter>framework-arduinoespressif32</Filter>
     </ClCompile>
   </ItemGroup>
@@ -128,6 +176,108 @@
     </ClInclude>
     <ClInclude Include="framework-arduinoespressif32\Serial.h">
       <Filter>framework-arduinoespressif32</Filter>
+    </ClInclude>
+    <ClInclude Include="framework-arduinoespressif32\esp_arduino_version.h">
+      <Filter>framework-arduinoespressif32</Filter>
+    </ClInclude>
+    <ClInclude Include="framework-arduinoespressif32\pins_arduino.h">
+      <Filter>framework-arduinoespressif32</Filter>
+    </ClInclude>
+    <ClInclude Include="framework-arduinoespressif32\cpu_caps.h">
+      <Filter>framework-arduinoespressif32\soc</Filter>
+    </ClInclude>
+    <ClInclude Include="framework-arduinoespressif32\i2c_caps.h">
+      <Filter>framework-arduinoespressif32\soc</Filter>
+    </ClInclude>
+    <ClInclude Include="framework-arduinoespressif32\ledc_caps.h">
+      <Filter>framework-arduinoespressif32\soc</Filter>
+    </ClInclude>
+    <ClInclude Include="framework-arduinoespressif32\mpu_caps.h">
+      <Filter>framework-arduinoespressif32\soc</Filter>
+    </ClInclude>
+    <ClInclude Include="framework-arduinoespressif32\pcnt_caps.h">
+      <Filter>framework-arduinoespressif32\soc</Filter>
+    </ClInclude>
+    <ClInclude Include="framework-arduinoespressif32\soc_caps.h">
+      <Filter>framework-arduinoespressif32\soc</Filter>
+    </ClInclude>
+    <ClInclude Include="framework-arduinoespressif32\twai_caps.h">
+      <Filter>framework-arduinoespressif32\soc</Filter>
+    </ClInclude>
+    <ClInclude Include="framework-arduinoespressif32\usb_caps.h">
+      <Filter>framework-arduinoespressif32\soc</Filter>
+    </ClInclude>
+    <ClInclude Include="framework-arduinoespressif32\brownout_caps.h">
+      <Filter>framework-arduinoespressif32\soc</Filter>
+    </ClInclude>
+    <ClInclude Include="framework-arduinoespressif32\sigmadelta_caps.h">
+      <Filter>framework-arduinoespressif32\soc</Filter>
+    </ClInclude>
+    <ClInclude Include="framework-arduinoespressif32\Wire.h">
+      <Filter>framework-arduinoespressif32</Filter>
+    </ClInclude>
+    <ClInclude Include="framework-arduinoespressif32\SparkFun Qwiic OTOS Arduino Library\SparkFun_Qwiic_OTOS_Arduino_Library.h">
+      <Filter>framework-arduinoespressif32</Filter>
+    </ClInclude>
+    <ClInclude Include="framework-arduinoespressif32\sfDevOTOS.h">
+      <Filter>framework-arduinoespressif32</Filter>
+    </ClInclude>
+    <ClInclude Include="framework-arduinoespressif32\ESP32_FastPWM.h">
+      <Filter>framework-arduinoespressif32</Filter>
+    </ClInclude>
+    <ClInclude Include="framework-arduinoespressif32\PWM_Generic_Debug.h">
+      <Filter>framework-arduinoespressif32</Filter>
+    </ClInclude>
+    <ClInclude Include="framework-arduinoespressif32\driver\ledc.h">
+      <Filter>framework-arduinoespressif32\driver</Filter>
+    </ClInclude>
+    <ClInclude Include="framework-arduinoespressif32\driver\ledc_types.h">
+      <Filter>framework-arduinoespressif32\driver</Filter>
+    </ClInclude>
+    <ClInclude Include="framework-arduinoespressif32\driver\esp32-hal-ledc.h">
+      <Filter>framework-arduinoespressif32\driver</Filter>
+    </ClInclude>
+    <ClInclude Include="framework-arduinoespressif32\Adafruit_NeoPixel.h">
+      <Filter>framework-arduinoespressif32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\GeoMathTools.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\LedRGB.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Motion.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Motor.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\OTOS.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\pins.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Structure.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Trajectory.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\PathPlanning\Mapping.h">
+      <Filter>include\PathPlanning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\PathPlanning\Node.h">
+      <Filter>include\PathPlanning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\PathPlanning\NodeList.h">
+      <Filter>include\PathPlanning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\PathPlanning\Obstacle.h">
+      <Filter>include\PathPlanning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\PathPlanning\PathFinding.h">
+      <Filter>include\PathPlanning</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

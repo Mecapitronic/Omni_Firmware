@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#pragma once
+#ifndef ESP_IDF_VERSION_H
+#define ESP_IDF_VERSION_H
+
 
 #ifdef __cplusplus
 extern "C" {
@@ -53,10 +55,15 @@ extern "C" {
  *
  * @return constant string from IDF_VER
  */
-const char* esp_get_idf_version(void);
+    inline const char* esp_get_idf_version(void) {
+        return "4.4.7";
+    };
 
 #endif
 
 #ifdef __cplusplus
 }
 #endif
+
+
+#endif // !ESP_IDF_VERSION_H
