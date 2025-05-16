@@ -16,6 +16,7 @@ using namespace Printer;
 #include "LedRGB.h"
 #include "ihm.h"
 #include "match.h"
+#include "Servo.h"
 
 #include "PathPlanning/PathFinding.h"
 

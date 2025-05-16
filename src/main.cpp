@@ -45,6 +45,8 @@ void setup()
   // Init IHM
   IHM::InitIHM();
 
+  ServoAX12::Initialisation();
+
   // led_ring.Initialisation(36, PIN_WS2812_LED);
 
   // Init sensors
@@ -280,6 +282,7 @@ void loop()
 
     otos.HandleCommand(cmd);
     motor.HandleCommand(cmd);
+    ServoAX12::HandleCommand(cmd);
 
     if (cmd.cmd == "Help")
     {

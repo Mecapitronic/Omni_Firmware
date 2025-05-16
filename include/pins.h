@@ -37,31 +37,12 @@ constexpr size_t TX_LIDAR = 20;
 #error "USB Serial not working"
 #endif
 
-// Serial 1
-#ifdef RX1
+//******************** Pins UART - Serial 1 Servo Dxl
 #undef RX1
-#endif
-#define RX1 18
-
-#ifdef TX1
 #undef TX1
-#endif
-#define TX1 17
-
-#define SERIAL_XX Serial1
-
-// Serial 2
-// #ifdef RX2
-// #undef RX2
-// #endif
-// #define RX2 xx
-
-// #ifdef TX2
-// #undef TX2
-// #endif
-// #define TX2 xx
-
-// #define SERIAL_XX Serial2
+constexpr size_t RX_SERVO = 18;
+constexpr size_t TX_SERVO = 17;
+#define SERIAL_SERVO Serial1
 
 //******************** Pins Motors - Drivers
 constexpr size_t PIN_STEP_M1 = 7;
@@ -82,6 +63,7 @@ constexpr size_t PIN_EN_MCU = 3;
 #undef SCL
 #define SCL 9
 */
+
 //******************** Pins LED - RGB
 constexpr size_t PIN_RGB_LED = 38;
 constexpr size_t PIN_WS2812_LED = 12;
@@ -91,5 +73,8 @@ constexpr size_t PIN_SWITCH = 14;
 constexpr size_t PIN_TEAM = 13;
 constexpr size_t PIN_BAU = 15;
 constexpr size_t PIN_START = 16;
+
+//******************** Pins SERVO
+constexpr size_t PIN_SERVO_DIR = 10;
 
 #endif
