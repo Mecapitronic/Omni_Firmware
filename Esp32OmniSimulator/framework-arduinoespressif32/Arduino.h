@@ -1,11 +1,18 @@
 #ifndef Arduino_h
 #define Arduino_h
 
+#define ARDUINO_USB_MODE 1
+#define ARDUINO_USB_CDC_ON_BOOT 1
+#define SIMULATOR
+
 #include <Windows.h>
 #include <chrono>
 
 #include "Serial.h"
 #include "WString.h"
+#include <pins_arduino.h>
+
+typedef uint32_t TickType_t;
 
 #define PI 3.1415926535897932384626433832795
 #define HALF_PI 1.5707963267948966192313216916398
@@ -13,6 +20,27 @@
 #define DEG_TO_RAD 0.017453292519943295769236907684886
 #define RAD_TO_DEG 57.295779513082320876798154814105
 // #define EULER 2.718281828459045235360287471352
+
+#define ARDUINO_BOARD "Visual Studio Simulator"
+
+#define F_CPU 240000000L
+
+#define CONFIG_FREERTOS_HZ  1000
+#define configTICK_RATE_HZ  ( CONFIG_FREERTOS_HZ )
+#define portTICK_PERIOD_MS  ( ( TickType_t ) 1000 / configTICK_RATE_HZ )
+
+#define LOW               0x0
+#define HIGH              0x1
+
+//GPIO FUNCTIONS
+#define INPUT             0x01
+#define OUTPUT            0x03 
+
+
+#include "esp_arduino_version.h"
+#include "esp_idf_version.h"
+
+#define CONFIG_DISABLE_HAL_LOCKS true
 
 /*
 #define SERIAL  0x0
@@ -45,10 +73,11 @@
 #define _abs(x) ((x)>0?(x):-(x))  // abs() comes from STL
 #define constrain(amt,low,high) ((amt)<(low)?(low):((amt)>(high)?(high):(amt)))
 #define _round(x)     ((x)>=0?(long)((x)+0.5):(long)((x)-0.5))  // round() comes from STL
+*/
 #define radians(deg) ((deg)*DEG_TO_RAD)
 #define degrees(rad) ((rad)*RAD_TO_DEG)
 #define sq(x) ((x)*(x))
-*/
+
 
 // Get time stamp in milliseconds.
 /*uint64_t millis()
@@ -83,12 +112,34 @@
 #define millis() EspClass::getTime() / 1e3
 #define micros() EspClass::getTime()
 
+#define temperatureRead() EspClass::TemperatureRead()
+#define getCpuFrequencyMhz() EspClass::GetCpuFrequencyMhz()
+
+#define pinMode(x,y) EspClass::PinMode(x,y)
+#define digitalWrite(x,y) EspClass::DigitalWrite(x,y)
+#define digitalRead(x) EspClass::DigitalRead(x)
+
+
 class EspClass
 {
    public:
     EspClass() {}
     ~EspClass() {}
     void restart();
+
+    static float TemperatureRead()
+    {
+        return (float)37.2;
+    }
+
+    static uint32_t GetCpuFrequencyMhz()
+    {
+        return 240;
+    }
+
+    static void PinMode(uint8_t pin, uint8_t mode) {}
+    static void DigitalWrite(uint8_t pin, uint8_t val) {}
+    static int DigitalRead(uint8_t pin) { return 0; }
 
     static void timerSleep(double seconds);
     static void startTime();
