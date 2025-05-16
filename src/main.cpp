@@ -157,7 +157,9 @@ void timerMotionCallback(TimerHandle_t xTimer)
 void TaskLidar(void *pvParameters)
 {
   println("Start TaskLidar");
-  SERIAL_LIDAR.setPins(SOC_RX0, SOC_TX0);
+  SERIAL_LIDAR.setPins(RX_LIDAR, TX_LIDAR);
+  SERIAL_LIDAR.setRxBufferSize(1024);
+  SERIAL_LIDAR.setTxBufferSize(1024);
   SERIAL_LIDAR.begin(230400);
 
   unsigned char trame[7];

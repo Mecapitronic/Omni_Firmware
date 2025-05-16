@@ -5,22 +5,37 @@
 #include <HardwareSerial.h>
 
 //******************** Pins Undefined
-constexpr size_t PIN_10 = 10;
 constexpr size_t PIN_11 = 11;
 
-//******************** Pins UART - Serial
-
-// Serial over USB
+//******************** Pins UART - Serial USB Debug
+// https://community.platformio.org/t/esp32-s3-native-usb-interface-and-serial-monitor-missing-first-messages/40377/10
+// Serial used for USB CDC
+#undef SERIAL_DEBUG
+#if (ARDUINO_USB_CDC_ON_BOOT && ARDUINO_USB_MODE) || WOKWI
+// HWCDC Serial;
 #define SERIAL_DEBUG Serial
+#else
+#error "USB Serial not working"
+#endif
 
-// Serial 0
+//******************** Pins UART - Serial 0 Lidar LD06
 //  We don't need this redefinition of pin, it's just for information
 #undef SOC_RX0
-#define SOC_RX0 44
 #undef SOC_TX0
-#define SOC_TX0 43
-
+#if ARDUINO_USB_CDC_ON_BOOT && ARDUINO_USB_MODE && !WOKWI
+constexpr size_t RX_LIDAR = 44;
+constexpr size_t TX_LIDAR = 43;
+// HardwareSerial Serial0(0);
 #define SERIAL_LIDAR Serial0
+#elif WOKWI
+#undef RX2
+#undef TX2
+constexpr size_t RX_LIDAR = 19;
+constexpr size_t TX_LIDAR = 20;
+#define SERIAL_LIDAR Serial2
+#else
+#error "USB Serial not working"
+#endif
 
 // Serial 1
 #ifdef RX1
