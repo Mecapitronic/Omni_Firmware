@@ -484,7 +484,7 @@ void Update_Passability_Robot(void)
 * Update the passability graph
 ****************************************************************************************/
 void Update_Passability_Graph(void)
-{ 
+{
   Update_Passability_Obstacle();
   Update_Passability_Robot();
 }

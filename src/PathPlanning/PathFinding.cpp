@@ -13,25 +13,15 @@ std::vector <NodeItem> close;
 std::vector <t_vertexID> solution;
 
 uint32_t timeout_pf = 0;
-
-/****************************************************************************************
- * Path planning
- ****************************************************************************************/
-boolean Path_Planning(void)
-{
-  boolean result;
-  //Update_Obstacles(BRAKE_DISTANCE);
-
-  Update_Passability_Graph();
-  result = Path_Finding();
-  return result;
-}
-
 /****************************************************************************************
  Fonction : Calculate the shortest path between the start point and the end point
  ****************************************************************************************/
-boolean Path_Finding()
+boolean PathFinding(int16_t start_x, int16_t start_y, t_vertexID end_vertex_ID)
 {
+	Mapping::Update_Start_Vertex(start_x, start_y);
+	Mapping::Set_End_Vertex(end_vertex_ID);
+	Mapping::Update_Passability_Graph();
+
 	std::vector <NodeItem> listPossible;
 	NodeItem startNode;
 	NodeItem best;

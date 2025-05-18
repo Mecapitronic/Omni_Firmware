@@ -133,9 +133,6 @@ void timerMotionCallback(TimerHandle_t xTimer)
     // Actual position update
     robot.SetPose(otos.position.x, otos.position.y, otos.position.h);
 
-    //Mapping::Update_Start_Vertex((int16_t)robot.x, (int16_t)robot.y);
-    //Mapping::Update_Passability_Graph();
-
     // Actual velocity update, in global field reference
     linear.velocity_actual = Norm2D(otos.velocity.x, otos.velocity.y);
     angular.velocity_actual = otos.velocity.h;
@@ -333,15 +330,21 @@ void loop()
       println("RobotRadius:", ROBOT_RADIUS);
       println("RobotMargin:", ROBOT_MARGIN);
     }
-    else if (cmd.cmd == "PF" && cmd.size == 1)
+    else if (cmd.cmd == "PF")
     {
+bool result = false;
       // PathFinding
       // PF:5
-      Mapping::Set_End_Vertex(cmd.data[0]);
-      Mapping::Update_Start_Vertex((int16_t)robot.x, (int16_t)robot.y);
-      Mapping::Update_Passability_Graph();
-
-      if (PathFinding::Path_Planning())
+      // PF:500:1000:5
+      if (cmd.size == 1)
+      {
+        result = PathFinding::PathFinding((int16_t)robot.x, (int16_t)robot.y, cmd.data[0]);
+}
+      else       if (cmd.size == 3)
+      {
+        result = PathFinding::PathFinding(cmd.data[0], cmd.data[1], cmd.data[2]);
+      }
+      if (result)
       {
         println("PF Found");
       }
@@ -472,10 +475,7 @@ void functionChrono(int nbrLoop)
     // function or code to loop
     // loop();
     static int end_vertex = 1;
-    Mapping::Set_End_Vertex(end_vertex);
-    Mapping::Update_Start_Vertex((int16_t)robot.x, (int16_t)robot.y);
-    Mapping::Update_Passability_Graph();
-    PathFinding::Path_Planning();
+    PathFinding::PathFinding((int16_t)robot.x, (int16_t)robot.y, end_vertex);
     end_vertex++;
     if (end_vertex >= Max_Vertex)
       end_vertex = 1;
