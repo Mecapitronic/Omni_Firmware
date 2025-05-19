@@ -37,6 +37,9 @@ constexpr size_t TX_LIDAR = 20;
 #error "USB Serial not working"
 #endif
 
+//******************** Pins Enable Power
+constexpr size_t PIN_EN_MCU = 3;
+
 //******************** Pins UART - Serial 1 Servo Dxl
 #undef RX1
 #undef TX1
@@ -53,8 +56,6 @@ constexpr size_t PIN_DIR_M2 = 4;
 
 constexpr size_t PIN_STEP_M3 = 2;
 constexpr size_t PIN_DIR_M3 = 1;
-
-constexpr size_t PIN_EN_MCU = 3;
 
 //******************** Pins TwoWire I²C - Otos
 /*

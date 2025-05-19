@@ -28,6 +28,9 @@ int nbrLoop = 0;
 //******************************************************* SETUP **************************************************************** */
 void setup()
 {
+  pinMode(PIN_EN_MCU, OUTPUT);
+  digitalWrite(PIN_EN_MCU, LOW);
+
   ESP32_Helper::Initialisation();
   delay(3000);
   println("Board : ", String(ARDUINO_BOARD));
@@ -90,6 +93,8 @@ void setup()
   ESP32_Helper::HandleCommand(Command("UpdateMapping"));
 
   // print("FreeRTOS heap remaining ");print(xPortGetFreeHeapSize());println(" bytes");
+
+  digitalWrite(PIN_EN_MCU, HIGH);
 }
 
 //******************************************************* TIMER 5ms => MOTION **************************************************************** */
@@ -460,6 +465,7 @@ void TaskMatch(void *pvParameters)
     // Fin du match
     if (Match::matchState == State::MATCH_END)
     {
+      digitalWrite(PIN_EN_MCU, LOW);
       IHM::useBlink = false;
     }
     vTaskDelay(1);
