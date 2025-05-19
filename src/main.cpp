@@ -235,6 +235,7 @@ void loop()
   Match::updateMatch();
   IHM::UpdateBAU();
   IHM::Blink();
+  ServoAX12::Update();
   // functionChrono(1);
   //  functionChrono(1000);
   //   delay(3000);
