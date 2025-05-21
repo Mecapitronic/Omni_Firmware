@@ -346,7 +346,7 @@ bool result = false;
       {
         result = PathFinding::PathFinding((int16_t)robot.x, (int16_t)robot.y, cmd.data[0]);
 }
-      else       if (cmd.size == 3)
+      else if (cmd.size == 3)
       {
         result = PathFinding::PathFinding(cmd.data[0], cmd.data[1], cmd.data[2]);
       }
@@ -480,12 +480,6 @@ void functionChrono(int nbrLoop)
   for (int i = 0; i < nbrLoop; i++)
   {
     // function or code to loop
-    // loop();
-    static int end_vertex = 1;
-    PathFinding::PathFinding((int16_t)robot.x, (int16_t)robot.y, end_vertex);
-    end_vertex++;
-    if (end_vertex >= Max_Vertex)
-      end_vertex = 1;
   }
   unsigned long endChrono = micros();
   unsigned long deltaChrono = endChrono - startChrono;
