@@ -93,8 +93,6 @@ void setup()
   ESP32_Helper::HandleCommand(Command("UpdateMapping"));
 
   // print("FreeRTOS heap remaining ");print(xPortGetFreeHeapSize());println(" bytes");
-
-  digitalWrite(PIN_EN_MCU, HIGH);
 }
 
 //******************************************************* TIMER 5ms => MOTION **************************************************************** */
@@ -439,11 +437,18 @@ void TaskMatch(void *pvParameters)
       else
       {
       }
+      // Disable Motor & Servo Power in Match mode during waiting
+      if (Match::matchMode == Enable::ENABLE_TRUE)
+        digitalWrite(PIN_EN_MCU, LOW);
+      else
+        digitalWrite(PIN_EN_MCU, HIGH);
     }
 
     // Match en cours
     if (Match::matchState == State::MATCH_BEGIN)
     {
+      // Enable Motor & Servo Power
+      digitalWrite(PIN_EN_MCU, HIGH);
       // Countdown
       if (lastMatchTime != (int)(Match::getMatchTimeSec()))
       {
