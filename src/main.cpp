@@ -12,7 +12,6 @@ Motion linear;
 Motion angular;
 
 Robot robot;
-// Robot adversaire;
 
 OpticalTrackingOdometrySensor otos;
 
@@ -51,6 +50,7 @@ void setup()
   ServoAX12::Initialisation();
 
   // led_ring.Initialisation(36, PIN_WS2812_LED);
+  Lidar::Initialisation(&robot);
 
   // Init sensors
   otos.Initialisation();
@@ -87,7 +87,6 @@ void setup()
   timerMotion.Start();
 
   TaskThread Task1 = TaskThread(TaskMatch, "TaskMatch", 20000, 1, 0);
-  TaskThread Task2 = TaskThread(TaskLidar, "TaskLidar", 20000, 1, 1);
 
   // Send to PC all the mapping data
   ESP32_Helper::HandleCommand(Command("UpdateMapping"));
@@ -152,84 +151,6 @@ void timerMotionCallback(TimerHandle_t xTimer)
   }
   
   timerMotion.Running(false);
-}
-
-//******************************************************* TASK => LIDAR *************************************************************** */
-//  do NON BLOCKING stuff
-void TaskLidar(void *pvParameters)
-{
-  println("Start TaskLidar");
-  SERIAL_LIDAR.setPins(RX_LIDAR, TX_LIDAR);
-  SERIAL_LIDAR.setRxBufferSize(1024);
-  SERIAL_LIDAR.setTxBufferSize(1024);
-  SERIAL_LIDAR.begin(230400);
-
-  unsigned char trame[7];
-  uint16_t cursor = 0;
-
-  while (1)
-  {
-    PoseF p = robot.GetPoseF();
-    // Starting char : '!'
-    SERIAL_LIDAR.write(0x21);
-
-    // Robot X
-    SERIAL_LIDAR.write((int)p.x % 256);
-    SERIAL_LIDAR.write((int)p.x >> 8);
-
-    // Robot Y
-    SERIAL_LIDAR.write((int)p.y % 256);
-    SERIAL_LIDAR.write((int)p.y >> 8);
-
-    // Robot Angle * 100
-    int angle = (int)(degrees(p.h) * 100);
-    SERIAL_LIDAR.write(angle % 256);
-    SERIAL_LIDAR.write(angle >> 8);
-
-    // Ending char : '\n'
-    SERIAL_LIDAR.write(0x0A);
-    //println("Lidar sent : ", p);
-
-    while (SERIAL_LIDAR.available())
-    {
-      char data = SERIAL_LIDAR.read();
-
-      if (data == 0x21 && cursor == 0)
-      {
-        trame[cursor++] = data;
-      }
-      else if (cursor > 0)
-      {
-        trame[cursor++] = data;
-        if (cursor >= 7)
-        {
-          if (data == 0x0A)
-          {
-            Point p;
-            int header = trame[0];
-            int num = trame[1];
-            p.x = trame[3] << 8 | trame[2];
-            p.y = trame[5] << 8 | trame[4];
-            int footer = trame[6];
-            // I use the radius as the id number
-// Obstacle::queueObstacle.Send(Circle(p, num));
-            Obstacle::Add_Obstacle(num, p);
-            if (p.x != 0 && p.y != 0)
-            {
-teleplot("Robs", p);
-              // print("Lidar received : ", num);
-// println(" ", p);
-            }
-            cursor = 0;
-            // break;
-          }
-          cursor = 0;
-        }
-      }
-    }
-    vTaskDelay(10);
-  }
-  println("End TaskLidar");
 }
 
 //******************************************************* LOOP *****************************************************************/
@@ -337,14 +258,14 @@ void loop()
     }
     else if (cmd.cmd == "PF")
     {
-bool result = false;
+      bool result = false;
       // PathFinding
       // PF:5
       // PF:500:1000:5
       if (cmd.size == 1)
       {
         result = PathFinding::PathFinding((int16_t)robot.x, (int16_t)robot.y, cmd.data[0]);
-}
+      }
       else if (cmd.size == 3)
       {
         result = PathFinding::PathFinding(cmd.data[0], cmd.data[1], cmd.data[2]);
@@ -387,7 +308,7 @@ bool result = false;
       Point p;
       p.x = cmd.data[1];
       p.y = cmd.data[2];
-// Obstacle::queueObstacle.Send(Circle(p, num));
+      // Obstacle::queueObstacle.Send(Circle(p, num));
       Obstacle::Add_Obstacle(num, p);
       Mapping::Update_Passability_Obstacle();
       Obstacle::PrintObstacleList();
@@ -395,7 +316,7 @@ bool result = false;
     else if (cmd.cmd == "RemoveObstacle" && cmd.size == 1)
     {
       int num = cmd.data[0];
-// Obstacle::queueObstacle.Send(Circle(0, 0, num));
+      // Obstacle::queueObstacle.Send(Circle(0, 0, num));
       Obstacle::Add_Obstacle(num, {0, 0});
       Mapping::Update_Passability_Obstacle();
       Obstacle::PrintObstacleList();
@@ -408,11 +329,11 @@ bool result = false;
 
   if (nbrLoop == 1)
   {
-    println("Chrono : ", (float)deltaChrono, " µs/func (1)");
+    // println("Chrono : ", (float)deltaChrono, " µs/func (1)");
   }
   if (nbrLoop >= 1000)
   {
-    println("Chrono : ", (float)deltaChrono / 1000, " µs/func (1000)");
+    // println("Chrono : ", (float)deltaChrono / 1000, " µs/func (1000)");
     nbrLoop = 0;
     deltaChrono = 0;
   }
@@ -442,6 +363,24 @@ void TaskMatch(void *pvParameters)
         digitalWrite(PIN_EN_MCU, LOW);
       else
         digitalWrite(PIN_EN_MCU, HIGH);
+
+      // Enable or disable Communication
+      if (IHM::switchMode == 0 && (Printer::IsEnable() || Wifi_Helper::IsEnable()))
+      {
+        println("Disable Com");
+        Printer::EnablePrinter(Enable::ENABLE_FALSE);
+        Wifi_Helper::EnableWifi(Enable::ENABLE_FALSE);
+        Printer::teleplotUDPEnable = Enable::ENABLE_FALSE;
+        Lidar::disableComLidar = true;
+      }
+      else if (IHM::switchMode == 1 && (!Printer::IsEnable() || !Wifi_Helper::IsEnable()))
+      {
+        Printer::EnablePrinter(Enable::ENABLE_TRUE);
+        Wifi_Helper::EnableWifi(Enable::ENABLE_TRUE);
+        Printer::teleplotUDPEnable = Enable::ENABLE_TRUE;
+        println("Enable Com");
+        Lidar::enableComLidar = true;
+      }
     }
 
     // Match en cours

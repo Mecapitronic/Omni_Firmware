@@ -17,7 +17,9 @@ namespace IHM
 
   Team team = Team::None;
   Enable tirette = Enable::ENABLE_NONE;
+  // OK = 1, TEST = 0, None = -1
   int switchMode = -1;
+  // Retiré = 1, Enclenché = 0, None = -1
   int bauReady = -1;
 
   CRGB led[1];
@@ -192,7 +194,7 @@ namespace IHM
   void PrintSwitch()
   {
     print("Switch  : ");
-    if (switchMode)
+    if (switchMode == 1)
       println("OK");
     else
       println("TEST");
@@ -201,7 +203,7 @@ namespace IHM
   void PrintBAU()
   {
     print("BAU     : ");
-    if (bauReady)
+    if (bauReady == 1)
       println("Retiré");
     else
       println("Enclenché");

@@ -17,6 +17,7 @@ using namespace Printer;
 #include "ihm.h"
 #include "match.h"
 #include "Servo.h"
+#include "Lidar.h"
 
 #include "PathPlanning/PathFinding.h"
 
@@ -51,7 +52,6 @@ extern TimerThread timerMotion;
 void timerMotionCallback(TimerHandle_t xTimer);
 
 void TaskMatch(void *pvParameters);
-void TaskLidar(void *pvParameters);
 
 void functionChrono(int nbrLoop = 1);
 #endif
