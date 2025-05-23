@@ -12,6 +12,7 @@ using namespace Printer;
 #include "OTOS.h"
 #include "Motor.h"
 #include "Motion.h"
+#include "Timer.h"
 #include "Trajectory.h"
 #include "LedRGB.h"
 #include "ihm.h"
@@ -39,10 +40,6 @@ const bool simulation = true;
 #else
 const bool simulation = false;
 #endif
-
-/****************************************************************************************
- * Variables
- ****************************************************************************************/
 
 // distance between center of robot and center of wheel in mm => equal to mm/radian
 #define CENTER_WHEEL_DISTANCE 115.0
