@@ -12,6 +12,7 @@ using namespace Printer;
 #include "OTOS.h"
 #include "Motor.h"
 #include "Motion.h"
+#include "Timer.h"
 #include "Trajectory.h"
 #include "LedRGB.h"
 #include "ihm.h"

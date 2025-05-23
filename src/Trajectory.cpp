@@ -5,22 +5,22 @@
 using namespace Printer;
 
 namespace Trajectory
-{  
+{
   /****************************************************************************************
    * Variables
    ****************************************************************************************/
   namespace
   {
-    Motion * linear;
-    Motion * angular;
-    Robot * robot;
+    Motion *linear;
+    Motion *angular;
+    Robot *robot;
 
     // current target pose to go
     PoseF target;
   }
 
   /****************************************************************************************
-   * Initialisation 
+   * Initialisation
    ****************************************************************************************/
   void Initialisation(Motion *_linear, Motion *_angular, Robot *_robot)
   {
@@ -35,12 +35,12 @@ namespace Trajectory
   }
 
   /****************************************************************************************
-   * Update linear direction and positions errors : Must be called on every speed control loop => motion timer 
+   * Update linear direction and positions errors : Must be called on every speed control loop => motion timer
    ****************************************************************************************/
   void Update()
   {
     // Direction of the linear motion vector, in local robot reference
-    linear->direction = NormalizeAngle( DirectionToPosition(robot->x, robot->y, target.x, target.y) - robot->h);
+    linear->direction = NormalizeAngle(DirectionToPosition(robot->x, robot->y, target.x, target.y) - robot->h);
 
     // Magnitude of the linear motion vector => Distance error
     linear->position_error = DistanceToPosition(robot->x, robot->y, target.x, target.y);
@@ -51,12 +51,11 @@ namespace Trajectory
 
   /****************************************************************************************
    * Pure translation to position x and y, with limit and final speed
+   * Don't forget to disable the motion timer before calling this function
+   * and enable it after updating the motion parameters.
    ****************************************************************************************/
   void TranslateToPosition(float x, float y, float speed_limit, float speed_final)
   {
-    // Disable motion timer before updating motion parameters
-    timerMotion.WaitForDisable();
-
     // Update target position
     target.x = x;
     target.y = y;
@@ -64,8 +63,6 @@ namespace Trajectory
     // Update linear speeds
     linear->speed_limit = speed_limit;
     linear->speed_final = speed_final;
-    
-    timerMotion.Enable();
   }
 
   /****************************************************************************************
@@ -78,11 +75,11 @@ namespace Trajectory
 
   /****************************************************************************************
    * Pure rotation to orientation h (in global field reference), with limit and final speed
+   * Don't forget to disable the motion timer before calling this function
+   * and enable it after updating the motion parameters.
    ****************************************************************************************/
   void RotateToOrientation(float h_rad, float speed_limit, float speed_final)
   {
-    // Disable motion timer before updating motion parameters
-    timerMotion.WaitForDisable();
 
     // Update target orientation
     target.h = h_rad;
@@ -90,8 +87,6 @@ namespace Trajectory
     // Update linear speeds
     angular->speed_limit = speed_limit;
     angular->speed_final = speed_final;
-    
-    timerMotion.Enable();
   }
 
   /****************************************************************************************
@@ -99,7 +94,7 @@ namespace Trajectory
    ****************************************************************************************/
   void RotateTowardsPosition(float x, float y, float speed_limit, float speed_final)
   {
-    RotateToOrientation( DirectionToPosition(robot->x, robot->y, x, y), speed_limit, speed_final);
+    RotateToOrientation(DirectionToPosition(robot->x, robot->y, x, y), speed_limit, speed_final);
   }
 
   /****************************************************************************************
@@ -112,27 +107,25 @@ namespace Trajectory
 
   /****************************************************************************************
    * Go to pose x, y and h, with limit and final speed
+   * Don't forget to disable the motion timer before calling this function
+   * and enable it after updating the motion parameters.
    ****************************************************************************************/
   void GoToPose(float x, float y, float h, float speed_limit, float speed_final)
   {
-    // Disable motion timer before updating motion parameters
-    timerMotion.WaitForDisable();
 
     // Update target position
     target.x = x;
     target.y = y;
     target.h = h;
 
-  // TODO: adapter vitesse de rotation selon distance : vitesse angular = angle * Vitesse linear / distance
-      // if (linear.position_error != 0)
-      // {
-      //   angular.speed_max = fmin((fabsf(angular.position_error) * linear.speed_max) / fabsf(linear.position_error), speed_ang_rads_max);
-      // }
+    // TODO: adapter vitesse de rotation selon distance : vitesse angular = angle * Vitesse linear / distance
+    // if (linear.position_error != 0)
+    // {
+    //   angular.speed_max = fmin((fabsf(angular.position_error) * linear.speed_max) / fabsf(linear.position_error), speed_ang_rads_max);
+    // }
 
     // Update linear speeds
     linear->speed_limit = speed_limit;
     linear->speed_final = speed_final;
-    
-    timerMotion.Enable();
   }
 }
