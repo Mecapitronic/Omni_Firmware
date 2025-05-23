@@ -72,9 +72,6 @@ namespace Trajectory
    ****************************************************************************************/
   void TranslateToPosition(float x, float y, float speed_limit, float speed_final)
   {
-    // Disable motion timer before updating motion parameters
-    timerMotion.WaitForDisable();
-
     // Update target position
     target.x = x;
     target.y = y;
@@ -82,8 +79,6 @@ namespace Trajectory
     // Update linear speeds
     linear->speed_limit = speed_limit;
     linear->speed_final = speed_final;
-    
-    timerMotion.Enable();
   }
 
   /****************************************************************************************
@@ -99,17 +94,12 @@ namespace Trajectory
    ****************************************************************************************/
   void RotateToOrientation(float h_rad, float speed_limit, float speed_final)
   {
-    // Disable motion timer before updating motion parameters
-    timerMotion.WaitForDisable();
-
     // Update target orientation
     target.h = h_rad;
 
     // Update linear speeds
     angular->speed_limit = speed_limit;
     angular->speed_final = speed_final;
-    
-    timerMotion.Enable();
   }
 
   /****************************************************************************************
@@ -133,9 +123,6 @@ namespace Trajectory
    ****************************************************************************************/
   void GoToPose(float x, float y, float h, float speed_limit, float speed_final)
   {
-    // Disable motion timer before updating motion parameters
-    timerMotion.WaitForDisable();
-
     // Update target position
     target.x = x;
     target.y = y;
@@ -149,9 +136,7 @@ namespace Trajectory
 
     // Update linear speeds
     linear->speed_limit = speed_limit;
-    linear->speed_final = speed_final;
-    
-    timerMotion.Enable();
+    linear->speed_final = speed_final;  
   }
 
   void GoToVertex(t_vertexID id, float speed_limit, float speed_final)
