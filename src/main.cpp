@@ -401,6 +401,7 @@ void TaskMatch(void *pvParameters)
     // Démarrage du robot
     if (Match::matchState == State::MATCH_RUN)
     {
+      // TODO 5 sec avant la fin du match aller dans la zone de back stage
     }
 
     // Arrêt du robot
@@ -412,8 +413,14 @@ void TaskMatch(void *pvParameters)
     // Fin du match
     if (Match::matchState == State::MATCH_END)
     {
+      // Disable Motor & Servo Power
       digitalWrite(PIN_EN_MCU, LOW);
       IHM::useBlink = false;
+      // Disable Motion timer
+      timerMotion.WaitForDisable();
+      motor.Update(0, 0, 0);
+      // ServoAX12::
+      //  TODO couper les commandes servo
     }
     vTaskDelay(1);
   }
