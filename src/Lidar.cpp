@@ -21,7 +21,7 @@ namespace Lidar
         SERIAL_LIDAR.setRxBufferSize(1024);
         SERIAL_LIDAR.setTxBufferSize(1024);
         SERIAL_LIDAR.begin(230400);
-        TaskThread Task = TaskThread(TaskLidar, "TaskLidar", 20000, 1, 1);
+        TaskThread Task = TaskThread(TaskLidar, "TaskLidar", 20000, 10, 1);
     }
 
     void TaskLidar(void *pvParameters)
@@ -95,9 +95,8 @@ namespace Lidar
                             Obstacle::Add_Obstacle(num, p);
                             if (p.x != 0 && p.y != 0)
                             {
-                                teleplot("Robs", p);
-                                // print("Lidar received : ", num);
-                                // println(" ", p);
+                                //  print("Lidar received : ", num);
+                                //  println(" ", p);
                             }
                             cursor = 0;
                             // break;

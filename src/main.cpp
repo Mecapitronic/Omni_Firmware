@@ -86,7 +86,7 @@ void setup()
   timerMotion = TimerThread(timerMotionCallback, "Timer Motion", (1000 * Motion::dt_motion) / portTICK_PERIOD_MS);
   timerMotion.Start();
 
-  TaskThread Task1 = TaskThread(TaskMatch, "TaskMatch", 20000, 1, 0);
+  TaskThread Task1 = TaskThread(TaskMatch, "TaskMatch", 20000, 10, 1);
 
   // Send to PC all the mapping data
   ESP32_Helper::HandleCommand(Command("UpdateMapping"));
@@ -149,17 +149,19 @@ void timerMotionCallback(TimerHandle_t xTimer)
     // Motor update => in local robot reference
     motor.Update(linear.velocity_command, linear.direction, angular.velocity_command);
   }
-  
   timerMotion.Running(false);
 }
 
 //******************************************************* LOOP *****************************************************************/
+// This task has a very high priority of 20 on core 1 (Max priority = 25)
 void loop()
 {
   startChrono = micros();
   Match::updateMatch();
   IHM::UpdateBAU();
   IHM::Blink();
+
+  // take some time to update the servo, maybe move it elsewhere
   ServoAX12::Update();
   // functionChrono(1);
   //  functionChrono(1000);
