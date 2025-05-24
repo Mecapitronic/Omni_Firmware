@@ -146,6 +146,9 @@ void OpticalTrackingOdometrySensor::Update()
         if (error != 0)
         {
             print("Error getPosVelAcc : ", error);
+        }
+        else
+        {
             position.x = myPosition.x * 1000;
             position.y = myPosition.y * 1000;
             position.h = myPosition.h;
