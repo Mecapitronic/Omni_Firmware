@@ -21,6 +21,7 @@ unsigned long startChrono = 0;
 unsigned long endChrono = 0;
 unsigned long deltaChrono = 0;
 unsigned long teleplotChrono = 0;
+unsigned long mappingChrono = 0;
 unsigned long rgbChrono = 0;
 int nbrLoop = 0;
 
@@ -174,7 +175,7 @@ void loop()
   //    delay(5000);
   //   //while(linear.isRunning || angular.isRunning) ;//doWhileWaiting();
 
-  if (startChrono - teleplotChrono > 1000 * 10) // Update time
+  if (startChrono - teleplotChrono > 1000 * 100) // Update time
   {
     teleplotChrono = startChrono;
     teleplot("Position", robot);
@@ -189,16 +190,26 @@ void loop()
     //// teleplot("v1", motor.GetMotorSpeed(1));
     //// teleplot("v2", motor.GetMotorSpeed(2));
     //// teleplot("v3", motor.GetMotorSpeed(3));
+    // teleplot("Servo_Up Pos", ServoAX12::Servo_Up.position);
+    // teleplot("Servo_Left Pos", ServoAX12::Servo_Left.position);
+    // teleplot("Servo_Up Cmd", ServoAX12::Servo_Up.command_position);
+    // teleplot("Servo_Left Cmd", ServoAX12::Servo_Left.command_position);
+  }
+
+  if (startChrono - mappingChrono > 1000 * 500) // Update every 1 sec
+  {
+    mappingChrono = startChrono;
+    Obstacle::PrintObstacleList();
+    Mapping::Update_Start_Vertex((int16_t)robot.x, (int16_t)robot.y);
+    // Mapping::Update_Passability_Graph();
+    // Mapping::PrintVertex0();
+    // Mapping::PrintVertexList();
   }
 
   if (startChrono - rgbChrono > 1000 * 100) // Update every 100ms
   {
     rgbChrono = startChrono;
-    Mapping::Update_Start_Vertex((int16_t)robot.x, (int16_t)robot.y);
-    Mapping::Update_Passability_Graph();
-    // Mapping::PrintVertex0();
-    Mapping::PrintVertexList();
-    // led_ring.Update();
+    //  led_ring.Update();
   }
 
   if (ESP32_Helper::HasWaitingCommand())
