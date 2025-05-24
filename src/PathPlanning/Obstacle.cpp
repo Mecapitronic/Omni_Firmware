@@ -127,10 +127,10 @@ namespace Obstacle
 
 	void PrintObstacleList()
 	{
-		String str = "ObstacleList:";
+		String str = ">ObsRob:";
 		String str01 = String(obstacle[0].p.x) + ":" + String(obstacle[0].p.y);
-		String str02 = ":" + String(obstacle[0].r);
-		str = str + str01 + str02;
+		// String str02 = ":" + String(obstacle[0].r);
+		str = str + str01; // + str02;
 
 		for (size_t i = 1; i < MAX_OBSTACLE; i++)
 		{
@@ -141,7 +141,7 @@ namespace Obstacle
 				str = str + ";" + stri1 + stri2;
 			}
 		}
-		// str = str + "|xy";
+		str = str + "|xy";
 		Printer::println(str);
 	}
 }
