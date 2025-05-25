@@ -7,8 +7,8 @@
 .vscode/extensions.json
 .vscode/ipch
 .vscode/launch.json
-.vscode/compile_commands.json
 *.code-workspace
+compile_commands.json
 
 # Python
 **/__pycache__
