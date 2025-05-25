@@ -49,6 +49,24 @@ namespace Trajectory
     angular->position_error = NormalizeAngle(target.h - robot->h);
   }
 
+  void Reset()
+  {
+    // Reset target pose to current robot pose
+    target.x = robot->x;
+    target.y = robot->y;
+    target.h = robot->h;
+
+    // Reset linear and angular motion parameters
+    linear->position_error = 0;
+    angular->position_error = 0;
+
+    linear->velocity_command = 0;
+    angular->velocity_command = 0;
+
+    linear->isRunning = false;
+    angular->isRunning = false;
+  }
+
   /****************************************************************************************
    * Pure translation to position x and y, with limit and final speed
    ****************************************************************************************/

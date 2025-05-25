@@ -17,6 +17,7 @@ namespace Trajectory
      ****************************************************************************************/
     void Initialisation(Motion *_linear, Motion *_angular, Robot *_robot);
     void Update();
+    void Reset();
 
     void TranslateToPosition(float x, float y, float speed_limit, float speed_final);
     void TranslateToPoint(PointF point, float speed_limit, float speed_final);

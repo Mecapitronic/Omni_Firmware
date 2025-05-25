@@ -256,6 +256,7 @@ void loop()
       println();
       robot.SetPose(goTo.x, goTo.y, goTo.h);
       otos.SetPose(robot.x, robot.y, robot.h);
+      Trajectory::Reset();
       timerMotion.Enable();
     }
     else if (cmd.cmd == "UpdateMapping")
