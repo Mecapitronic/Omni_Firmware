@@ -293,6 +293,10 @@ void loop()
         print("PF Not Found");
       }
     }
+    else if (cmd.cmd == "Nav" && cmd.size == 1)
+    {
+      Trajectory::Navigate_To_Vertex(cmd.data[0], linear.speed_max, 0);
+    }
     else if (cmd.cmd == "VertexList")
     {
       Mapping::PrintVertexList();
