@@ -16,7 +16,15 @@ enum class Team
   None
 };
 
-// WAIT BEGIN RUN STOP END
+// 
+
+/**
+ * @brief WAIT BEGIN RUN STOP END
+ *
+ * WAIT attend que le match démarre, BEGIN le match démarre avec la tirette (état temporaire très court)
+ * RUN le match est en cours, STOP les actions sont terminées, on attend la fin du timer, END le match et le timer sont terminés
+ * 
+ */
 enum class State
 {
   MATCH_WAIT,
