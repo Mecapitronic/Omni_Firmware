@@ -10,24 +10,15 @@
 #include "Structure.h"
 
 #define NUM_LEDS 24
-#define DATA_PIN 12
 
 using namespace Printer;
 
-struct LEDState
-{
-  // represents current math time (from 0 to 100 seconds) as led number from 0 to 23
-  long time_led;
-  uint16_t color;
-  std::vector<float> obstacles;
-  std::vector<float> adversaries;
-  bool emergencyStop;
-};
+
 class LedRGB
 {
 
 public:
-  void Initialisation(uint8_t numPixels, uint8_t data_pin);
+  void Initialisation();
 
   /**
    * @brief update the current robot state from value in other modules
@@ -63,8 +54,11 @@ private:
   CRGB leds[NUM_LEDS];
 
   int current_hue = 0;
-  LEDState current_state;
-  uint8_t m_numPixels;
+
+  long time_led = 0;
+  // uint16_t color;
+  std::vector<float> obstacles;
+  std::vector<float> adversaries;
 };
 
 #endif

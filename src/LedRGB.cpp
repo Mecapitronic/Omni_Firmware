@@ -2,26 +2,30 @@
 
 using namespace Printer;
 
-void LedRGB::Initialisation(uint8_t numPixels, uint8_t data_pin)
+void LedRGB::Initialisation()
 {
-    print("RGB initialisation of ", numPixels, " pixels");
-    println(" on pin ", data_pin);
-    m_numPixels = numPixels;
+    print("RGB initialisation of ", NUM_LEDS, " pixels");
+    println(" on pin ", PIN_WS2812_LED);
 
-    FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, numPixels);
+    FastLED.addLeds<NEOPIXEL, PIN_WS2812_LED>(leds, NUM_LEDS);
     FastLED.setBrightness(RGB_BRIGHTNESS);
 }
 
-// This function would update the current_state based on the robot's state
+// This function would update the current state based on the robot's state
 void LedRGB::updateState(PoseF position, std::array<Circle, 10> obstacles)
 {   
-    long match_time =(NUM_LEDS  * Match::getMatchTimeSec()) / Match::time_end_match;
-    if (match_time == 0 || match_time > NUM_LEDS) {
-        match_time = 1;
+    if (Match::matchState == State::MATCH_RUN) {
+        time_led = (NUM_LEDS  * Match::getMatchTimeSec()) / Match::time_end_match;
     }
-    current_state.time_led = match_time;
-
-    println("LED: Updating state with time_led: ", current_state.time_led);
+    else
+    {
+        time_led++;
+        if (time_led >= NUM_LEDS)
+        {
+            time_led = 0;
+        }   
+    }
+    println("LED: Updating state with time_led: ",time_led );
 }
 
 
@@ -30,8 +34,8 @@ void LedRGB::update()
     // update led ring display according to current robot state
     for (int i = 0; i < NUM_LEDS; i++)
     {
-        // set the time as filled green leds from start to current_state.time
-        if (i == current_state.time_led)
+        // set the time as filled green leds from start to time_led
+        if (i == time_led)
         {
             leds[i] = CRGB::Green;
         }
@@ -40,12 +44,12 @@ void LedRGB::update()
             // Default color for remaining LEDs
             leds[i] = CRGB::Black;
         }
-        // if (i < current_state.obstacles.size())
+        // if (i < obstacles.size())
         // {
         //     // Set color based on obstacle position
         //     leds[i] = CRGB::Violet;
         // }
-        // else if (i < current_state.adversaries.size() + current_state.obstacles.size())
+        // else if (i < adversaries.size() + obstacles.size())
         // {
         //     // Set color based on adversary position
         //     leds[i] = CRGB::Red; // Example: Blue for adversaries
@@ -53,7 +57,6 @@ void LedRGB::update()
 
     }
     FastLED.show(); // Update the LEDs to reflect the changes   
-    vTaskDelay(100); // Add a small delay to avoid overwhelming the LED updates
 }
 
 int LedRGB::obstacleRelativePosition(PoseF robotPosition, Point obstaclePosition) {
@@ -67,13 +70,13 @@ int LedRGB::obstacleRelativePosition(PoseF robotPosition, Point obstaclePosition
 
 int LedRGB::lidarPositionToLedNumber(float position, float min, float max)
 {
-    // Convert the position to a value between 0 and m_numPixels
-    auto ledNumber = static_cast<int>((position - min) / (max - min) * m_numPixels);
+    // Convert the position to a value between 0 and NUM_LEDS
+    auto ledNumber = static_cast<int>((position - min) / (max - min) * NUM_LEDS);
     // Ensure the ledNumber is within bounds
     if (ledNumber < 0)
         ledNumber = 0;
-    else if (ledNumber >= m_numPixels)
-        ledNumber = m_numPixels - 1;
+    else if (ledNumber >= NUM_LEDS)
+        ledNumber = NUM_LEDS - 1;
     return ledNumber;
 }
 
@@ -81,13 +84,13 @@ int LedRGB::lidarPositionToLedNumber(float position, float min, float max)
 
 void LedRGB::loader()
 {
-    for (int i = 0; i < m_numPixels; i++)
+    for (int i = 0; i < NUM_LEDS; i++)
     {
         leds[i] = CRGB::Black; // Clear all LEDs
         FastLED.show();
         delay(50);
     }
-    for (int i = 0; i < m_numPixels; i++)
+    for (int i = 0; i < NUM_LEDS; i++)
     {
         leds[i] = CHSV(current_hue++, 255, 255); // Cycle through colors
         FastLED.show();
