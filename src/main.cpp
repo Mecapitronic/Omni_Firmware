@@ -50,7 +50,7 @@ void setup()
 
   ServoAX12::Initialisation();
 
-  led_ring.Initialisation(24, PIN_WS2812_LED);
+  led_ring.Initialisation();
 
   // Init sensors
   otos.Initialisation();
@@ -442,6 +442,7 @@ void TaskLed(void *pvParameters)
   {
     led_ring.updateState(robot.GetPoseF(), Obstacle::obstacle);
     led_ring.update();
+    vTaskDelay(10);
   }
 }
 //******************************************************* TASK => MATCH *************************************************************** */
