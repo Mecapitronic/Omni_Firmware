@@ -1,4 +1,5 @@
 #include "LedRGB.h"
+#include "GeoMathTools.h"
 
 void LedRGB::Initialisation(uint8_t numPixels, uint8_t data_pin)
 {
@@ -56,10 +57,27 @@ void LedRGB::update()
     }
 }
 
-void LedRGB::updateState()
+int LedRGB::obstacleRelativePosition(PoseF robotPosition, Point obstaclePosition){
+    // get angle between h and the vector formed by robotposition x,y and obstaclePosition x,y
+
+    DirectionToPoint(robotPosition.x, robotPosition.y, obstaclePosition.x, obstaclePosition.y)
+
+        ATan((object 1 Y - object 2 Y) / (object 1 X - object 2 X)) +
+    180}
+
+void LedRGB::updateState(PoseF position, std::array<Circle> obstacles)
 {
     // This function would update the current_state based on the robot's state
-    // and other conditions. It is a placeholder for the actual implementation.
+
+    // represent obstacles as radis or led position to be displayed
+    size_t list_size = sizeof(obstacles) / sizeof(obstacles[0]);
+
+    for (int i = 0; i < list_size; i++)
+    {
+        obstacles[i].x
+            obstacles[i]
+                .y
+    }
 }
 
 int LedRGB::lidarPositionToLedNumber(float position, float min, float max)

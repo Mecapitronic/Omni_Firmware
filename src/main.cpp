@@ -440,6 +440,7 @@ void TaskLed(void *pvParameters)
   println("Start TaskLed");
   while (1)
   {
+    led_ring.updateState(Obstacle::obstacle);
     led_ring.update();
   }
 }

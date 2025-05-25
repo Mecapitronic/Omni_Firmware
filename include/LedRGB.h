@@ -24,6 +24,7 @@ class LedRGB
 
 public:
   void Initialisation(uint8_t numPixels, uint8_t data_pin);
+
   /**
    * @brief update led ring display according to current robot state.
    * @description Takes into account: enemies position, obstacles position, robot position, robot state.
@@ -39,19 +40,21 @@ public:
    *
    * @return * void
    */
-
   void loader();
-  int lidarPositionToLedNumber(float position, float min, float max);
 
-private:
   /**
    * @brief update the current robot state from value in other modules
    * get the adversaries and obstacles positions, robot position, robot state.
    * This function is called by the update() function.
    */
-  void updateState();
+  void updateState(PoseF position, std::array<Circle> obstacles);
 
-  std::vector<uint32_t> color = {0xFF0000, 0x00FF00, 0x0000FF}; //{0x0F0000,0x000F00,0x00000F,0x000000};
+  int lidarPositionToLedNumber(float position, float min, float max);
+  int obstacleRelativePosition(PoseF robotPosition, Point obstaclePosition);
+
+private:
+  //{0x0F0000,0x000F00,0x00000F,0x000000};
+  std::vector<uint32_t> color = {0xFF0000, 0x00FF00, 0x0000FF};
   CRGB leds[NUM_LEDS];
 
   int current_hue = 0;
