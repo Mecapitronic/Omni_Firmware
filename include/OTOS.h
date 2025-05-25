@@ -8,8 +8,6 @@
 #include "pins.h"
 #include "ESP32_Helper.h"
 
-typedef sfeTkError_t sfTkError_t;
-
 class OpticalTrackingOdometrySensor
 {
 public:
