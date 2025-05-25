@@ -10,7 +10,7 @@
 namespace IHM
 {
     extern Team team;
-    extern Enable tirette;
+    extern Enable tirettePresent;
     extern int switchMode;
     extern int bauReady;
     
