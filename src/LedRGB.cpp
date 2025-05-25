@@ -28,6 +28,38 @@ void LedRGB::loader()
 
 void LedRGB::update()
 {
+    // update led ring display according to current robot state
+    updateState(); // Update the current_state based on robot's state and other conditions
+    for (int i = 0; i < m_numPixels; i++)
+    {
+        // set the time as filled green leds from start to current_state.time
+        if (i < current_state.time)
+        {
+            leds[i] = CRGB::Green; // Example: Green for time
+        }
+
+        if (i < current_state.obstacles.size())
+        {
+            // Set color based on obstacle position
+            leds[i] = CRGB::Violet; // Example: Red for obstacles
+        }
+        else if (i < current_state.adversaries.size() + current_state.obstacles.size())
+        {
+            // Set color based on adversary position
+            leds[i] = CRGB::Red; // Example: Blue for adversaries
+        }
+        else
+        {
+            // Default color for remaining LEDs
+            leds[i] = CRGB::Black;
+        }
+    }
+}
+
+void LedRGB::updateState()
+{
+    // This function would update the current_state based on the robot's state
+    // and other conditions. It is a placeholder for the actual implementation.
 }
 
 int LedRGB::lidarPositionToLedNumber(float position, float min, float max)
