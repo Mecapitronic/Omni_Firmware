@@ -15,7 +15,7 @@ using namespace Printer;
 #include "Timer.h"
 #include "Trajectory.h"
 #include "LedRGB.h"
-#include "ihm.h"
+#include "IHM.h"
 #include "Match.h"
 #include "ServoAX12.h"
 #include "Lidar.h"

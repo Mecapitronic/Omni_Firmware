@@ -1,4 +1,4 @@
-#include "ihm.h"
+#include "IHM.h"
 
 using namespace Printer;
 using namespace std;
@@ -16,7 +16,8 @@ namespace IHM
   }
 
   Team team = Team::None;
-  Enable tirette = Enable::ENABLE_NONE;
+  //
+  Enable isTirettePresent = Enable::ENABLE_NONE;
   // OK = 1, TEST = 0, None = -1
   int switchMode = -1;
   // Retiré = 1, Enclenché = 0, None = -1
@@ -40,14 +41,14 @@ namespace IHM
     // Boutton Arret d'Urgence
     pinMode(PIN_BAU, INPUT);
 
-    tirette = (Enable)!digitalRead(PIN_START);
-    if (tirette == Enable::ENABLE_TRUE)
+    tirettePresent = (Enable)!digitalRead(PIN_START);
+    if (tirettePresent == Enable::ENABLE_TRUE)
     {
       println("Tirette : Présente au démarrage");
       Match::matchMode = Enable::ENABLE_TRUE;
       intervalLED = 500;
     }
-    else if (tirette == Enable::ENABLE_FALSE)
+    else if (tirettePresent == Enable::ENABLE_FALSE)
     {
       println("Tirette : Absente au démarrage");
       Match::matchMode = Enable::ENABLE_FALSE;
@@ -83,7 +84,7 @@ namespace IHM
 
     // Lecture de la tirette de démarrage
     Enable tiretteTmp = (Enable)!digitalRead(PIN_START);
-    if (tiretteTmp != tirette)
+    if (tiretteTmp != tirettePresent)
     {
       if (tiretteTmp == Enable::ENABLE_TRUE)
       {
@@ -94,7 +95,7 @@ namespace IHM
         intervalLED = 1000;
         Match::startMatch();
       }
-      tirette = tiretteTmp;
+      tirettePresent = tiretteTmp;
       PrintStart();
     }
 
@@ -212,9 +213,9 @@ namespace IHM
   void PrintStart()
   {
     print("Tirette : ");
-    if (tirette == Enable::ENABLE_TRUE)
+    if (tirettePresent == Enable::ENABLE_TRUE)
       println("Insérée");
-    else if (tirette == Enable::ENABLE_FALSE)
+    else if (tirettePresent == Enable::ENABLE_FALSE)
       println("Enlevée");
   }
 }
