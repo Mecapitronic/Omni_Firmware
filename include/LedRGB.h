@@ -39,10 +39,18 @@ public:
    *
    * @return * void
    */
+
   void loader();
   int lidarPositionToLedNumber(float position, float min, float max);
 
 private:
+  /**
+   * @brief update the current robot state from value in other modules
+   * get the adversaries and obstacles positions, robot position, robot state.
+   * This function is called by the update() function.
+   */
+  void updateState();
+
   std::vector<uint32_t> color = {0xFF0000, 0x00FF00, 0x0000FF}; //{0x0F0000,0x000F00,0x00000F,0x000000};
   CRGB leds[NUM_LEDS];
 
