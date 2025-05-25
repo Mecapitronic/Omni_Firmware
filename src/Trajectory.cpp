@@ -153,4 +153,26 @@ namespace Trajectory
     
     timerMotion.Enable();
   }
+
+  void GoToVertex(t_vertexID id, float speed_limit, float speed_final)
+  {
+    GoToPose(
+        Mapping::Get_Vertex_Point(id).x,
+        Mapping::Get_Vertex_Point(id).y,
+        robot->h,
+        speed_limit,
+        speed_final);
+  }
+
+  void Navigate_To_Vertex(t_vertexID id, float speed_limit, float speed_final)
+  {
+    if (PathFinding::PathFinding((int16_t)robot->x, (int16_t)robot->y, id))
+    {
+      if (PathFinding::solution.size() > 0)
+      {
+        t_vertexID nextPoint = PathFinding::solution.front();
+        GoToVertex(nextPoint, speed_limit, speed_final);
+      }
+    }
+  }
 }

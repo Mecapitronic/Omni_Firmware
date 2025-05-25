@@ -27,5 +27,7 @@ namespace Trajectory
     void RotateTowardsPoint(PointF point, float speed_limit, float speed_final);
 
     void GoToPose(float x, float y, float h, float speed_limit, float speed_final);
+    void GoToVertex(t_vertexID id, float speed_limit, float speed_final);
+    void Navigate_To_Vertex(t_vertexID id, float speed_limit, float speed_final);
 }
 #endif

@@ -61,6 +61,7 @@ void Update_Passability_Element(void);
 
 void Set_End_Vertex(t_vertexID id);
 t_vertexID Get_End_Vertex(void);
+Point Get_Vertex_Point(t_vertexID id);
 boolean Is_Equal_Vertex(t_vertexID id1, t_vertexID id2);
 boolean Is_Valid_Vertex(uint8_t vertexID);
 uint32_t Get_Distance_Vertex(t_vertexID id1, t_vertexID id2);

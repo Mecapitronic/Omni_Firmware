@@ -597,6 +597,14 @@ t_vertexID Get_End_Vertex(void)
   return end_vertex_ID;
 }
 
+Point Get_Vertex_Point(t_vertexID id)
+{
+  if (id >= 0 && id < Max_Vertex)
+    return vertex[id].point;
+  else
+    return Point(0, 0); // return invalid point if id is out of range
+}
+
 /****************************************************************************************
 * Return 1 if vertex id1 is the same vertex than id2
 ****************************************************************************************/

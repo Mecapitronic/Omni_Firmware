@@ -22,6 +22,8 @@ namespace PathFinding
     constexpr uint8_t LIST_LENGTH = Mapping::Max_Vertex;
     constexpr bool PRINT_PF = false;
 
+    extern std::vector<t_vertexID> solution;
+
     boolean PathFinding(int16_t start_x, int16_t start_y, t_vertexID end_vertex_ID);
     void PathFindingAddToOpen(std::vector<NodeItem> &list);
 
