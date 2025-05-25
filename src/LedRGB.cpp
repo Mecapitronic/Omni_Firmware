@@ -1,5 +1,5 @@
 #include "LedRGB.h"
-#include "GeoMathTools.h"
+
 
 void LedRGB::Initialisation(uint8_t numPixels, uint8_t data_pin)
 {
@@ -10,6 +10,78 @@ void LedRGB::Initialisation(uint8_t numPixels, uint8_t data_pin)
     FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, numPixels);
     FastLED.setBrightness(RGB_BRIGHTNESS);
 }
+
+void LedRGB::updateState(PoseF position, std::array<Circle, 10> obstacles)
+{    
+    current_state.time_led = (NUM_LEDS  * Match::getMatchTimeSec()) / Match::time_end_match;
+    // This function would update the current_state based on the robot's state
+
+
+    // represent obstacles as radis or led position to be displayed
+    size_t list_size = sizeof(obstacles) / sizeof(obstacles[0]);
+
+
+    // for (int i = 0; i < list_size; i++)
+    // {
+    //     obstacles[i].x
+    //         obstacles[i].y
+    // }
+}
+
+
+void LedRGB::update()
+{
+    // update led ring display according to current robot state
+    for (int i = 0; i < m_numPixels; i++)
+    {
+        // set the time as filled green leds from start to current_state.time
+        if (i < current_state.time_led)
+        {
+            leds[i] = CRGB::Green;
+        }
+
+        if (i < current_state.obstacles.size())
+        {
+            // Set color based on obstacle position
+            leds[i] = CRGB::Violet;
+        }
+        else if (i < current_state.adversaries.size() + current_state.obstacles.size())
+        {
+            // Set color based on adversary position
+            leds[i] = CRGB::Red; // Example: Blue for adversaries
+        }
+        else
+        {
+            // Default color for remaining LEDs
+            leds[i] = CRGB::Black;
+        }
+    }
+    FastLED.show(); // Update the LEDs to reflect the changes   
+    vTaskDelay(10); // Add a small delay to avoid overwhelming the LED updates
+}
+
+int LedRGB::obstacleRelativePosition(PoseF robotPosition, Point obstaclePosition) {
+    // get angle between h and the vector formed by robotposition x,y and obstaclePosition x,y
+
+//     DirectionFromPoint(robotPosition.x, robotPosition.y, obstaclePosition.x, obstaclePosition.y)
+
+//     atan2((object 1 Y - object 2 Y) / (object 1 X - object 2 X)) + 180}
+
+}
+
+int LedRGB::lidarPositionToLedNumber(float position, float min, float max)
+{
+    // Convert the position to a value between 0 and m_numPixels
+    auto ledNumber = static_cast<int>((position - min) / (max - min) * m_numPixels);
+    // Ensure the ledNumber is within bounds
+    if (ledNumber < 0)
+        ledNumber = 0;
+    else if (ledNumber >= m_numPixels)
+        ledNumber = m_numPixels - 1;
+    return ledNumber;
+}
+
+// ANIMATIONS
 
 void LedRGB::loader()
 {
@@ -27,67 +99,22 @@ void LedRGB::loader()
     }
 }
 
-void LedRGB::update()
+void LedRGB::emergencyStop()
 {
-    // update led ring display according to current robot state
-    updateState(); // Update the current_state based on robot's state and other conditions
-    for (int i = 0; i < m_numPixels; i++)
+    // set all leds glowing red smoothly
+    for (int i = 0; i < NUM_LEDS; i++)
     {
-        // set the time as filled green leds from start to current_state.time
-        if (i < current_state.time)
-        {
-            leds[i] = CRGB::Green; // Example: Green for time
-        }
-
-        if (i < current_state.obstacles.size())
-        {
-            // Set color based on obstacle position
-            leds[i] = CRGB::Violet; // Example: Red for obstacles
-        }
-        else if (i < current_state.adversaries.size() + current_state.obstacles.size())
-        {
-            // Set color based on adversary position
-            leds[i] = CRGB::Red; // Example: Blue for adversaries
-        }
-        else
-        {
-            // Default color for remaining LEDs
-            leds[i] = CRGB::Black;
-        }
+        leds[i] = CRGB::Red; // Set all LEDs to red
     }
-}
-
-int LedRGB::obstacleRelativePosition(PoseF robotPosition, Point obstaclePosition){
-    // get angle between h and the vector formed by robotposition x,y and obstaclePosition x,y
-
-    DirectionToPoint(robotPosition.x, robotPosition.y, obstaclePosition.x, obstaclePosition.y)
-
-        ATan((object 1 Y - object 2 Y) / (object 1 X - object 2 X)) +
-    180}
-
-void LedRGB::updateState(PoseF position, std::array<Circle> obstacles)
-{
-    // This function would update the current_state based on the robot's state
-
-    // represent obstacles as radis or led position to be displayed
-    size_t list_size = sizeof(obstacles) / sizeof(obstacles[0]);
-
-    for (int i = 0; i < list_size; i++)
+    FastLED.show();
+    // going proegressively to black
+    for (int i = 255; i >= 0; i--)
     {
-        obstacles[i].x
-            obstacles[i]
-                .y
+        FastLED.setBrightness(i); // Decrease brightness
+        FastLED.show();
+        delay(10);
     }
-}
+    FastLED.clear(); // Clear the LEDs
+    FastLED.show(); // Update the LEDs to turn them off
 
-int LedRGB::lidarPositionToLedNumber(float position, float min, float max)
-{
-    // Convert the position to a value between 0 and m_numPixels
-    auto ledNumber = static_cast<int>((position - min) / (max - min) * m_numPixels);
-    // Ensure the ledNumber is within bounds
-    if (ledNumber < 0)
-        ledNumber = 0;
-    else if (ledNumber >= m_numPixels)
-        ledNumber = m_numPixels - 1;
-    return ledNumber;
 }
