@@ -4,6 +4,8 @@
 #include <FastLED.h>
 
 #include "ESP32_Helper.h"
+#include "GeoMathTools.h"
+#include "Match.h"
 #include "pins.h"
 #include "Structure.h"
 
@@ -14,16 +16,25 @@ using namespace Printer;
 
 struct LEDState
 {
-  uint8_t time;
+  // represents current math time (from 0 to 100 seconds) as led number from 0 to 23
+  long time_led;
   uint16_t color;
   std::vector<float> obstacles;
   std::vector<float> adversaries;
+  bool emergencyStop;
 };
 class LedRGB
 {
 
 public:
   void Initialisation(uint8_t numPixels, uint8_t data_pin);
+
+  /**
+   * @brief update the current robot state from value in other modules
+   * get the adversaries and obstacles positions, robot position, robot state.
+   * This function is called by the update() function.
+   */
+  void updateState(PoseF position, std::array<Circle, 10> obstacles);
 
   /**
    * @brief update led ring display according to current robot state.
@@ -42,13 +53,7 @@ public:
    */
   void loader();
 
-  /**
-   * @brief update the current robot state from value in other modules
-   * get the adversaries and obstacles positions, robot position, robot state.
-   * This function is called by the update() function.
-   */
-  void updateState(PoseF position, std::array<Circle> obstacles);
-
+  void emergencyStop();
   int lidarPositionToLedNumber(float position, float min, float max);
   int obstacleRelativePosition(PoseF robotPosition, Point obstaclePosition);
 
