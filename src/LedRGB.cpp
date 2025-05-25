@@ -1,5 +1,6 @@
 #include "LedRGB.h"
 
+using namespace Printer;
 
 void LedRGB::Initialisation(uint8_t numPixels, uint8_t data_pin)
 {
@@ -11,53 +12,48 @@ void LedRGB::Initialisation(uint8_t numPixels, uint8_t data_pin)
     FastLED.setBrightness(RGB_BRIGHTNESS);
 }
 
+// This function would update the current_state based on the robot's state
 void LedRGB::updateState(PoseF position, std::array<Circle, 10> obstacles)
-{    
-    current_state.time_led = (NUM_LEDS  * Match::getMatchTimeSec()) / Match::time_end_match;
-    // This function would update the current_state based on the robot's state
+{   
+    long match_time =(NUM_LEDS  * Match::getMatchTimeSec()) / Match::time_end_match;
+    if (match_time == 0 || match_time > NUM_LEDS) {
+        match_time = 1;
+    }
+    current_state.time_led = match_time;
 
-
-    // represent obstacles as radis or led position to be displayed
-    size_t list_size = sizeof(obstacles) / sizeof(obstacles[0]);
-
-
-    // for (int i = 0; i < list_size; i++)
-    // {
-    //     obstacles[i].x
-    //         obstacles[i].y
-    // }
+    println("LED: Updating state with time_led: ", current_state.time_led);
 }
 
 
 void LedRGB::update()
 {
     // update led ring display according to current robot state
-    for (int i = 0; i < m_numPixels; i++)
+    for (int i = 0; i < NUM_LEDS; i++)
     {
         // set the time as filled green leds from start to current_state.time
-        if (i < current_state.time_led)
+        if (i == current_state.time_led)
         {
             leds[i] = CRGB::Green;
-        }
-
-        if (i < current_state.obstacles.size())
-        {
-            // Set color based on obstacle position
-            leds[i] = CRGB::Violet;
-        }
-        else if (i < current_state.adversaries.size() + current_state.obstacles.size())
-        {
-            // Set color based on adversary position
-            leds[i] = CRGB::Red; // Example: Blue for adversaries
         }
         else
         {
             // Default color for remaining LEDs
             leds[i] = CRGB::Black;
         }
+        // if (i < current_state.obstacles.size())
+        // {
+        //     // Set color based on obstacle position
+        //     leds[i] = CRGB::Violet;
+        // }
+        // else if (i < current_state.adversaries.size() + current_state.obstacles.size())
+        // {
+        //     // Set color based on adversary position
+        //     leds[i] = CRGB::Red; // Example: Blue for adversaries
+        // }
+
     }
     FastLED.show(); // Update the LEDs to reflect the changes   
-    vTaskDelay(10); // Add a small delay to avoid overwhelming the LED updates
+    vTaskDelay(100); // Add a small delay to avoid overwhelming the LED updates
 }
 
 int LedRGB::obstacleRelativePosition(PoseF robotPosition, Point obstaclePosition) {
