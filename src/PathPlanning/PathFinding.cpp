@@ -71,7 +71,7 @@ boolean PathFinding(int16_t start_x, int16_t start_y, t_vertexID end_vertex_ID)
 			dummy.currentID = best.parentID;
 			
 			//A partir du noeud de fin,
-			while (dummy.currentID != INVALID_VERTEX_ID)
+			while (dummy.currentID != INVALID_VERTEX_ID && dummy.currentID != 0)
 			{
 				auto it = std::find_if(close.begin(), close.end(), [&dummy](const NodeItem &node) { return Mapping::Is_Equal_Vertex(node.currentID, dummy.currentID); });
 				//if(it != close.end()) // we assume it's in !
