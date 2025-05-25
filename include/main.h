@@ -49,6 +49,8 @@ extern TimerThread timerMotion;
 void timerMotionCallback(TimerHandle_t xTimer);
 
 void TaskMatch(void *pvParameters);
+void TaskLidar(void *pvParameters);
+void TaskLed(void *pvParameters);
 
 void functionChrono(int nbrLoop = 1);
 #endif

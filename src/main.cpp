@@ -50,7 +50,7 @@ void setup()
 
   ServoAX12::Initialisation();
 
-  led_ring.init(24, PIN_WS2812_LED);
+  led_ring.Initialisation(24, PIN_WS2812_LED);
 
   // Init sensors
   otos.Initialisation();
@@ -87,6 +87,7 @@ void setup()
   timerMotion.Start();
 
   TaskThread Task1 = TaskThread(TaskMatch, "TaskMatch", 20000, 10, 1);
+  TaskThread Task2 = TaskThread(TaskLed, "TaskLed", 10000, 1, 0);
 
   // Send to PC all the mapping data
   ESP32_Helper::HandleCommand(Command("UpdateMapping"));
@@ -434,6 +435,14 @@ void loop()
   }
 }
 
+void TaskLed(void *pvParameters)
+{
+  println("Start TaskLed");
+  while (1)
+  {
+    led_ring.update();
+  }
+}
 //******************************************************* TASK => MATCH *************************************************************** */
 // Note the 1 Tick delay, this is need  so the watchdog doesn't get confused
 void TaskMatch(void *pvParameters)
