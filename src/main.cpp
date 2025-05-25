@@ -379,7 +379,7 @@ void TaskMatch(void *pvParameters)
         digitalWrite(PIN_EN_MCU, HIGH);
 
       // Enable or disable Communication
-      if (IHM::switchMode == 0 && (Printer::IsEnable() || Wifi_Helper::IsEnable()))
+      if (IHM::switchMode == 0 && (Printer::IsEnable())) // || Wifi_Helper::IsEnable()))
       {
         println("Disable Com");
         Printer::EnablePrinter(Enable::ENABLE_FALSE);
@@ -387,7 +387,7 @@ void TaskMatch(void *pvParameters)
         Printer::teleplotUDPEnable = Enable::ENABLE_FALSE;
         Lidar::disableComLidar = true;
       }
-      else if (IHM::switchMode == 1 && (!Printer::IsEnable() || !Wifi_Helper::IsEnable()))
+      else if (IHM::switchMode == 1 && (!Printer::IsEnable())) // || !Wifi_Helper::IsEnable()))
       {
         Printer::EnablePrinter(Enable::ENABLE_TRUE);
         Wifi_Helper::EnableWifi(Enable::ENABLE_TRUE);
