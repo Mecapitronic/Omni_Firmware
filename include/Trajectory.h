@@ -6,6 +6,9 @@
 #include "GeoMathTools.h"
 #include "Motion.h"
 #include "Timer.h"
+#include "PathPlanning/PathFinding.h"
+#include "PathPlanning/Mapping.h"
+
 namespace Trajectory
 {
     /**
