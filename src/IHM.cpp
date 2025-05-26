@@ -47,13 +47,13 @@ namespace IHM
     {
       println("Tirette : Présente au démarrage");
       Match::matchMode = Enable::ENABLE_TRUE;
-      ledTimeOut.timeout = 500;
+      ledTimeOut.timeOut = 500;
     }
     else if (tirettePresent == Enable::ENABLE_FALSE)
     {
       println("Tirette : Absente au démarrage");
       Match::matchMode = Enable::ENABLE_FALSE;
-      ledTimeOut.timeout = 200;
+      ledTimeOut.timeOut = 200;
     }
     Match::printMatch();
     UpdateHMI();
@@ -88,11 +88,11 @@ namespace IHM
     {
       if (tiretteTmp == Enable::ENABLE_TRUE)
       {
-        ledTimeOut.timeout = 500;
+        ledTimeOut.timeOut = 500;
       }
       else if (tiretteTmp == Enable::ENABLE_FALSE)
       {
-        ledTimeOut.timeout = 1000;
+        ledTimeOut.timeOut = 1000;
         Match::startMatch();
       }
       tirettePresent = tiretteTmp;
