@@ -50,6 +50,27 @@ namespace ServoAX12
         bool ledState;
     };
 
+    enum class ServoPosition
+    {
+        Haut = 270,
+        Bas = 0,
+
+        GaucheMax = 197,
+        GaucheDepose = 185,
+        GauchePrise = 150,
+        GaucheTourne = 80,
+        GaucheMin = 70,
+
+        DroiteMin = 100,
+        DroiteDepose = 112,
+        DroitePrise = 149,
+        DroiteTourne = 220,
+        DroiteMax = 290,
+
+        Min = 0,
+        Max = 290
+    };
+
     extern ServoMotion Servo_Up;
     extern ServoMotion Servo_Left;
     extern ServoMotion Servo_Right;
@@ -64,6 +85,11 @@ namespace ServoAX12
     void UpdateServo(ServoMotion &servo);
 
     void SetServoPosition(ServoMotion &servo, float position);
+    void Prise();
+    void Depose();
+    void Tourne();
+    void Haut();
+    void Bas();
 
     void HandleCommand(Command cmd);
     const void PrintCommandHelp();

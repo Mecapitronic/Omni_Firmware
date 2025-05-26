@@ -106,6 +106,30 @@ namespace ServoAX12
         dxl.setGoalPosition(servo.id, servo.command_position, UNIT_DEGREE);
     }
 
+    void Prise()
+    {
+        SetServoPosition(Servo_Left, (float)ServoPosition::GauchePrise);
+        SetServoPosition(Servo_Right, (float)ServoPosition::DroitePrise);
+    }
+    void Depose()
+    {
+        SetServoPosition(Servo_Left, (float)ServoPosition::GaucheDepose);
+        SetServoPosition(Servo_Right, (float)ServoPosition::DroiteDepose);
+    }
+    void Tourne()
+    {
+        SetServoPosition(Servo_Left, (float)ServoPosition::GaucheTourne);
+        SetServoPosition(Servo_Right, (float)ServoPosition::DroiteTourne);
+    }
+    void Haut()
+    {
+        SetServoPosition(Servo_Up, (float)ServoPosition::Haut);
+    }
+    void Bas()
+    {
+        SetServoPosition(Servo_Up, (float)ServoPosition::Bas);
+    }
+
     void HandleCommand(Command cmd)
     {
         if (cmd.cmd == "AX12Scan")
@@ -123,21 +147,10 @@ namespace ServoAX12
         }
         else if (cmd.cmd == "AX12Pos")
         {
-            if (cmd.size == 1 && cmd.dataStr != "")
+            if (cmd.size == 2)
             {
-                // UP : Bas 0, Haut 270
-                // Left : MAX 197, depose 185, prise 150, tourne 80, MIN 70
-                // Right : MIN 100, depose 112, prise 149, tourne 220, MIN 227
-                // 0° to 290°
-                // AX12Pos:100:Up
-                // AX12Pos:150:Left
-                // AX12Pos:150:Right
-                if (cmd.dataStr == "Up")
-                    SetServoPosition(Servo_Up, cmd.data[0]);
-                else if (cmd.dataStr == "Left")
-                    SetServoPosition(Servo_Left, cmd.data[0]);
-                else if (cmd.dataStr == "Right")
-                    SetServoPosition(Servo_Right, cmd.data[0]);
+                // AX12Pos:3:100
+                dxl.setGoalPosition(cmd.data[0], cmd.data[1], UNIT_DEGREE);
             }
             else
             {
@@ -149,12 +162,49 @@ namespace ServoAX12
         else if (cmd.cmd == "AX12Vit" && cmd.size == 2)
         {
             // AX12Vit:5:30
+            println("AX12 Servo id : ", cmd.data[0]);
+            println(" Vitesse : ", cmd.data[1]);
             dxl.writeControlTableItem(ControlTableItem::PROFILE_VELOCITY, cmd.data[0], cmd.data[1]);
         }
         else if (cmd.cmd == "AX12Acc" && cmd.size == 2)
         {
             // AX12Acc:5:50
+            println("AX12 Servo id : ", cmd.data[0]);
+            println(" Accel : ", cmd.data[1]);
             dxl.writeControlTableItem(ControlTableItem::PROFILE_ACCELERATION, cmd.data[0], cmd.data[1]);
+        }
+        else if (cmd.cmd == "AX12Stop")
+        {
+            println("AX12Stop");
+            StopAllServo();
+        }
+        else if (cmd.cmd == "AX12Prise")
+        {
+            Prise();
+        }
+        else if (cmd.cmd == "AX12Depose")
+        {
+            Depose();
+        }
+        else if (cmd.cmd == "AX12Tourne")
+        {
+            Tourne();
+        }
+        else if (cmd.cmd == "AX12Haut")
+        {
+            Haut();
+        }
+        else if (cmd.cmd == "AX12Bas")
+        {
+            Bas();
+        }
+        else if (cmd.cmd == "AX12Help")
+        {
+            PrintCommandHelp();
+        }
+        else
+        {
+            println("Unknown command : ", cmd.cmd);
         }
     }
 
