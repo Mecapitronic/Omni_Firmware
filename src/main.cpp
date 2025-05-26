@@ -88,11 +88,17 @@ void setup()
 
   TaskThread Task1 = TaskThread(TaskMatch, "TaskMatch", 20000, 10, 1);
   TaskThread Task2 = TaskThread(TaskLed, "TaskLed", 10000, 1, 0);
+  TaskThread Task3 = TaskThread(TaskMain, "TaskMain", 10000, 1, 0);
 
   // Send to PC all the mapping data
   ESP32_Helper::HandleCommand(Command("UpdateMapping"));
 
   // print("FreeRTOS heap remaining ");print(xPortGetFreeHeapSize());println(" bytes");
+}
+
+void loop()
+{
+  vTaskDelete(NULL); // Supprime immédiatement le task Arduino "loop"
 }
 
 //******************************************************* TIMER 5ms => MOTION **************************************************************** */
@@ -154,268 +160,189 @@ void timerMotionCallback(TimerHandle_t xTimer)
   timerMotion.Running(false);
 }
 
-//******************************************************* TASK => LIDAR *************************************************************** */
-//  do NON BLOCKING stuff
-void TaskLidar(void *pvParameters)
+[[noreturn]] void TaskMain(void *pvParameters)
 {
-  println("Start TaskLidar");
-  SERIAL_LIDAR.setPins(RX_LIDAR, TX_LIDAR);
-  SERIAL_LIDAR.setRxBufferSize(1024);
-  SERIAL_LIDAR.setTxBufferSize(1024);
-  SERIAL_LIDAR.begin(230400);
-
-  unsigned char trame[7];
-  uint16_t cursor = 0;
-
-  while (1)
+  while (true)
   {
-    PoseF p = robot.GetPoseF();
-    // Starting char : '!'
-    SERIAL_LIDAR.write(0x21);
+    startChrono = micros();
+    Match::updateMatch();
+    IHM::UpdateBAU();
+    IHM::Blink();
 
-    // Robot X
-    SERIAL_LIDAR.write((int)p.x % 256);
-    SERIAL_LIDAR.write((int)p.x >> 8);
+    // take some time to update the servo, maybe move it elsewhere
+    ServoAX12::Update();
+    // functionChrono(1);
+    //  functionChrono(1000);
+    //   delay(3000);
+    //   // Test trajectoires
+    //    goTo.x = 500;
+    //    goTo.y = 1000; // avance 500
+    //    goTo.h = 0;
+    //    SetRobotPosition(goTo.x, goTo.y, goTo.h);
+    //    delay(5000);
+    //   //while(linear.isRunning || angular.isRunning) ;//doWhileWaiting();
 
-    // Robot Y
-    SERIAL_LIDAR.write((int)p.y % 256);
-    SERIAL_LIDAR.write((int)p.y >> 8);
-
-    // Robot Angle * 100
-    int angle = (int)(degrees(p.h) * 100);
-    SERIAL_LIDAR.write(angle % 256);
-    SERIAL_LIDAR.write(angle >> 8);
-
-    // Ending char : '\n'
-    SERIAL_LIDAR.write(0x0A);
-    // println("Lidar sent : ", p);
-
-    while (SERIAL_LIDAR.available())
+    if (startChrono - teleplotChrono > 1000 * 100) // Update time
     {
-      char data = SERIAL_LIDAR.read();
+      teleplotChrono = startChrono;
+      teleplot("Position", robot);
+      teleplot("Orient", degrees(robot.h));
 
-      if (data == 0x21 && cursor == 0)
+      //// teleplot("Direction", linear.direction);
+      // println(">fixeScale:0:0;0:2000;3000:2000;3000:0;|xy");
+      //// otos.Teleplot();
+      //// linear.Teleplot("linear");
+      //// angular.Teleplot("angular");
+
+      //// teleplot("v1", motor.GetMotorSpeed(1));
+      //// teleplot("v2", motor.GetMotorSpeed(2));
+      //// teleplot("v3", motor.GetMotorSpeed(3));
+      // teleplot("Servo_Up Pos", ServoAX12::Servo_Up.position);
+      // teleplot("Servo_Left Pos", ServoAX12::Servo_Left.position);
+      // teleplot("Servo_Up Cmd", ServoAX12::Servo_Up.command_position);
+      // teleplot("Servo_Left Cmd", ServoAX12::Servo_Left.command_position);
+    }
+
+    if (startChrono - mappingChrono > 1000 * 500) // Update every 1 sec
+    {
+      mappingChrono = startChrono;
+      Obstacle::PrintObstacleList();
+      Mapping::Update_Start_Vertex((int16_t)robot.x, (int16_t)robot.y);
+      // Mapping::Update_Passability_Graph();
+      // Mapping::PrintVertex0();
+      // Mapping::PrintVertexList();
+    }
+
+    if (startChrono - rgbChrono > 1000 * 100) // Update every 100ms
+    {
+      rgbChrono = startChrono;
+      led_ring.update();
+    }
+
+    if (ESP32_Helper::HasWaitingCommand())
+    {
+      Command cmd = ESP32_Helper::GetCommand();
+
+      otos.HandleCommand(cmd);
+      motor.HandleCommand(cmd);
+      ServoAX12::HandleCommand(cmd);
+
+      if (cmd.cmd == "Help")
       {
-        trame[cursor++] = data;
+        otos.PrintCommandHelp();
+        motor.PrintCommandHelp();
       }
-      else if (cursor > 0)
+      else if (cmd.cmd == "GoToPose" && cmd.size == 3)
       {
-        trame[cursor++] = data;
-        if (cursor >= 7)
+        // GoToPose:500;500;90
+        // GoToPose:500;500;0
+        // GoToPose:50;50;0
+        // GoToPose:0;0;45
+        // GoToPose:0;0;0
+        goTo.x = cmd.data[0];
+        goTo.y = cmd.data[1];
+        goTo.h = radians(cmd.data[2]);
+        print("Robot go to x=", goTo.x);
+        print(" y=", goTo.y);
+        print(" h=", goTo.h);
+        println();
+        Trajectory::GoToPose(goTo.x, goTo.y, goTo.h, linear.speed_max, 0);
+      }
+      else if (cmd.cmd == "SetPose" && cmd.size == 3)
+      {
+        // SetPose:2000:200:9000
+        // SetPose:500;500;0
+        // SetPose:1500;1000;0
+        timerMotion.WaitForDisable();
+        goTo.x = cmd.data[0];
+        goTo.y = cmd.data[1];
+        goTo.h = radians(cmd.data[2]);
+        print("Robot set to x=", goTo.x);
+        print(" y=", goTo.y);
+        print(" h=", goTo.h);
+        println();
+        robot.SetPose(goTo.x, goTo.y, goTo.h);
+        otos.SetPose(robot.x, robot.y, robot.h);
+        Trajectory::Reset();
+        timerMotion.Enable();
+      }
+      else if (cmd.cmd == "UpdateMapping")
+      {
+        Mapping::Update_Start_Vertex((int16_t)robot.x, (int16_t)robot.y);
+        Mapping::Update_Passability_Graph();
+        Mapping::PrintVertexList();
+        Mapping::PrintSegmentList();
+        Mapping::PrintCircleList();
+        Obstacle::PrintObstacleList();
+        println("RobotRadius:", ROBOT_RADIUS);
+        println("RobotMargin:", ROBOT_MARGIN);
+      }
+      else if (cmd.cmd == "PF")
+      {
+        bool result = false;
+        // PathFinding
+        // PF:5
+        // PF:500:1000:5
+        if (cmd.size == 1)
         {
-          if (data == 0x0A)
-          {
-            Point p;
-            int header = trame[0];
-            int num = trame[1];
-            p.x = trame[3] << 8 | trame[2];
-            p.y = trame[5] << 8 | trame[4];
-            int footer = trame[6];
-            // I use the radius as the id number
-            Obstacle::queueObstacle.Send(Circle(p, num));
-            // Obstacle::Add_Obstacle(num, p);
-            if (p.x != 0 && p.y != 0)
-            {
-              print("Lidar received : ", num);
-              println(" ", p);
-            }
-            cursor = 0;
-            // break;
-          }
-          cursor = 0;
+          result = PathFinding::PathFinding((int16_t)robot.x, (int16_t)robot.y, cmd.data[0]);
+        }
+        else if (cmd.size == 3)
+        {
+          result = PathFinding::PathFinding(cmd.data[0], cmd.data[1], cmd.data[2]);
+        }
+        if (result)
+        {
+          println("PF Found");
+        }
+        else
+        {
+          print("PF Not Found");
         }
       }
-    }
-    vTaskDelay(10);
-  }
-  println("End TaskLidar");
-}
-
-//******************************************************* LOOP *****************************************************************/
-// This task has a very high priority of 20 on core 1 (Max priority = 25)
-void loop()
-{
-  startChrono = micros();
-  Match::updateMatch();
-  IHM::UpdateBAU();
-  IHM::Blink();
-
-  // take some time to update the servo, maybe move it elsewhere
-  ServoAX12::Update();
-  // functionChrono(1);
-  //  functionChrono(1000);
-  //   delay(3000);
-  //   // Test trajectoires
-  //    goTo.x = 500;
-  //    goTo.y = 1000; // avance 500
-  //    goTo.h = 0;
-  //    SetRobotPosition(goTo.x, goTo.y, goTo.h);
-  //    delay(5000);
-  //   //while(linear.isRunning || angular.isRunning) ;//doWhileWaiting();
-
-  if (startChrono - teleplotChrono > 1000 * 100) // Update time
-  {
-    teleplotChrono = startChrono;
-    teleplot("Position", robot);
-    teleplot("Orient", degrees(robot.h));
-
-    //// teleplot("Direction", linear.direction);
-    // println(">fixeScale:0:0;0:2000;3000:2000;3000:0;|xy");
-    //// otos.Teleplot();
-    //// linear.Teleplot("linear");
-    //// angular.Teleplot("angular");
-
-    //// teleplot("v1", motor.GetMotorSpeed(1));
-    //// teleplot("v2", motor.GetMotorSpeed(2));
-    //// teleplot("v3", motor.GetMotorSpeed(3));
-    // teleplot("Servo_Up Pos", ServoAX12::Servo_Up.position);
-    // teleplot("Servo_Left Pos", ServoAX12::Servo_Left.position);
-    // teleplot("Servo_Up Cmd", ServoAX12::Servo_Up.command_position);
-    // teleplot("Servo_Left Cmd", ServoAX12::Servo_Left.command_position);
-  }
-
-  if (startChrono - mappingChrono > 1000 * 500) // Update every 1 sec
-  {
-    mappingChrono = startChrono;
-    Obstacle::PrintObstacleList();
-    Mapping::Update_Start_Vertex((int16_t)robot.x, (int16_t)robot.y);
-    // Mapping::Update_Passability_Graph();
-    // Mapping::PrintVertex0();
-    // Mapping::PrintVertexList();
-  }
-
-  if (startChrono - rgbChrono > 1000 * 100) // Update every 100ms
-  {
-    rgbChrono = startChrono;
-    led_ring.update();
-  }
-
-  if (ESP32_Helper::HasWaitingCommand())
-  {
-    Command cmd = ESP32_Helper::GetCommand();
-
-    otos.HandleCommand(cmd);
-    motor.HandleCommand(cmd);
-    ServoAX12::HandleCommand(cmd);
-
-    if (cmd.cmd == "Help")
-    {
-      otos.PrintCommandHelp();
-      motor.PrintCommandHelp();
-    }
-    else if (cmd.cmd == "GoToPose" && cmd.size == 3)
-    {
-      // GoToPose:500;500;90
-      // GoToPose:500;500;0
-      // GoToPose:50;50;0
-      // GoToPose:0;0;45
-      // GoToPose:0;0;0
-      goTo.x = cmd.data[0];
-      goTo.y = cmd.data[1];
-      goTo.h = radians(cmd.data[2]);
-      print("Robot go to x=", goTo.x);
-      print(" y=", goTo.y);
-      print(" h=", goTo.h);
-      println();
-      Trajectory::GoToPose(goTo.x, goTo.y, goTo.h, linear.speed_max, 0);
-    }
-    else if (cmd.cmd == "SetPose" && cmd.size == 3)
-    {
-      // SetPose:2000:200:9000
-      // SetPose:500;500;0
-      // SetPose:1500;1000;0
-      timerMotion.WaitForDisable();
-      goTo.x = cmd.data[0];
-      goTo.y = cmd.data[1];
-      goTo.h = radians(cmd.data[2]);
-      print("Robot set to x=", goTo.x);
-      print(" y=", goTo.y);
-      print(" h=", goTo.h);
-      println();
-      robot.SetPose(goTo.x, goTo.y, goTo.h);
-      otos.SetPose(robot.x, robot.y, robot.h);
-      Trajectory::Reset();
-      timerMotion.Enable();
-    }
-    else if (cmd.cmd == "UpdateMapping")
-    {
-      Mapping::Update_Start_Vertex((int16_t)robot.x, (int16_t)robot.y);
-      Mapping::Update_Passability_Graph();
-      Mapping::PrintVertexList();
-      Mapping::PrintSegmentList();
-      Mapping::PrintCircleList();
-      Obstacle::PrintObstacleList();
-      println("RobotRadius:", ROBOT_RADIUS);
-      println("RobotMargin:", ROBOT_MARGIN);
-    }
-    else if (cmd.cmd == "PF")
-    {
-      bool result = false;
-      // PathFinding
-      // PF:5
-      // PF:500:1000:5
-      if (cmd.size == 1)
+      else if (cmd.cmd == "VertexList")
       {
-        result = PathFinding::PathFinding((int16_t)robot.x, (int16_t)robot.y, cmd.data[0]);
+        Mapping::PrintVertexList();
       }
-      else if (cmd.size == 3)
+      else if (cmd.cmd == "SegmentList")
       {
-        result = PathFinding::PathFinding(cmd.data[0], cmd.data[1], cmd.data[2]);
+        Mapping::PrintSegmentList();
       }
-      if (result)
+      else if (cmd.cmd == "CircleList")
       {
-        println("PF Found");
+        Mapping::PrintCircleList();
       }
-      else
+      else if (cmd.cmd == "MappingList")
       {
-        print("PF Not Found");
+        Mapping::PrintVertexList();
+        Mapping::PrintSegmentList();
+        Mapping::PrintCircleList();
       }
-    }
-    else if (cmd.cmd == "Nav" && cmd.size == 1)
-    {
-      Trajectory::Navigate_To_Vertex(cmd.data[0], linear.speed_max, 0);
-    }
-    else if (cmd.cmd == "VertexList")
-    {
-      Mapping::PrintVertexList();
-    }
-    else if (cmd.cmd == "SegmentList")
-    {
-      Mapping::PrintSegmentList();
-    }
-    else if (cmd.cmd == "CircleList")
-    {
-      Mapping::PrintCircleList();
-    }
-    else if (cmd.cmd == "MappingList")
-    {
-      Mapping::PrintVertexList();
-      Mapping::PrintSegmentList();
-      Mapping::PrintCircleList();
-    }
-    else if (cmd.cmd == "ObstacleList")
-    {
-      Obstacle::PrintObstacleList();
-    }
-    else if (cmd.cmd == "AddObs" && cmd.size == 3)
-    {
-      // AddObs:0:500:1000
-      int num = cmd.data[0];
-      Point p;
-      p.x = cmd.data[1];
-      p.y = cmd.data[2];
-      // Obstacle::queueObstacle.Send(Circle(p, num));
-      Obstacle::Add_Obstacle(num, p);
-      Mapping::Update_Passability_Obstacle();
-      Obstacle::PrintObstacleList();
-    }
-    else if (cmd.cmd == "RemoveObstacle" && cmd.size == 1)
-    {
-      int num = cmd.data[0];
-      // Obstacle::queueObstacle.Send(Circle(0, 0, num));
-      Obstacle::Add_Obstacle(num, {0, 0});
-      Mapping::Update_Passability_Obstacle();
-      Obstacle::PrintObstacleList();
+      else if (cmd.cmd == "ObstacleList")
+      {
+        Obstacle::PrintObstacleList();
+      }
+      else if (cmd.cmd == "AddObs" && cmd.size == 3)
+      {
+        // AddObs:0:500:1000
+        int num = cmd.data[0];
+        Point p;
+        p.x = cmd.data[1];
+        p.y = cmd.data[2];
+        // Obstacle::queueObstacle.Send(Circle(p, num));
+        Obstacle::Add_Obstacle(num, p);
+        Mapping::Update_Passability_Obstacle();
+        Obstacle::PrintObstacleList();
+      }
+      else if (cmd.cmd == "RemoveObstacle" && cmd.size == 1)
+      {
+        int num = cmd.data[0];
+        // Obstacle::queueObstacle.Send(Circle(0, 0, num));
+        Obstacle::Add_Obstacle(num, {0, 0});
+        Mapping::Update_Passability_Obstacle();
+        Obstacle::PrintObstacleList();
+      }
+      vTaskDelay(1); // Allow other tasks to run
     }
   }
 
