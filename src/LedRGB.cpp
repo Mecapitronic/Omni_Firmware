@@ -23,19 +23,6 @@ void LedRGB::updateState(PoseF position, std::array<Circle, 10> obstacles_list)
     {
         m_obstacles_list.emplace_back(obstacle.p.x, obstacle.p.y);
     }
-
-    if (Match::matchState == State::MATCH_RUN)
-    {
-        match_time_led = (NUM_LEDS * Match::getMatchTimeSec()) / Match::time_end_match;
-    }
-    else
-    {
-        match_time_led++;
-        if (match_time_led >= NUM_LEDS)
-        {
-            match_time_led = 0;
-        }
-    }
 }
 
 // pour faire un clignotement on stock 2 couleurs pour alterner
@@ -67,23 +54,29 @@ void LedRGB::update()
     // update led ring display according to current robot state
     if (Match::matchState != State::MATCH_WAIT)
     {
-        fill_solid(&leds[match_time_led], 1, CRGB::Green); // Set the time in green
+        match_time_led = (NUM_LEDS * Match::getMatchTimeMs()) / Match::time_end_match;
+        // Ensure we don't go out of bounds
+        if (match_time_led <= NUM_LEDS)
+        {
+            leds[match_time_led] = CRGB::Green; // Set the time in green
+        }
+        println("LED TIME: ", match_time_led);
     }
 
-    // calculate obstacles orientation relative to the robot position and orientation
-    for (size_t i = 0; i < m_obstacles_list.size(); i++)
-    {
-        // get the led number corresponding to the obstacle position
-        int ledNumber = lidarPositionToLedNumber(m_obstacles_list[i].x, -200, 200);
-        if (ledNumber >= 0 && ledNumber < NUM_LEDS)
-        {
-            leds[ledNumber] = CRGB::Violet; // Example: Violet for obstacles
-        }
-        else
-        {
-            leds[0] = CRGB::Violet;
-        }
-    }
+    // // calculate obstacles orientation relative to the robot position and orientation
+    // for (size_t i = 0; i < m_obstacles_list.size(); i++)
+    // {
+    //     // get the led number corresponding to the obstacle position
+    //     int ledNumber = lidarPositionToLedNumber(m_obstacles_list[i].x, -200, 200);
+    //     if (ledNumber >= 0 && ledNumber < NUM_LEDS)
+    //     {
+    //         leds[ledNumber] = CRGB::Violet; // Example: Violet for obstacles
+    //     }
+    //     else
+    //     {
+    //         leds[0] = CRGB::Violet;
+    //     }
+    // }
 
     // else if (i < adversaries.size() + obstacles.size())
     // {

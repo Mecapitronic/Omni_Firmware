@@ -90,7 +90,7 @@ private:
   CRGB team_color = CRGB::Black; // Default color for the team
 
   // numero de la led a allumer pour indiquer le temps de match écoulé
-  long match_time_led = 0;
+  uint8_t match_time_led = 0;
 
   std::vector<Point> m_obstacles_list;
 };
