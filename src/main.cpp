@@ -164,13 +164,13 @@ void TaskTeleplot(void *pvParameters)
 {
   int lastMatchTime = 0;
   println("Start TaskTeleplot");
-  Timeout robotPosTO, mapTO;
-  robotPosTO.Start(100);
-  mapTO.Start(200);
+  Timeout robotPosTimeOut, mapTimeOut;
+  robotPosTimeOut.Start(100);
+  mapTimeOut.Start(200);
 
   while (1)
   {
-    if (robotPosTO.IsTimeOut())
+    if (robotPosTimeOut.IsTimeOut())
     {
       teleplot("Position", robot);
       teleplot("Orient", degrees(robot.h));
@@ -190,7 +190,7 @@ void TaskTeleplot(void *pvParameters)
       // teleplot("Servo_Left Cmd", ServoAX12::Servo_Left.command_position);
     }
 
-    if (mapTO.IsTimeOut())
+    if (mapTimeOut.IsTimeOut())
     {
       Obstacle::PrintObstacleList();
       Mapping::PrintVertex0();

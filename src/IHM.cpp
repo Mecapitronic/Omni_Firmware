@@ -10,7 +10,7 @@ namespace IHM
     int bauReadyPrev = -1;
 
     int ledState = LOW;
-    Timeout ledTO;
+    Timeout ledTimeOut;
   }
 
   Team team = Team::None;
@@ -40,18 +40,20 @@ namespace IHM
     // Boutton Arret d'Urgence
     pinMode(PIN_BAU, INPUT);
 
+    ledTimeOut.Start(1000);
+
     tirettePresent = (Enable)!digitalRead(PIN_START);
     if (tirettePresent == Enable::ENABLE_TRUE)
     {
       println("Tirette : Présente au démarrage");
       Match::matchMode = Enable::ENABLE_TRUE;
-      ledTO.timeout = 500;
+      ledTimeOut.timeout = 500;
     }
     else if (tirettePresent == Enable::ENABLE_FALSE)
     {
       println("Tirette : Absente au démarrage");
       Match::matchMode = Enable::ENABLE_FALSE;
-      ledTO.timeout = 200;
+      ledTimeOut.timeout = 200;
     }
     Match::printMatch();
     UpdateHMI();
@@ -60,7 +62,6 @@ namespace IHM
     LEDcontroller = &FastLED.addLeds<WS2812, PIN_RGB_LED, RGB>(&builtin_led, 1);
     builtin_led = CRGB::Black;
     LEDcontroller->showLeds(BUILTIN_BRIGHTNESS);
-    ledTO.Start(1000);
   }
 
   void UpdateHMI()
@@ -87,11 +88,11 @@ namespace IHM
     {
       if (tiretteTmp == Enable::ENABLE_TRUE)
       {
-        ledTO.timeout = 500;
+        ledTimeOut.timeout = 500;
       }
       else if (tiretteTmp == Enable::ENABLE_FALSE)
       {
-        ledTO.timeout = 1000;
+        ledTimeOut.timeout = 1000;
         Match::startMatch();
       }
       tirettePresent = tiretteTmp;
@@ -140,7 +141,7 @@ namespace IHM
 
     if (useBlink)
     {
-      if (ledTO.IsTimeOut())
+      if (ledTimeOut.IsTimeOut())
       {
         ledState = !ledState;
       }
