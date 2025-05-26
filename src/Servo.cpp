@@ -6,10 +6,10 @@ namespace ServoAX12
 {
     Dynamixel2Arduino dxl(SERIAL_SERVO, PIN_SERVO_DIR);
 
-    ServoMotion Servo_Up = {5, 30, 50, 0, 0, false};
+    ServoMotion Servo_Up = {6, 30, 50, 0, 0, false};
     // ServoMotion Servo_Down = {7, 30, 50, 0, 0, false};
-    ServoMotion Servo_Left = {9, 30, 50, 0, 0, false};
-    // ServoMotion Servo_Right = {11, 30, 50, 0, 0, false};
+    ServoMotion Servo_Left = {5, 30, 50, 0, 0, false};
+    ServoMotion Servo_Right = {3, 30, 50, 0, 0, false};
 
     void Initialisation()
     {
@@ -22,7 +22,7 @@ namespace ServoAX12
         InitServo(Servo_Up);
         // InitServo(Servo_Down);
         InitServo(Servo_Left);
-        // InitServo(Servo_Right);
+        InitServo(Servo_Right);
     }
 
     void InitServo(ServoMotion &servo)
@@ -64,6 +64,7 @@ namespace ServoAX12
         // 1 ms / servo
         UpdateServo(Servo_Up);
         UpdateServo(Servo_Left);
+        UpdateServo(Servo_Right);
     }
 
     void UpdateServo(ServoMotion &servo)
@@ -116,6 +117,8 @@ namespace ServoAX12
                 SetServoPosition(Servo_Up, cmd.data[0]);
             else if (cmd.dataStr == "Left")
                 SetServoPosition(Servo_Left, cmd.data[0]);
+            else if (cmd.dataStr == "Right")
+                SetServoPosition(Servo_Right, cmd.data[0]);
         }
         /*
         else if (cmd.cmd == "AX12Vit" && cmd.size == 2)

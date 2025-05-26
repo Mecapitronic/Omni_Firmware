@@ -30,6 +30,7 @@ namespace ServoAX12
         DxlProtocolVersion::PROTOCOL_1,
         DxlProtocolVersion::PROTOCOL_2};
 
+    // id vitesse acceleration position command_position ledState
     struct ServoMotion
     {
         uint8_t id;
@@ -43,7 +44,7 @@ namespace ServoAX12
     extern ServoMotion Servo_Up;
     // extern ServoMotion Servo_Down;
     extern ServoMotion Servo_Left;
-    // extern ServoMotion Servo_Right;
+    extern ServoMotion Servo_Right;
 
     void Initialisation();
     void InitServo(ServoMotion &servo);
