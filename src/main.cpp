@@ -160,7 +160,7 @@ void timerMotionCallback(TimerHandle_t xTimer)
   timerMotion.Running(false);
 }
 
-[[noreturn]] void TaskTeleplot(void *pvParameters)
+void TaskTeleplot(void *pvParameters)
 {
   int lastMatchTime = 0;
   println("Start TaskTeleplot");
@@ -200,7 +200,7 @@ void timerMotionCallback(TimerHandle_t xTimer)
   }
 }
 
-[[noreturn]] void TaskMain(void *pvParameters)
+void TaskMain(void *pvParameters)
 {
   while (true)
   {
@@ -365,7 +365,7 @@ void timerMotionCallback(TimerHandle_t xTimer)
   }
 }
 
-[[noreturn]] void TaskLed(void *pvParameters)
+void TaskLed(void *pvParameters)
 {
   println("Start TaskLed");
   while (true)
@@ -395,11 +395,9 @@ void TaskMatch(void *pvParameters)
       // TODO : update mapping according to color
       if (IHM::team == Team::Jaune)
       {
-        println("Team Jaune");
       }
       else
       {
-        println("Team Bleu");
       }
       // Disable Motor & Servo Power in Match mode during waiting
       if (Match::matchMode == Enable::ENABLE_TRUE)

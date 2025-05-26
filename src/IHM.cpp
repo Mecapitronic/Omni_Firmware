@@ -21,7 +21,7 @@ namespace IHM
   // Retiré (OK) = 1, Enclenché (NOK) = 0, None = -1
   int bauReady = -1;
 
-  CLEDController * LEDcontroller;
+  CLEDController *LEDcontroller;
   CRGB builtin_led;
 
   bool useBlink = true;
@@ -57,7 +57,7 @@ namespace IHM
     UpdateHMI();
     UpdateBAU();
 
-    LEDcontroller = & FastLED.addLeds<WS2812, PIN_RGB_LED, RGB>(&builtin_led, 1);
+    LEDcontroller = &FastLED.addLeds<WS2812, PIN_RGB_LED, RGB>(&builtin_led, 1);
     builtin_led = CRGB::Black;
     LEDcontroller->showLeds(BUILTIN_BRIGHTNESS);
     ledTO.Start(1000);
@@ -132,7 +132,8 @@ namespace IHM
     if (!bauReady)
     {
       builtin_led = CRGB::Red;
-    } else
+    }
+    else
     {
       builtin_led = teamColor;
     }
@@ -143,10 +144,11 @@ namespace IHM
       {
         ledState = !ledState;
       }
-      
+
       if (ledState)
         builtin_led = teamColor;
-      else {
+      else
+      {
         builtin_led = bauReady ? CRGB::Black : CRGB::Red;
       }
     }
