@@ -30,14 +30,11 @@ void LedRGB::updateState(PoseF position, std::array<Circle, 10> obstacles)
             match_time_led = 0;
         }
     }
-    println("LED: Updating state with match_time_led: ", match_time_led);
 }
 
 // pour faire un clignotement on stock 2 couleurs pour alterner
 void LedRGB::update()
 {
-    println("LED: Updating LED ring");
-
     if (Match::matchState == State::MATCH_RUN)
     {
         // update led ring display according to current robot state

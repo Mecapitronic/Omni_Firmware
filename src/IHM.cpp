@@ -118,7 +118,6 @@ namespace IHM
 
   void Blink()
   {
-    println("Blinking LED");
     CRGB teamColor;
     if (team == Team::Jaune)
     {
