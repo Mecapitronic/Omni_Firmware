@@ -5,6 +5,7 @@
 
 #include "ESP32_Helper.h"
 #include "GeoMathTools.h"
+#include "IHM.h"
 #include "Match.h"
 #include "pins.h"
 #include "Structure.h"
@@ -13,7 +14,16 @@
 
 using namespace Printer;
 
-
+/**
+ * @brief Gère l'affichage des LEDs RGB du robot sur un anneau de 24 LEDs.
+ * 
+ * affiche la couleur de l'équipe en fond très léger (bleu ou jaune)
+ * affiche la position des adversaires en rouge
+ * affiche la position des obstacles en violet
+ * affiche le temps écoulé depuis le début du match en vert
+ * lors d'un arrêt d'urgence, affiche toutes les LEDs en rouge clignotant
+ * 
+ */
 class LedRGB
 {
 
@@ -44,17 +54,21 @@ public:
    */
   void loader();
 
+  /**
+   * @brief set all leds to red and glow smoothly
+   * 
+   */
   void emergencyStop();
+
   int lidarPositionToLedNumber(float position, float min, float max);
   int obstacleRelativePosition(PoseF robotPosition, Point obstaclePosition);
 
 private:
-  //{0x0F0000,0x000F00,0x00000F,0x000000};
-  std::vector<uint32_t> color = {0xFF0000, 0x00FF00, 0x0000FF};
+  CLEDController *ring_controller;
   CRGB leds[NUM_LEDS];
 
   int current_hue = 0;
-
+  CRGB::HTMLColorCode team_color = CRGB::Black; // Default color for the team
   long time_led = 0;
   // uint16_t color;
   std::vector<float> obstacles;

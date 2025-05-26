@@ -7,13 +7,15 @@ void LedRGB::Initialisation()
     print("RGB initialisation of ", NUM_LEDS, " pixels");
     println(" on pin ", PIN_WS2812_LED);
 
-    FastLED.addLeds<NEOPIXEL, PIN_WS2812_LED>(leds, NUM_LEDS);
+    ring_controller = &FastLED.addLeds<NEOPIXEL, PIN_WS2812_LED>(leds, NUM_LEDS);
     FastLED.setBrightness(RGB_BRIGHTNESS);
 }
 
 // This function would update the current state based on the robot's state
 void LedRGB::updateState(PoseF position, std::array<Circle, 10> obstacles)
 {   
+    IHM::team == Team::Jaune ? team_color = CRGB::Gold : team_color = CRGB::DodgerBlue;
+
     if (Match::matchState == State::MATCH_RUN) {
         time_led = (NUM_LEDS  * Match::getMatchTimeSec()) / Match::time_end_match;
     }
@@ -31,6 +33,33 @@ void LedRGB::updateState(PoseF position, std::array<Circle, 10> obstacles)
 
 void LedRGB::update()
 {
+
+    // si le bouton d'arrêt d'urgence est enclenché on voit rouge
+    if (IHM::bauReady == 0) {
+        emergencyStop();
+        return;
+    }
+
+    // si le match n'est pas démarré on affiche la couleur de l'équipe
+    if (Match::matchState == State::MATCH_WAIT)
+    {
+        for (int i = 0; i < NUM_LEDS; i++)
+        {
+            leds[i] = team_color; // Set all LEDs to team color
+        }
+        FastLED.show(); // Update the LEDs to reflect the changes
+        return;
+    }
+    // // diminue l'intensité des LEDs si le match n'est pas en cours
+    // if (Match::matchState != State::MATCH_RUN)
+    // {
+    //     FastLED.setBrightness(RGB_BRIGHTNESS / 2); // Dim the LEDs
+    // }
+    // else
+    // {
+    //     FastLED.setBrightness(RGB_BRIGHTNESS); // Set brightness to normal
+    // }
+    
     // update led ring display according to current robot state
     for (int i = 0; i < NUM_LEDS; i++)
     {
@@ -100,20 +129,13 @@ void LedRGB::loader()
 
 void LedRGB::emergencyStop()
 {
-    // set all leds glowing red smoothly
-    for (int i = 0; i < NUM_LEDS; i++)
-    {
-        leds[i] = CRGB::Red; // Set all LEDs to red
-    }
-    FastLED.show();
-    // going proegressively to black
-    for (int i = 255; i >= 0; i--)
-    {
-        FastLED.setBrightness(i); // Decrease brightness
-        FastLED.show();
-        delay(10);
-    }
-    FastLED.clear(); // Clear the LEDs
-    FastLED.show(); // Update the LEDs to turn them off
+    fill_solid(leds, NUM_LEDS, CRGB::Red);
+    ring_controller->showLeds(RGB_BRIGHTNESS);
 
+    for (uint8_t i = RGB_BRIGHTNESS ; i > 0; i--)
+    {
+        ring_controller->showLeds(i);
+        delay(30);
+    }
+    ring_controller->showLeds(0); // Turn off all LEDs
 }
