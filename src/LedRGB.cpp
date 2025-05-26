@@ -13,11 +13,12 @@ void LedRGB::Initialisation()
 
 // This function would update the current state based on the robot's state
 void LedRGB::updateState(PoseF position, std::array<Circle, 10> obstacles)
-{   
+{
     IHM::team == Team::Jaune ? team_color = CRGB::Gold : team_color = CRGB::DodgerBlue;
 
-    if (Match::matchState == State::MATCH_RUN) {
-        time_led = (NUM_LEDS  * Match::getMatchTimeSec()) / Match::time_end_match;
+    if (Match::matchState == State::MATCH_RUN)
+    {
+        time_led = (NUM_LEDS * Match::getMatchTimeSec()) / Match::time_end_match;
     }
     else
     {
@@ -25,32 +26,32 @@ void LedRGB::updateState(PoseF position, std::array<Circle, 10> obstacles)
         if (time_led >= NUM_LEDS)
         {
             time_led = 0;
-        }   
+        }
     }
-    println("LED: Updating state with time_led: ",time_led );
+    println("LED: Updating state with time_led: ", time_led);
 }
-
 
 void LedRGB::update()
 {
     println("LED: Updating display");
 
-    // // si le bouton d'arrêt d'urgence est enclenché on voit rouge
-    // if (IHM::bauReady == 0) {
-    //     emergencyStop();
-    //     return;
-    // }
+    // si le bouton d'arrêt d'urgence est enclenché on voit rouge
+    if (IHM::bauReady == 0)
+    {
+        emergencyStop();
+        return;
+    }
 
     // si le match n'est pas démarré on affiche la couleur de l'équipe
     if (Match::matchState != State::MATCH_RUN)
     {
-        CRGB currentColor = CRGB::Red;
+        CRGB currentColor = CRGB::Red; // Start with the team color
 
-        EVERY_N_MILLISECONDS(30) {
+        EVERY_N_MILLISECONDS(30)
+        {
             nblend(currentColor, team_color, 10); // 10/255 de transition à chaque appel
-            fill_solid(leds, NUM_LEDS, currentColor); 
+            fill_solid(leds, NUM_LEDS, currentColor);
             ring_controller->showLeds(RGB_BRIGHTNESS); // Show the current color
-
         }
     }
     // // diminue l'intensité des LEDs si le match n'est pas en cours
@@ -62,7 +63,7 @@ void LedRGB::update()
     // {
     //     FastLED.setBrightness(RGB_BRIGHTNESS); // Set brightness to normal
     // }
-    
+
     // update led ring display according to current robot state
     for (int i = 0; i < NUM_LEDS; i++)
     {
@@ -86,17 +87,17 @@ void LedRGB::update()
         //     // Set color based on adversary position
         //     leds[i] = CRGB::Red; // Example: Blue for adversaries
         // }
-
     }
     ring_controller->showLeds(RGB_BRIGHTNESS); // Show the current color
 }
 
-int LedRGB::obstacleRelativePosition(PoseF robotPosition, Point obstaclePosition) {
+int LedRGB::obstacleRelativePosition(PoseF robotPosition, Point obstaclePosition)
+{
     // get angle between h and the vector formed by robotposition x,y and obstaclePosition x,y
 
-//     DirectionFromPoint(robotPosition.x, robotPosition.y, obstaclePosition.x, obstaclePosition.y)
+    //     DirectionFromPoint(robotPosition.x, robotPosition.y, obstaclePosition.x, obstaclePosition.y)
 
-//     atan2((object 1 Y - object 2 Y) / (object 1 X - object 2 X)) + 180}
+    //     atan2((object 1 Y - object 2 Y) / (object 1 X - object 2 X)) + 180}
 
     return 0;
 }
@@ -117,12 +118,12 @@ int LedRGB::lidarPositionToLedNumber(float position, float min, float max)
 
 void LedRGB::loader()
 {
-    fill_solid(leds, NUM_LEDS, CRGB::Black); // Clear all LEDs
+    fill_solid(leds, NUM_LEDS, CRGB::Black);   // Clear all LEDs
     ring_controller->showLeds(RGB_BRIGHTNESS); // Show the current color
 
     for (int i = 0; i < NUM_LEDS; i++)
     {
-        leds[i] = CHSV(current_hue++, 255, 255); // Cycle through colors
+        leds[i] = CHSV(current_hue++, 255, 255);   // Cycle through colors
         ring_controller->showLeds(RGB_BRIGHTNESS); // Show the current color
         delay(50);
     }
@@ -131,10 +132,15 @@ void LedRGB::loader()
 inline void LedRGB::emergencyStop()
 {
     fill_solid(leds, NUM_LEDS, CRGB::Red);
-    for (uint8_t i = RGB_BRIGHTNESS / 2 ; i > 0; i--)
+    for (uint8_t i = RGB_BRIGHTNESS / 2; i > 0; i--)
     {
         ring_controller->showLeds(i);
         delay(30);
     }
     ring_controller->showLeds(0); // Turn off all LEDs
+    for (uint8_t i = 0; i < RGB_BRIGHTNESS / 2; i++)
+    {
+        ring_controller->showLeds(i);
+        delay(30);
+    }
 }
