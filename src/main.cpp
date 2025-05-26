@@ -193,7 +193,6 @@ void TaskTeleplot(void *pvParameters)
     if (mapTimeOut.IsTimeOut())
     {
       Obstacle::PrintObstacleList();
-      Mapping::PrintVertex0();
     }
 
     vTaskDelay(10);
