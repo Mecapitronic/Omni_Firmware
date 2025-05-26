@@ -10,9 +10,7 @@ namespace IHM
     int bauReadyPrev = -1;
 
     int ledState = LOW;
-    unsigned long previousMillisLED = 0;
-    unsigned long intervalLED = 1000;
-    unsigned long currentMillisLED = 0;
+    Timeout ledTO;
   }
 
   Team team = Team::None;
@@ -47,13 +45,13 @@ namespace IHM
     {
       println("Tirette : Présente au démarrage");
       Match::matchMode = Enable::ENABLE_TRUE;
-      intervalLED = 500;
+      ledTO.timeout = 500;
     }
     else if (tirettePresent == Enable::ENABLE_FALSE)
     {
       println("Tirette : Absente au démarrage");
       Match::matchMode = Enable::ENABLE_FALSE;
-      intervalLED = 200;
+      ledTO.timeout = 200;
     }
     Match::printMatch();
     UpdateHMI();
@@ -62,6 +60,7 @@ namespace IHM
     LEDcontroller = & FastLED.addLeds<WS2812, PIN_RGB_LED, RGB>(&builtin_led, 1);
     builtin_led = CRGB::Black;
     LEDcontroller->showLeds(BUILTIN_BRIGHTNESS);
+    ledTO.Start(1000);
   }
 
   void UpdateHMI()
@@ -88,11 +87,11 @@ namespace IHM
     {
       if (tiretteTmp == Enable::ENABLE_TRUE)
       {
-        intervalLED = 500;
+        ledTO.timeout = 500;
       }
       else if (tiretteTmp == Enable::ENABLE_FALSE)
       {
-        intervalLED = 1000;
+        ledTO.timeout = 1000;
         Match::startMatch();
       }
       tirettePresent = tiretteTmp;
@@ -140,10 +139,8 @@ namespace IHM
 
     if (useBlink)
     {
-      currentMillisLED = millis();
-      if (currentMillisLED - previousMillisLED >= intervalLED)
+      if (ledTO.IsTimeOut())
       {
-        previousMillisLED = currentMillisLED;
         ledState = !ledState;
       }
       
