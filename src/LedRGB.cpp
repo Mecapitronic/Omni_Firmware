@@ -41,72 +41,67 @@ void LedRGB::updateState(PoseF position, std::array<Circle, 10> obstacles_list)
 // pour faire un clignotement on stock 2 couleurs pour alterner
 void LedRGB::update()
 {
-    if (Match::matchState == State::MATCH_RUN)
-    {
-        // update led ring display according to current robot state
-        fill_solid(leds, NUM_LEDS, CRGB::Black);           // Clear all LEDs
-        fill_solid(&leds[match_time_led], 1, CRGB::Green); // Set the time in green
-
-        // if (i < obstacles.size())
-        // {
-        //     // Set color based on obstacle position
-        //     leds[i] = CRGB::Violet;
-        // }
-        // else if (i < adversaries.size() + obstacles.size())
-        // {
-        //     // Set color based on adversary position
-        //     leds[i] = CRGB::Red; // Example: Blue for adversaries
-        // }
-
-        // calculate obstacles orientation relative to the robot position and orientation
-        for (size_t i = 0; i < m_obstacles_list.size(); i++)
-        {
-            // get the led number corresponding to the obstacle position
-            int ledNumber = lidarPositionToLedNumber(m_obstacles_list[i].x, -200, 200);
-            if (ledNumber >= 0 && ledNumber < NUM_LEDS)
-            {
-                leds[ledNumber] = CRGB::Violet; // Example: Violet for obstacles
-            }
-            else
-            {
-                leds[0] = CRGB::Violet;
-            }
-        }
-
-        ring_controller->showLeds(RGB_BRIGHTNESS);
-        return;
-    }
-
     if (Match::matchState == State::MATCH_END)
     {
         rainbow();
         return;
     }
 
-    CRGB color_bau, color_team = CRGB::Black;
+    // Default color for the emergency stop button
+    CRGB color_de_fond = CRGB::Black;
 
     // si le bouton d'arrêt d'urgence est enclenché on voit rouge
     if (IHM::bauReady == 0)
     {
-        color_bau = CRGB::Red;
+        color_de_fond = CRGB::Red;
     }
     else
     {
-        // sinon on affiche la couleur de l'équipe
-        color_bau = CRGB::Black;
+        if (Match::matchState == State::MATCH_WAIT || Match::matchState == State::MATCH_BEGIN)
+        {
+            color_de_fond = team_color; // Set the team color when waiting for the match to start
+        }
     }
+    fill_solid(leds, NUM_LEDS, color_de_fond); // Clear all LEDs
+
+    // update led ring display according to current robot state
+    if (Match::matchState != State::MATCH_WAIT)
+    {
+        fill_solid(&leds[match_time_led], 1, CRGB::Green); // Set the time in green
+    }
+
+    // calculate obstacles orientation relative to the robot position and orientation
+    for (size_t i = 0; i < m_obstacles_list.size(); i++)
+    {
+        // get the led number corresponding to the obstacle position
+        int ledNumber = lidarPositionToLedNumber(m_obstacles_list[i].x, -200, 200);
+        if (ledNumber >= 0 && ledNumber < NUM_LEDS)
+        {
+            leds[ledNumber] = CRGB::Violet; // Example: Violet for obstacles
+        }
+        else
+        {
+            leds[0] = CRGB::Violet;
+        }
+    }
+
+    // else if (i < adversaries.size() + obstacles.size())
+    // {
+    //     // Set color based on adversary position
+    //     leds[i] = CRGB::Red; // Example: Blue for adversaries
+    // }
 
     // si le match n'est pas démarré on affiche la couleur de l'équipe
-    if (Match::matchState == State::MATCH_WAIT || Match::matchState == State::MATCH_BEGIN)
-    {
-        color_team = team_color;
-    }
-    else
-    {
-        color_team = CRGB::Black;
-    }
+    // if (Match::matchState == State::MATCH_WAIT || Match::matchState == State::MATCH_BEGIN)
+    // {
+    //     color_team = team_color;
+    // }
+    // else
+    // {
+    //     color_team = CRGB::Black;
+    // }
 
-    glowTwoColors(color_bau, color_team);
+    ring_controller->showLeds(RGB_BRIGHTNESS / 2);
 }
 
 int LedRGB::obstacleRelativePosition(PoseF robotPosition, Point obstaclePosition)
