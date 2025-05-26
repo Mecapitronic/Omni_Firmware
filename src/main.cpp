@@ -435,14 +435,14 @@ void loop()
   }
 }
 
-void TaskLed(void *pvParameters)
+[[noreturn]] void TaskLed(void *pvParameters)
 {
   println("Start TaskLed");
-  while (1)
+  while (true)
   {
     led_ring.updateState(robot.GetPoseF(), Obstacle::obstacle);
     led_ring.update();
-    vTaskDelay(10);
+    vTaskDelay(20);
   }
 }
 //******************************************************* TASK => MATCH *************************************************************** */
