@@ -8,9 +8,39 @@
     {
       "type": "wokwi-led-ring",
       "id": "ring2",
-      "top": 29.44,
-      "left": -162.01,
-      "attrs": { "pixels": "16" }
+      "top": -18.69,
+      "left": -291.67,
+      "attrs": {
+        "pixels": "24"
+      }
+    },
+    {
+      "type": "wokwi-slide-switch",
+      "id": "PIN_BAU",
+      "top": 33.2,
+      "left": -54.5,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-slide-switch",
+      "id": "PIN_START",
+      "top": 33.2,
+      "left": -92.9,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-slide-switch",
+      "id": "PIN_TEAM",
+      "top": 244.4,
+      "left": -112.1,
+      "attrs": {}
+    },
+    {
+      "type": "wokwi-slide-switch",
+      "id": "PIN_SWITCH",
+      "top": 244.4,
+      "left": -64.1,
+      "attrs": {}
     }
   ],
   "connections": [
@@ -21,7 +51,87 @@
     [ "rgb1:DIN", "esp:38", "violet", [ "h37.6", "v0", "h38.4", "v172.98" ] ],
     [ "esp:GND.1", "ring2:GND", "black", [ "h-72.34", "v-0.18", "h-38.34" ] ],
     [ "ring2:VCC", "esp:5V", "red", [ "v0" ] ],
-    [ "esp:12", "ring2:DIN", "green", [ "v-0.18", "h-91.48" ] ]
+    [
+      "esp:12",
+      "ring2:DIN",
+      "green",
+      [
+        "v-0.18",
+        "h-91.48"
+      ]
+    ],
+    [
+      "PIN_BAU:3",
+      "esp:15",
+      "limegreen",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "PIN_START:3",
+      "esp:16",
+      "limegreen",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "PIN_START:2",
+      "esp:GND.1",
+      "black",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "PIN_BAU:2",
+      "esp:GND.1",
+      "black",
+      [
+        "v0"
+      ]
+    ],
+    [
+      "PIN_SWITCH:2",
+      "esp:GND.1",
+      "black",
+      [
+        "v9.6",
+        "h38.5",
+        "v-57.6"
+      ]
+    ],
+    [
+      "PIN_TEAM:2",
+      "esp:GND.1",
+      "black",
+      [
+        "v19.2",
+        "h86.5",
+        "v-67.2"
+      ]
+    ],
+    [
+      "PIN_SWITCH:1",
+      "esp:14",
+      "green",
+      [
+        "v0",
+        "h-9.6",
+        "v-67.2"
+      ]
+    ],
+    [
+      "PIN_TEAM:1",
+      "esp:13",
+      "green",
+      [
+        "v0",
+        "h-19.2",
+        "v-76.8"
+      ]
+    ]
   ],
   "serialMonitor": { "display": "auto", "newline": "lf", "convertEol": false },
   "dependencies": {}
