@@ -128,5 +128,8 @@
     "sonarlint.connectedMode.project": {
         "connectionId": "mecapitronic",
         "projectKey": "Mecapitronic_Omni_Firmware"
-    }
+    },
+    "vscode-serial-monitor.customBaudRates": [
+        921600
+    ]
 }
