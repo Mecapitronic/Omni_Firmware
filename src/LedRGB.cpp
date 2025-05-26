@@ -95,6 +95,7 @@ int LedRGB::obstacleRelativePosition(PoseF robotPosition, Point obstaclePosition
 
 //     atan2((object 1 Y - object 2 Y) / (object 1 X - object 2 X)) + 180}
 
+    return 0;
 }
 
 int LedRGB::lidarPositionToLedNumber(float position, float min, float max)
@@ -129,9 +130,6 @@ void LedRGB::loader()
 
 void LedRGB::emergencyStop()
 {
-    fill_solid(leds, NUM_LEDS, CRGB::Red);
-    ring_controller->showLeds(RGB_BRIGHTNESS);
-
     for (uint8_t i = RGB_BRIGHTNESS ; i > 0; i--)
     {
         ring_controller->showLeds(i);

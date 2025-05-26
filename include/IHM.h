@@ -7,14 +7,14 @@
 #include <FastLED.h>
 #include "Structure.h"
 
+#define BUILTIN_BRIGHTNESS 50 // Brightness of the built-in LED
+
 namespace IHM
 {
     extern Team team;
     extern Enable tirettePresent;
     extern int switchMode;
     extern int bauReady;
-    
-    extern CRGB led[1];
     
     extern bool useBlink;
     

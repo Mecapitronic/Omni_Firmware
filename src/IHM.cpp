@@ -16,14 +16,15 @@ namespace IHM
   }
 
   Team team = Team::None;
-  //
-  Enable isTirettePresent = Enable::ENABLE_NONE;
+
+  Enable tirettePresent = Enable::ENABLE_NONE;
   // OK = 1, TEST = 0, None = -1
   int switchMode = -1;
-  // Retiré = 1, Enclenché = 0, None = -1
+  // Retiré (OK) = 1, Enclenché (NOK) = 0, None = -1
   int bauReady = -1;
 
-  CRGB led[1];
+  CLEDController * LEDcontroller;
+  CRGB builtin_led;
 
   bool useBlink = true;
 
@@ -58,10 +59,9 @@ namespace IHM
     UpdateHMI();
     UpdateBAU();
 
-    FastLED.addLeds<WS2812, PIN_RGB_LED, RGB>(led, 1);
-    led[0] = CRGB::Black;
-    FastLED.setBrightness(50);
-    FastLED.show();
+    LEDcontroller = & FastLED.addLeds<WS2812, PIN_RGB_LED, RGB>(&builtin_led, 1);
+    builtin_led = CRGB::Black;
+    LEDcontroller->showLeds(BUILTIN_BRIGHTNESS);
   }
 
   void UpdateHMI()
@@ -118,6 +118,25 @@ namespace IHM
 
   void Blink()
   {
+    CRGB::HTMLColorCode teamColor;
+    if (team == Team::Jaune)
+    {
+      teamColor = CRGB::Gold;
+    }
+    if (team == Team::Bleu)
+    {
+      teamColor = CRGB::Blue;
+    }
+
+    // no blink behavior
+    if (!bauReady)
+    {
+      builtin_led = CRGB::Red;
+    } else
+    {
+      builtin_led = teamColor;
+    }
+
     if (useBlink)
     {
       currentMillisLED = millis();
@@ -125,62 +144,15 @@ namespace IHM
       {
         previousMillisLED = currentMillisLED;
         ledState = !ledState;
-        if (ledState)
-        {
-          if (team == Team::Jaune)
-          {
-            led[0] = CRGB::Gold;
-          }
-          else
-          {
-            led[0] = CRGB::Blue;
-          }
-        }
-        else
-        {
-          if (bauReady)
-          {
-            led[0] = CRGB::Black;
-          }
-          else
-          {
-            led[0] = CRGB::Red;
-          }
-        }
-        FastLED.show();
+      }
+      
+      if (ledState)
+        builtin_led = teamColor;
+      else {
+        builtin_led = bauReady ? CRGB::Black : CRGB::Red;
       }
     }
-    else
-    {
-      ledState = HIGH;
-      if (!bauReady)
-      {
-        if (led[0] != CRGB::Red)
-        {
-          led[0] = CRGB::Red;
-          FastLED.show();
-        }
-      }
-      else
-      {
-        if (team == Team::Jaune)
-        {
-          if (led[0] != CRGB::Gold)
-          {
-            led[0] = CRGB::Gold;
-            FastLED.show();
-          }
-        }
-        else
-        {
-          if (led[0] != CRGB::Blue)
-          {
-            led[0] = CRGB::Blue;
-            FastLED.show();
-          }
-        }
-      }
-    }
+    LEDcontroller->showLeds(BUILTIN_BRIGHTNESS);
   }
 
   void PrintTeam()
