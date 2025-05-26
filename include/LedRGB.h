@@ -73,17 +73,22 @@ public:
   inline void TwoColorsTransition(CRGB color1, CRGB color2);
   inline void glowTwoColors(CRGB color1, CRGB color2);
   inline void glowOneColor(CRGB color);
-  bool isItTimeToChangeColor(uint32_t *time_led, uint32_t delta_ms = 1000);
 
 private:
   CLEDController *ring_controller;
   CRGB leds[NUM_LEDS];
-  uint32_t switch_color_timer = 0;
-  uint8_t blendAmount = 0; // Amount of blending between two colors
+
+  // Timer to switch colors
+  Timeout changeColorTimer;
+  // Amount of blending between two colors,that changes over time
+  uint8_t blendAmount = 0;
 
   uint8_t current_hue = 0;
   CRGB team_color = CRGB::Black; // Default color for the team
-  long time_led = 0;
+
+  // numero de la led a allumer pour indiquer le temps de match écoulé
+  long match_time_led = 0;
+
   std::vector<float> obstacles;
   std::vector<float> adversaries;
 };

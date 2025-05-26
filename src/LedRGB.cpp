@@ -9,6 +9,8 @@ void LedRGB::Initialisation()
 
     ring_controller = &FastLED.addLeds<NEOPIXEL, PIN_WS2812_LED>(leds, NUM_LEDS);
     FastLED.setBrightness(RGB_BRIGHTNESS);
+
+    changeColorTimer.Start(10);
 }
 
 // This function would update the current state based on the robot's state
@@ -18,17 +20,17 @@ void LedRGB::updateState(PoseF position, std::array<Circle, 10> obstacles)
 
     if (Match::matchState == State::MATCH_RUN)
     {
-        time_led = (NUM_LEDS * Match::getMatchTimeSec()) / Match::time_end_match;
+        match_time_led = (NUM_LEDS * Match::getMatchTimeSec()) / Match::time_end_match;
     }
     else
     {
-        time_led++;
-        if (time_led >= NUM_LEDS)
+        match_time_led++;
+        if (match_time_led >= NUM_LEDS)
         {
-            time_led = 0;
+            match_time_led = 0;
         }
     }
-    println("LED: Updating state with time_led: ", time_led);
+    println("LED: Updating state with match_time_led: ", match_time_led);
 }
 
 // pour faire un clignotement on stock 2 couleurs pour alterner
@@ -36,34 +38,11 @@ void LedRGB::update()
 {
     println("LED: Updating LED ring");
 
-    // si le bouton d'arrêt d'urgence est enclenché on voit rouge
-    if (IHM::bauReady == 0)
+    if (Match::matchState == State::MATCH_RUN)
     {
-        glowOneColor(CRGB::Red);
-        return;
-    }
-
-    // si le match n'est pas démarré on affiche la couleur de l'équipe
-    if (Match::matchState == State::MATCH_WAIT || Match::matchState == State::MATCH_BEGIN)
-    {
-        // glowOneColor(team_color);
-
-        CRGB currentColor = CRGB::Black;
-        EVERY_N_MILLISECONDS(30)
-        {
-            nblend(currentColor, team_color, 10); // 10/255 de transition à chaque appel
-            fill_solid(leds, NUM_LEDS, currentColor);
-            ring_controller->showLeds(RGB_BRIGHTNESS); // Show the current color
-        }
-    }
-
-    if (Match::matchState != State::MATCH_RUN)
-    {
-        FastLED.setBrightness(RGB_BRIGHTNESS / 2); // Dim the LEDs
-
         // update led ring display according to current robot state
-        fill_solid(leds, NUM_LEDS, CRGB::Black); // Clear all LEDs
-        fill_solid(leds, time_led, CRGB::Green); // Set the time in green
+        fill_solid(leds, NUM_LEDS, CRGB::Black);           // Clear all LEDs
+        fill_solid(&leds[match_time_led], 1, CRGB::Green); // Set the time in green
 
         // if (i < obstacles.size())
         // {
@@ -75,8 +54,35 @@ void LedRGB::update()
         //     // Set color based on adversary position
         //     leds[i] = CRGB::Red; // Example: Blue for adversaries
         // }
+
         ring_controller->showLeds(RGB_BRIGHTNESS);
+        return;
     }
+
+    CRGB color_bau, color_team = CRGB::Black;
+
+    // si le bouton d'arrêt d'urgence est enclenché on voit rouge
+    if (IHM::bauReady == 0)
+    {
+        color_bau = CRGB::Red;
+    }
+    else
+    {
+        // sinon on affiche la couleur de l'équipe
+        color_bau = CRGB::Black;
+    }
+
+    // si le match n'est pas démarré on affiche la couleur de l'équipe
+    if (Match::matchState == State::MATCH_WAIT || Match::matchState == State::MATCH_BEGIN)
+    {
+        color_team = team_color;
+    }
+    else
+    {
+        color_team = CRGB::Black;
+    }
+
+    glowTwoColors(color_bau, color_team);
 }
 
 int LedRGB::obstacleRelativePosition(PoseF robotPosition, Point obstaclePosition)
@@ -119,30 +125,9 @@ void LedRGB::loader()
     // void fill_rainbow_circular(struct CRGB *targetArray, int numToFill, uint8_t initialhue, bool reversed) {
 }
 
-bool LedRGB::isItTimeToChangeColor(uint32_t *time_led, uint32_t delta_ms)
-{
-    // Check if it's time to change the color
-    if (millis() - *time_led > delta_ms) // Change color every second
-    {
-        *time_led = millis();
-        return true; // Time to change color
-    }
-    return false; // Not time yet
-}
-
-//   currentMillisLED = millis();
-//       if (currentMillisLED - previousMillisLED >= intervalLED)
-//       {
-//         previousMillisLED = currentMillisLED;
-//         ledState = !ledState;
-//       }
-
 inline void LedRGB::TwoColorsTransition(CRGB color1, CRGB color2)
 {
-    uint8_t steps = 30;
-    uint32_t durationMs = 2000; // Total duration of the transition in milliseconds
-
-    if (isItTimeToChangeColor(&switch_color_timer, (durationMs / steps)))
+    if (changeColorTimer.IsTimeOut())
     {
         // uint8_t blendAmount = map(i, 0, steps, 0, 255); // 0 → 255
         CRGB color = blend(color1, color2, blendAmount);
@@ -156,14 +141,6 @@ inline void LedRGB::TwoColorsTransition(CRGB color1, CRGB color2)
         }
     }
 }
-
-// // EVERY_N_MILLISECONDS(100)
-// // {
-// nblend(color1, color2, 10); // 10/255 de transition à chaque appel
-// fill_solid(leds, NUM_LEDS, color1);
-// ring_controller->showLeds(RGB_BRIGHTNESS); // Show the current color
-// // }
-// delay(100); // Wait for the transition to complete
 
 inline void LedRGB::glowTwoColors(CRGB color1, CRGB color2)
 {
