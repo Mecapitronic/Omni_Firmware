@@ -78,7 +78,6 @@ namespace Trajectory
 
     /**
      * @brief Go to pose x, y and h, with limit and final speed
-     * @details Don't forget to disable the motion timer before calling this function and enable it after updating the motion parameters.
      *
      * @param x
      * @param y
