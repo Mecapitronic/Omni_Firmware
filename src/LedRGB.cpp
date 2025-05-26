@@ -31,22 +31,24 @@ void LedRGB::updateState(PoseF position, std::array<Circle, 10> obstacles)
     println("LED: Updating state with time_led: ", time_led);
 }
 
+// pour faire un clignotement on stock 2 couleurs pour alterner
 void LedRGB::update()
 {
-    println("LED: Updating display");
+    println("LED: Updating LED ring");
 
     // si le bouton d'arrêt d'urgence est enclenché on voit rouge
     if (IHM::bauReady == 0)
     {
-        emergencyStop();
+        glowOneColor(CRGB::Red);
         return;
     }
 
     // si le match n'est pas démarré on affiche la couleur de l'équipe
-    if (Match::matchState != State::MATCH_RUN)
+    if (Match::matchState == State::MATCH_WAIT || Match::matchState == State::MATCH_BEGIN)
     {
-        CRGB currentColor = CRGB::Red; // Start with the team color
+        // glowOneColor(team_color);
 
+        CRGB currentColor = CRGB::Black;
         EVERY_N_MILLISECONDS(30)
         {
             nblend(currentColor, team_color, 10); // 10/255 de transition à chaque appel
@@ -54,29 +56,15 @@ void LedRGB::update()
             ring_controller->showLeds(RGB_BRIGHTNESS); // Show the current color
         }
     }
-    // // diminue l'intensité des LEDs si le match n'est pas en cours
-    // if (Match::matchState != State::MATCH_RUN)
-    // {
-    //     FastLED.setBrightness(RGB_BRIGHTNESS / 2); // Dim the LEDs
-    // }
-    // else
-    // {
-    //     FastLED.setBrightness(RGB_BRIGHTNESS); // Set brightness to normal
-    // }
 
-    // update led ring display according to current robot state
-    for (int i = 0; i < NUM_LEDS; i++)
+    if (Match::matchState != State::MATCH_RUN)
     {
-        // set the time as filled green leds from start to time_led
-        if (i == time_led)
-        {
-            leds[i] = CRGB::Green;
-        }
-        else
-        {
-            // Default color for remaining LEDs
-            leds[i] = CRGB::Black;
-        }
+        FastLED.setBrightness(RGB_BRIGHTNESS / 2); // Dim the LEDs
+
+        // update led ring display according to current robot state
+        fill_solid(leds, NUM_LEDS, CRGB::Black); // Clear all LEDs
+        fill_solid(leds, time_led, CRGB::Green); // Set the time in green
+
         // if (i < obstacles.size())
         // {
         //     // Set color based on obstacle position
@@ -87,8 +75,8 @@ void LedRGB::update()
         //     // Set color based on adversary position
         //     leds[i] = CRGB::Red; // Example: Blue for adversaries
         // }
+        ring_controller->showLeds(RGB_BRIGHTNESS);
     }
-    ring_controller->showLeds(RGB_BRIGHTNESS); // Show the current color
 }
 
 int LedRGB::obstacleRelativePosition(PoseF robotPosition, Point obstaclePosition)
@@ -127,6 +115,65 @@ void LedRGB::loader()
         ring_controller->showLeds(RGB_BRIGHTNESS); // Show the current color
         delay(50);
     }
+
+    // void fill_rainbow_circular(struct CRGB *targetArray, int numToFill, uint8_t initialhue, bool reversed) {
+}
+
+bool LedRGB::isItTimeToChangeColor(uint32_t *time_led, uint32_t delta_ms)
+{
+    // Check if it's time to change the color
+    if (millis() - *time_led > delta_ms) // Change color every second
+    {
+        *time_led = millis();
+        return true; // Time to change color
+    }
+    return false; // Not time yet
+}
+
+//   currentMillisLED = millis();
+//       if (currentMillisLED - previousMillisLED >= intervalLED)
+//       {
+//         previousMillisLED = currentMillisLED;
+//         ledState = !ledState;
+//       }
+
+inline void LedRGB::TwoColorsTransition(CRGB color1, CRGB color2)
+{
+    uint8_t steps = 30;
+    uint32_t durationMs = 2000; // Total duration of the transition in milliseconds
+
+    if (isItTimeToChangeColor(&switch_color_timer, (durationMs / steps)))
+    {
+        // uint8_t blendAmount = map(i, 0, steps, 0, 255); // 0 → 255
+        CRGB color = blend(color1, color2, blendAmount);
+        fill_solid(leds, NUM_LEDS, color);
+        ring_controller->showLeds(RGB_BRIGHTNESS); // Show the current color
+
+        blendAmount++;
+        if (blendAmount > 255)
+        {
+            blendAmount = 0; // Reset blend amount after full transition
+        }
+    }
+}
+
+// // EVERY_N_MILLISECONDS(100)
+// // {
+// nblend(color1, color2, 10); // 10/255 de transition à chaque appel
+// fill_solid(leds, NUM_LEDS, color1);
+// ring_controller->showLeds(RGB_BRIGHTNESS); // Show the current color
+// // }
+// delay(100); // Wait for the transition to complete
+
+inline void LedRGB::glowTwoColors(CRGB color1, CRGB color2)
+{
+    TwoColorsTransition(color1, color2);
+    TwoColorsTransition(color2, color1);
+}
+
+inline void LedRGB::glowOneColor(CRGB color)
+{
+    LedRGB::glowTwoColors(CRGB::Black, color);
 }
 
 inline void LedRGB::emergencyStop()
