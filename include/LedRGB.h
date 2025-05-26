@@ -56,9 +56,9 @@ public:
 
   /**
    * @brief set all leds to red and glow smoothly
-   * 
+   * inline function
    */
-  void emergencyStop();
+  inline void emergencyStop();
 
   int lidarPositionToLedNumber(float position, float min, float max);
   int obstacleRelativePosition(PoseF robotPosition, Point obstaclePosition);
@@ -67,10 +67,9 @@ private:
   CLEDController *ring_controller;
   CRGB leds[NUM_LEDS];
 
-  int current_hue = 0;
-  CRGB::HTMLColorCode team_color = CRGB::Black; // Default color for the team
+  uint8_t current_hue = 0;
+  CRGB team_color = CRGB::Black; // Default color for the team
   long time_led = 0;
-  // uint16_t color;
   std::vector<float> obstacles;
   std::vector<float> adversaries;
 };
