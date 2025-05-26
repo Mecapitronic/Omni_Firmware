@@ -85,8 +85,7 @@ void setup()
   timerMotion.Start();
 
   TaskThread(TaskMatch, "TaskMatch", 20000, 10, 1);
-  TaskThread(TaskMain, "TaskMain", 10000, 5, 1);
-  TaskThread(TaskLed, "TaskLed", 10000, 5, 0);
+  TaskThread(TaskUpdate, "TaskUpdate", 10000, 5, 1);
   TaskThread(TaskTeleplot, "TaskTeleplot", 10000, 10, 0);
 
   // Send to PC all the mapping data
@@ -175,6 +174,12 @@ void TaskTeleplot(void *pvParameters)
       teleplot("Position", robot);
       teleplot("Orient", degrees(robot.h));
 
+      // Countdown
+      if (lastMatchTime != (int)(Match::getMatchTimeSec()))
+      {
+        println("Match Time : ", (int)(Match::getMatchTimeSec()));
+        lastMatchTime = (int)(Match::getMatchTimeSec());
+      }
       // teleplot("Direction", linear.direction)
       // println(">fixeScale:0:0;0:2000;3000:2000;3000:0;|xy");
       // otos.Teleplot();
@@ -199,12 +204,17 @@ void TaskTeleplot(void *pvParameters)
   }
 }
 
-void TaskMain(void *pvParameters)
+void TaskUpdate(void *pvParameters)
 {
   while (true)
   {
     startChrono = micros();
     Match::updateMatch();
+    IHM::UpdateBAU();
+    IHM::Blink();
+
+    led_ring.updateState(robot.GetPoseF(), Obstacle::obstacle);
+    led_ring.update();
 
     // take some time to update the servo, maybe move it elsewhere
     ServoAX12::Update();
@@ -218,6 +228,24 @@ void TaskMain(void *pvParameters)
     //    SetRobotPosition(goTo.x, goTo.y, goTo.h);
     //    delay(5000);
     //   //while(linear.isRunning || angular.isRunning) ;//doWhileWaiting();
+
+    // Enable or disable Communication
+    if (IHM::switchMode == 0 && (Printer::IsEnable())) // || Wifi_Helper::IsEnable()))
+    {
+      println("Disable Com");
+      Printer::EnablePrinter(Enable::ENABLE_FALSE);
+      Wifi_Helper::EnableWifi(Enable::ENABLE_FALSE);
+      Printer::teleplotUDPEnable = Enable::ENABLE_FALSE;
+      Lidar::disableComLidar = true;
+    }
+    else if (IHM::switchMode == 1 && (!Printer::IsEnable())) // || !Wifi_Helper::IsEnable()))
+    {
+      Printer::EnablePrinter(Enable::ENABLE_TRUE);
+      Wifi_Helper::EnableWifi(Enable::ENABLE_TRUE);
+      Printer::teleplotUDPEnable = Enable::ENABLE_TRUE;
+      println("Enable Com");
+      Lidar::enableComLidar = true;
+    }
 
     if (ESP32_Helper::HasWaitingCommand())
     {
@@ -360,29 +388,14 @@ void TaskMain(void *pvParameters)
       nbrLoop = 0;
       deltaChrono = 0;
     }
-    vTaskDelay(10); // Allow other tasks to run
+    vTaskDelay(1); // Allow other tasks to run
   }
 }
 
-void TaskLed(void *pvParameters)
-{
-  println("Start TaskLed");
-  while (true)
-  {
-    led_ring.updateState(robot.GetPoseF(), Obstacle::obstacle);
-    led_ring.update();
-
-    IHM::UpdateBAU();
-    IHM::Blink();
-
-    vTaskDelay(1);
-  }
-}
 // TASK => MATCH
 // Note the 1 Tick delay, this is need  so the watchdog doesn't get confused
 void TaskMatch(void *pvParameters)
 {
-  int lastMatchTime = 0;
   println("Start TaskMatch");
   while (true)
   {
@@ -403,24 +416,6 @@ void TaskMatch(void *pvParameters)
         digitalWrite(PIN_EN_MCU, LOW);
       else
         digitalWrite(PIN_EN_MCU, HIGH);
-
-      // Enable or disable Communication
-      if (IHM::switchMode == 0 && (Printer::IsEnable())) // || Wifi_Helper::IsEnable()))
-      {
-        println("Disable Com");
-        Printer::EnablePrinter(Enable::ENABLE_FALSE);
-        Wifi_Helper::EnableWifi(Enable::ENABLE_FALSE);
-        Printer::teleplotUDPEnable = Enable::ENABLE_FALSE;
-        Lidar::disableComLidar = true;
-      }
-      else if (IHM::switchMode == 1 && (!Printer::IsEnable())) // || !Wifi_Helper::IsEnable()))
-      {
-        Printer::EnablePrinter(Enable::ENABLE_TRUE);
-        Wifi_Helper::EnableWifi(Enable::ENABLE_TRUE);
-        Printer::teleplotUDPEnable = Enable::ENABLE_TRUE;
-        println("Enable Com");
-        Lidar::enableComLidar = true;
-      }
     }
 
     // Match en cours
@@ -428,17 +423,13 @@ void TaskMatch(void *pvParameters)
     {
       // Enable Motor & Servo Power
       digitalWrite(PIN_EN_MCU, HIGH);
-      // Countdown
-      if (lastMatchTime != (int)(Match::getMatchTimeSec()))
-      {
-        println("Match Time : ", (int)(Match::getMatchTimeSec()));
-        lastMatchTime = (int)(Match::getMatchTimeSec());
-      }
     }
 
     // Démarrage du robot
     if (Match::matchState == State::MATCH_RUN)
     {
+      // Enable Motor & Servo Power
+      digitalWrite(PIN_EN_MCU, HIGH);
       // TODO 5 sec avant la fin du match aller dans la zone de back stage
     }
 

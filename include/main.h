@@ -49,9 +49,8 @@ extern TimerThread timerMotion;
 void timerMotionCallback(TimerHandle_t xTimer);
 
 [[noreturn]] void TaskTeleplot(void *pvParameters);
-[[noreturn]] void TaskMain(void *pvParameters);
+[[noreturn]] void TaskUpdate(void *pvParameters);
 [[noreturn]] void TaskMatch(void *pvParameters);
-[[noreturn]] void TaskLed(void *pvParameters);
 
 void functionChrono(int nbrLoop = 1);
 #endif
