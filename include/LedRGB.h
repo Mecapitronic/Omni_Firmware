@@ -12,6 +12,9 @@
 
 #define NUM_LEDS 24
 
+#define TRANSITION_DELAY_MS 500
+#define TRANSITION_STEPS 100
+
 using namespace Printer;
 
 /**
@@ -42,7 +45,7 @@ public:
    * get the adversaries and obstacles positions, robot position, robot state.
    * This function is called by the update() function.
    */
-  void updateState(PoseF position, std::array<Circle, 10> obstacles);
+  void updateState(PoseF position, std::array<Circle, 10> obstacles_list);
 
   /**
    * @brief update led ring display according to current robot state.
@@ -54,12 +57,12 @@ public:
   void update();
 
   /**
-   * @brief display a loading circle on the RGB LEDs ring
-   * turns all leds on one by one, then turns them off one by one, cycling through colors.
+   * @brief display a circular rainbow as a loading circle on the RGB LEDs ring
+   * the rainbow is circling
    *
    * @return * void
    */
-  void loader();
+  void rainbow();
 
   /**
    * @brief set all leds to red and glow smoothly
@@ -89,8 +92,7 @@ private:
   // numero de la led a allumer pour indiquer le temps de match écoulé
   long match_time_led = 0;
 
-  std::vector<float> obstacles;
-  std::vector<float> adversaries;
+  std::vector<Point> m_obstacles_list;
 };
 
 #endif

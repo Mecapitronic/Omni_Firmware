@@ -10,13 +10,19 @@ void LedRGB::Initialisation()
     ring_controller = &FastLED.addLeds<NEOPIXEL, PIN_WS2812_LED>(leds, NUM_LEDS);
     FastLED.setBrightness(RGB_BRIGHTNESS);
 
-    changeColorTimer.Start(10);
+    changeColorTimer.Start(TRANSITION_DELAY_MS / TRANSITION_STEPS);
 }
 
 // This function would update the current state based on the robot's state
-void LedRGB::updateState(PoseF position, std::array<Circle, 10> obstacles)
+void LedRGB::updateState(PoseF position, std::array<Circle, 10> obstacles_list)
 {
     IHM::team == Team::Jaune ? team_color = CRGB::Gold : team_color = CRGB::DodgerBlue;
+
+    m_obstacles_list.clear();
+    for (const auto &obstacle : obstacles_list)
+    {
+        m_obstacles_list.emplace_back(obstacle.p.x, obstacle.p.y);
+    }
 
     if (Match::matchState == State::MATCH_RUN)
     {
@@ -52,7 +58,28 @@ void LedRGB::update()
         //     leds[i] = CRGB::Red; // Example: Blue for adversaries
         // }
 
+        // calculate obstacles orientation relative to the robot position and orientation
+        for (size_t i = 0; i < m_obstacles_list.size(); i++)
+        {
+            // get the led number corresponding to the obstacle position
+            int ledNumber = lidarPositionToLedNumber(m_obstacles_list[i].x, -200, 200);
+            if (ledNumber >= 0 && ledNumber < NUM_LEDS)
+            {
+                leds[ledNumber] = CRGB::Violet; // Example: Violet for obstacles
+            }
+            else
+            {
+                leds[0] = CRGB::Violet;
+            }
+        }
+
         ring_controller->showLeds(RGB_BRIGHTNESS);
+        return;
+    }
+
+    if (Match::matchState == State::MATCH_END)
+    {
+        rainbow();
         return;
     }
 
@@ -107,19 +134,14 @@ int LedRGB::lidarPositionToLedNumber(float position, float min, float max)
 
 // ANIMATIONS
 
-void LedRGB::loader()
+void LedRGB::rainbow()
 {
-    fill_solid(leds, NUM_LEDS, CRGB::Black);   // Clear all LEDs
-    ring_controller->showLeds(RGB_BRIGHTNESS); // Show the current color
-
-    for (int i = 0; i < NUM_LEDS; i++)
+    if (changeColorTimer.IsTimeOut())
     {
-        leds[i] = CHSV(current_hue++, 255, 255);   // Cycle through colors
+        fill_rainbow_circular(leds, NUM_LEDS, current_hue, false);
         ring_controller->showLeds(RGB_BRIGHTNESS); // Show the current color
-        delay(50);
+        current_hue += 2;                          // Increment hue for the next cycle
     }
-
-    // void fill_rainbow_circular(struct CRGB *targetArray, int numToFill, uint8_t initialhue, bool reversed) {
 }
 
 inline void LedRGB::TwoColorsTransition(CRGB color1, CRGB color2)
@@ -142,7 +164,7 @@ inline void LedRGB::TwoColorsTransition(CRGB color1, CRGB color2)
 inline void LedRGB::glowTwoColors(CRGB color1, CRGB color2)
 {
     TwoColorsTransition(color1, color2);
-    TwoColorsTransition(color2, color1);
+    // TwoColorsTransition(color2, color1);
 }
 
 inline void LedRGB::glowOneColor(CRGB color)

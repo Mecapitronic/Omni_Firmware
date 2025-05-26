@@ -375,7 +375,7 @@ void TaskLed(void *pvParameters)
     IHM::UpdateBAU();
     IHM::Blink();
 
-    vTaskDelay(20);
+    vTaskDelay(1);
   }
 }
 // TASK => MATCH
