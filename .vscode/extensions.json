@@ -4,9 +4,11 @@
     "recommendations": [
         "SonarSource.sonarlint-vscode",
         "Wokwi.wokwi-vscode",
+        "cschlosser.doxdocgen",
         "github.vscode-github-actions",
         "gruntfuggly.todo-tree",
         "ms-vscode.cpptools",
+        "naumovs.color-highlight",
         "platformio.platformio-ide"
     ],
     "unwantedRecommendations": [
