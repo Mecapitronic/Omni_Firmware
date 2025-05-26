@@ -6,7 +6,7 @@ namespace ServoAX12
 {
     Dynamixel2Arduino dxl(SERIAL_SERVO, PIN_SERVO_DIR);
 
-    ServoMotion Servo_Up = {6, 30, 50, 0, 0, false};
+    ServoMotion Servo_Up = {6, 30, 20, 0, 0, false};
     ServoMotion Servo_Left = {5, 30, 50, 0, 0, false};
     ServoMotion Servo_Right = {3, 30, 50, 0, 0, false};
 
@@ -121,18 +121,31 @@ namespace ServoAX12
             else
                 PrintDxlInfo();
         }
-        else if (cmd.cmd == "AX12Pos" && cmd.size == 1)
+        else if (cmd.cmd == "AX12Pos")
         {
-            // 0° to 290°
-            // AX12Pos:100:Up
-            if (cmd.dataStr == "Up")
-                SetServoPosition(Servo_Up, cmd.data[0]);
-            else if (cmd.dataStr == "Left")
-                SetServoPosition(Servo_Left, cmd.data[0]);
-            else if (cmd.dataStr == "Right")
-                SetServoPosition(Servo_Right, cmd.data[0]);
+            if (cmd.size == 1 && cmd.dataStr != "")
+            {
+                // UP : Bas 0, Haut 270
+                // Left : MAX 197, depose 185, prise 150, tourne 80, MIN 70
+                // Right : MIN 100, depose 112, prise 149, tourne 220, MIN 227
+                // 0° to 290°
+                // AX12Pos:100:Up
+                // AX12Pos:150:Left
+                // AX12Pos:150:Right
+                if (cmd.dataStr == "Up")
+                    SetServoPosition(Servo_Up, cmd.data[0]);
+                else if (cmd.dataStr == "Left")
+                    SetServoPosition(Servo_Left, cmd.data[0]);
+                else if (cmd.dataStr == "Right")
+                    SetServoPosition(Servo_Right, cmd.data[0]);
+            }
+            else
+            {
+                println("Servo_Up : ", dxl.getPresentPosition(Servo_Up.id, UNIT_DEGREE));
+                println("Servo_Left : ", dxl.getPresentPosition(Servo_Left.id, UNIT_DEGREE));
+                println("Servo_Right : ", dxl.getPresentPosition(Servo_Right.id, UNIT_DEGREE));
+            }
         }
-        /*
         else if (cmd.cmd == "AX12Vit" && cmd.size == 2)
         {
             // AX12Vit:5:30
@@ -142,7 +155,7 @@ namespace ServoAX12
         {
             // AX12Acc:5:50
             dxl.writeControlTableItem(ControlTableItem::PROFILE_ACCELERATION, cmd.data[0], cmd.data[1]);
-        }*/
+        }
     }
 
     const void PrintCommandHelp()

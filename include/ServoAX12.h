@@ -31,6 +31,15 @@ namespace ServoAX12
         DxlProtocolVersion::PROTOCOL_2};
 
     // id vitesse acceleration position command_position ledState
+    /**
+     * @brief Structure représentant l'état d'un servo moteur.
+     * @param id Identifiant du servo moteur.
+     * @param vitesse Vitesse maximale du servo moteur en degrés par seconde.
+     * @param acceleration Accélération maximale du servo moteur en degrés par seconde carrée.
+     * @param position Position actuelle du servo moteur.
+     * @param command_position Position cible du servo moteur.
+     * @param ledState État de la LED du servo moteur (allumée en mouvement, éteinte sinon).
+     */
     struct ServoMotion
     {
         uint8_t id;
