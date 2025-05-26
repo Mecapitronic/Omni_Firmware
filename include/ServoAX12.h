@@ -1,5 +1,5 @@
-#ifndef SERVO_H
-#define SERVO_H
+#ifndef SERVO_AX12_H
+#define SERVO_AX12_H
 
 #include <Arduino.h>
 #include <Dynamixel2Arduino.h>
@@ -42,14 +42,18 @@ namespace ServoAX12
     };
 
     extern ServoMotion Servo_Up;
-    // extern ServoMotion Servo_Down;
     extern ServoMotion Servo_Left;
     extern ServoMotion Servo_Right;
 
     void Initialisation();
     void InitServo(ServoMotion &servo);
+
+    void StopAllServo();
+    void StopServo(ServoMotion &servo);
+
     void Update();
     void UpdateServo(ServoMotion &servo);
+
     void SetServoPosition(ServoMotion &servo, float position);
 
     void HandleCommand(Command cmd);

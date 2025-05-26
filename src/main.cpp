@@ -435,8 +435,7 @@ void TaskMatch(void *pvParameters)
       // Disable Motion timer
       timerMotion.WaitForDisable();
       motor.Update(0, 0, 0);
-      // ServoAX12::
-      //  TODO couper les commandes servo
+      ServoAX12::StopAllServo();
     }
     vTaskDelay(1);
   }

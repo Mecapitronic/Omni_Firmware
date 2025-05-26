@@ -1,4 +1,4 @@
-#include "Servo.h"
+#include "ServoAX12.h"
 
 using namespace Printer;
 
@@ -7,7 +7,6 @@ namespace ServoAX12
     Dynamixel2Arduino dxl(SERIAL_SERVO, PIN_SERVO_DIR);
 
     ServoMotion Servo_Up = {6, 30, 50, 0, 0, false};
-    // ServoMotion Servo_Down = {7, 30, 50, 0, 0, false};
     ServoMotion Servo_Left = {5, 30, 50, 0, 0, false};
     ServoMotion Servo_Right = {3, 30, 50, 0, 0, false};
 
@@ -20,7 +19,6 @@ namespace ServoAX12
         dxl.setPortProtocolVersion((float)DxlProtocolVersion::PROTOCOL_1);
 
         InitServo(Servo_Up);
-        // InitServo(Servo_Down);
         InitServo(Servo_Left);
         InitServo(Servo_Right);
     }
@@ -57,6 +55,20 @@ namespace ServoAX12
             println("Servo ID : ", servo.id, " is NOT connected");
             return;
         }
+    }
+
+    void StopAllServo()
+    {
+        println("Stop All Servo");
+        StopServo(Servo_Up);
+        StopServo(Servo_Left);
+        StopServo(Servo_Right);
+    }
+
+    void StopServo(ServoMotion &servo)
+    {        
+        dxl.torqueOff(servo.id);
+        dxl.ledOff(servo.id);
     }
 
     void Update()
