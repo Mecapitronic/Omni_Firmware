@@ -15,7 +15,9 @@ Robot robot;
 
 OpticalTrackingOdometrySensor otos;
 
-PoseF goTo = {500, 500, 0}; // TODO: pourquoi parfois il démarre en 0;0 ? c'est réinitialisé à 0 par défaut au lieu de ces valeurs ?
+// TODO: pourquoi parfois il démarre en 0;0 ? c'est
+// réinitialisé à 0 par défaut au lieu de ces valeurs ?
+PoseF goTo = {500, 500, 0};
 
 unsigned long startChrono = 0;
 unsigned long endChrono = 0;
@@ -25,7 +27,6 @@ unsigned long mappingChrono = 0;
 unsigned long rgbChrono = 0;
 int nbrLoop = 0;
 
-//******************************************************* SETUP **************************************************************** */
 void setup()
 {
   pinMode(PIN_EN_MCU, OUTPUT);
@@ -38,7 +39,8 @@ void setup()
   print(".", ESP_ARDUINO_VERSION_MINOR);
   println(".", ESP_ARDUINO_VERSION_PATCH);
   println("ESP IDF Version : ", String(esp_get_idf_version()));
-  // print("ESP IDF Version : ",ESP_IDF_VERSION_MAJOR);  print(".",ESP_IDF_VERSION_MINOR);  println(".",ESP_IDF_VERSION_PATCH);
+  // print("ESP IDF Version : ",ESP_IDF_VERSION_MAJOR);
+  // print(".",ESP_IDF_VERSION_MINOR);  println(".",ESP_IDF_VERSION_PATCH);
   println("Temperature : ", temperatureRead(), " deg Celsius");
   println("Frequency CPU : ", getCpuFrequencyMhz(), " MHz");
   println();
@@ -59,8 +61,10 @@ void setup()
   motor.Initialisation(Motor::OMNIDIRECTIONAL_3_MOTORS, CENTER_WHEEL_DISTANCE);
 
   // Init Motion
-  linear.Initialisation(1500, 1000);                   // Linear max speed 1500 mm/s and acceleration 1000 mm/s²
-  angular.Initialisation(radians(500), radians(1000)); // Angular max speed 500 °/s and acceleration 1000 °/s²
+  // Linear max speed 1500 mm/s and acceleration 1000 mm/s²
+  linear.Initialisation(1500, 1000);
+  // Angular max speed 500 °/s and acceleration 1000 °/s²
+  angular.Initialisation(radians(500), radians(1000));
   // Init end position tolerance
   linear.SetMargin(1);           // 1 mm
   angular.SetMargin(radians(1)); // 1 deg
@@ -83,17 +87,19 @@ void setup()
   Mapping::Update_Passability_Graph();
 
   // Create a timer => for motion
-  timerMotion = TimerThread(timerMotionCallback, "Timer Motion", (1000 * Motion::dt_motion) / portTICK_PERIOD_MS);
+  timerMotion = TimerThread(timerMotionCallback, "Timer Motion",
+                            (1000 * Motion::dt_motion) / portTICK_PERIOD_MS);
   timerMotion.Start();
 
-  TaskThread Task1 = TaskThread(TaskMatch, "TaskMatch", 20000, 10, 1);
-  TaskThread Task2 = TaskThread(TaskLed, "TaskLed", 10000, 1, 0);
-  TaskThread Task3 = TaskThread(TaskMain, "TaskMain", 10000, 1, 0);
+  auto Task1 = TaskThread(TaskMatch, "TaskMatch", 20000, 10, 1);
+  auto Task3 = TaskThread(TaskMain, "TaskMain", 10000, 5, 0);
+  auto Task2 = TaskThread(TaskLed, "TaskLed", 10000, 5, 0);
 
   // Send to PC all the mapping data
   ESP32_Helper::HandleCommand(Command("UpdateMapping"));
 
-  // print("FreeRTOS heap remaining ");print(xPortGetFreeHeapSize());println(" bytes");
+  // print("FreeRTOS heap remaining ");print(xPortGetFreeHeapSize());println("
+  // bytes");
 }
 
 void loop()
@@ -101,8 +107,8 @@ void loop()
   vTaskDelete(NULL); // Supprime immédiatement le task Arduino "loop"
 }
 
-//******************************************************* TIMER 5ms => MOTION **************************************************************** */
-//  do NON BLOCKING stuff
+// TIMER 5ms => MOTION
+// do NON BLOCKING stuff
 void timerMotionCallback(TimerHandle_t xTimer)
 {
   if (timerMotion.IsEnable())
@@ -120,10 +126,12 @@ void timerMotionCallback(TimerHandle_t xTimer)
       float motor3_speed = motor.GetMotorSpeed(3);
 
       // Simulation Calcul Vitesse OK
-      // Calcul des composantes x, y et angular à partir des vitesses des moteurs
+      // Calcul des composantes x, y et angular à partir des vitesses des
+      // moteurs
       float v_x = (motor1_speed + motor2_speed - 2 * motor3_speed) / 3;
       float v_y = (motor2_speed - motor1_speed) * INV_SQRT3;
-      float v_ang = (-(motor1_speed + motor2_speed + motor3_speed) / (3 * CENTER_WHEEL_DISTANCE));
+      float v_ang = (-(motor1_speed + motor2_speed + motor3_speed) /
+                     (3 * CENTER_WHEEL_DISTANCE));
 
       otos.acceleration.x = v_x - otos.velocity.x;
       otos.acceleration.y = v_y - otos.velocity.y;
@@ -154,7 +162,8 @@ void timerMotionCallback(TimerHandle_t xTimer)
     angular.Update();
 
     // Motor update => in local robot reference
-    motor.Update(linear.velocity_command, linear.direction, angular.velocity_command);
+    motor.Update(linear.velocity_command, linear.direction,
+                 angular.velocity_command);
   }
 
   timerMotion.Running(false);
@@ -166,8 +175,6 @@ void timerMotionCallback(TimerHandle_t xTimer)
   {
     startChrono = micros();
     Match::updateMatch();
-    IHM::UpdateBAU();
-    IHM::Blink();
 
     // take some time to update the servo, maybe move it elsewhere
     ServoAX12::Update();
@@ -216,7 +223,6 @@ void timerMotionCallback(TimerHandle_t xTimer)
     if (startChrono - rgbChrono > 1000 * 100) // Update every 100ms
     {
       rgbChrono = startChrono;
-      led_ring.update();
     }
 
     if (ESP32_Helper::HasWaitingCommand())
@@ -285,11 +291,13 @@ void timerMotionCallback(TimerHandle_t xTimer)
         // PF:500:1000:5
         if (cmd.size == 1)
         {
-          result = PathFinding::PathFinding((int16_t)robot.x, (int16_t)robot.y, cmd.data[0]);
+          result = PathFinding::PathFinding((int16_t)robot.x, (int16_t)robot.y,
+                                            cmd.data[0]);
         }
         else if (cmd.size == 3)
         {
-          result = PathFinding::PathFinding(cmd.data[0], cmd.data[1], cmd.data[2]);
+          result =
+              PathFinding::PathFinding(cmd.data[0], cmd.data[1], cmd.data[2]);
         }
         if (result)
         {
@@ -342,23 +350,23 @@ void timerMotionCallback(TimerHandle_t xTimer)
         Mapping::Update_Passability_Obstacle();
         Obstacle::PrintObstacleList();
       }
-      vTaskDelay(1); // Allow other tasks to run
     }
-  }
 
-  endChrono = micros();
-  deltaChrono += endChrono - startChrono;
-  nbrLoop++;
+    endChrono = micros();
+    deltaChrono += endChrono - startChrono;
+    nbrLoop++;
 
-  if (nbrLoop == 1)
-  {
-    // println("Chrono : ", (float)deltaChrono, " µs/func (1)");
-  }
-  if (nbrLoop >= 1000)
-  {
-    // println("Chrono : ", (float)deltaChrono / 1000, " µs/func (1000)");
-    nbrLoop = 0;
-    deltaChrono = 0;
+    if (nbrLoop == 1)
+    {
+      // println("Chrono : ", (float)deltaChrono, " µs/func (1)");
+    }
+    if (nbrLoop >= 1000)
+    {
+      // println("Chrono : ", (float)deltaChrono / 1000, " µs/func (1000)");
+      nbrLoop = 0;
+      deltaChrono = 0;
+    }
+    vTaskDelay(10); // Allow other tasks to run
   }
 }
 
@@ -369,16 +377,20 @@ void timerMotionCallback(TimerHandle_t xTimer)
   {
     led_ring.updateState(robot.GetPoseF(), Obstacle::obstacle);
     led_ring.update();
+
+    IHM::UpdateBAU();
+    IHM::Blink();
+
     vTaskDelay(20);
   }
 }
-//******************************************************* TASK => MATCH *************************************************************** */
+// TASK => MATCH
 // Note the 1 Tick delay, this is need  so the watchdog doesn't get confused
 void TaskMatch(void *pvParameters)
 {
   int lastMatchTime = 0;
   println("Start TaskMatch");
-  while (1)
+  while (true)
   {
     // Attente du démarrage du match par la tirette
     if (Match::matchState == State::MATCH_WAIT)
@@ -387,9 +399,11 @@ void TaskMatch(void *pvParameters)
       // Update robot position
       if (IHM::team == Team::Jaune)
       {
+        println("Team Jaune");
       }
       else
       {
+        println("Team Bleu");
       }
       // Disable Motor & Servo Power in Match mode during waiting
       if (Match::matchMode == Enable::ENABLE_TRUE)
@@ -452,7 +466,7 @@ void TaskMatch(void *pvParameters)
       motor.Update(0, 0, 0);
       ServoAX12::StopAllServo();
     }
-    vTaskDelay(1);
+    vTaskDelay(10);
   }
 }
 
