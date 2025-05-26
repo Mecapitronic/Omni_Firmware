@@ -9,9 +9,11 @@ Le firmware est compilé avec [Platform.io](https://platformio.org/).
 Tasks can be assigned priorities of 0 to (configMAX_PRIORITIES - 1).  Zero is the lowest priority.
 
 ---
+### Main::Loop - Core 1, Priority 20 ? DELETED
+
+---
 ### ESP32_Helper::Update  "CommandUpdate" - Default : Core 0, Priority 5
 Read Serial Debug and save incomming command into queue
-
 
 ---
 ### Wifi_Helper::Update "WifiUpdate" - Core 0, Priority 10
@@ -22,20 +24,31 @@ Read Wifi Client and save incomming command into queue
 Handle OTA
 
 ---
+### Main::Update  "Teleplot" - Core 0, Priority 5
+Send / print over Serial / wifi server / wifi UDP
+
+
+---
 ### Lidar::TaskLidar "TaskLidar" - Core 1, Priority 10
 Read Serial Lidar and save incomming obstacle
 
 
 ---
-### TaskMatch "TaskMatch" - Core 1, Priority 10
-State machine of the Match
+### Main::TaskMatch "TaskMatch" - Core 1, Priority 10
+State machine of the Match : Main strategy code here
 
 ---
-### Loop - Core 1, Priority 20 ?
+### Main::TaskMain "TaskMain" - Core 1, Priority 5
+Handle command
+
+---
+### Lidar::TaskLed "TaskLed" - Core 0, Priority 5
+Update the ring according to robot state, hmi, obstacle, etc...
 
 
 
-### timerMotionCallback "Timer Motion" - Must not block !!! Priority MAX
+
+### Main::timerMotionCallback "Timer Motion" - Must not block !!! Priority MAX
 Update Position
 Update Trajectory
 Update Motion

@@ -15,16 +15,9 @@ Robot robot;
 
 OpticalTrackingOdometrySensor otos;
 
-// TODO: pourquoi parfois il démarre en 0;0 ? c'est
-// réinitialisé à 0 par défaut au lieu de ces valeurs ?
-PoseF goTo = {500, 500, 0};
-
 unsigned long startChrono = 0;
 unsigned long endChrono = 0;
 unsigned long deltaChrono = 0;
-unsigned long teleplotChrono = 0;
-unsigned long mappingChrono = 0;
-unsigned long rgbChrono = 0;
 int nbrLoop = 0;
 
 void setup()
@@ -39,8 +32,6 @@ void setup()
   print(".", ESP_ARDUINO_VERSION_MINOR);
   println(".", ESP_ARDUINO_VERSION_PATCH);
   println("ESP IDF Version : ", String(esp_get_idf_version()));
-  // print("ESP IDF Version : ",ESP_IDF_VERSION_MAJOR);
-  // print(".",ESP_IDF_VERSION_MINOR);  println(".",ESP_IDF_VERSION_PATCH);
   println("Temperature : ", temperatureRead(), " deg Celsius");
   println("Frequency CPU : ", getCpuFrequencyMhz(), " MHz");
   println();
@@ -53,6 +44,8 @@ void setup()
   ServoAX12::Initialisation();
 
   led_ring.Initialisation();
+
+  Lidar::Initialisation(&robot);
 
   // Init sensors
   otos.Initialisation();
@@ -91,15 +84,13 @@ void setup()
                             (1000 * Motion::dt_motion) / portTICK_PERIOD_MS);
   timerMotion.Start();
 
-  auto Task1 = TaskThread(TaskMatch, "TaskMatch", 20000, 10, 1);
-  auto Task3 = TaskThread(TaskMain, "TaskMain", 10000, 5, 0);
-  auto Task2 = TaskThread(TaskLed, "TaskLed", 10000, 5, 0);
+  TaskThread(TaskMatch, "TaskMatch", 20000, 10, 1);
+  TaskThread(TaskMain, "TaskMain", 10000, 5, 1);
+  TaskThread(TaskLed, "TaskLed", 10000, 5, 0);
+  TaskThread(TaskTeleplot, "TaskTeleplot", 10000, 10, 0);
 
   // Send to PC all the mapping data
   ESP32_Helper::HandleCommand(Command("UpdateMapping"));
-
-  // print("FreeRTOS heap remaining ");print(xPortGetFreeHeapSize());println("
-  // bytes");
 }
 
 void loop()
@@ -169,6 +160,46 @@ void timerMotionCallback(TimerHandle_t xTimer)
   timerMotion.Running(false);
 }
 
+[[noreturn]] void TaskTeleplot(void *pvParameters)
+{
+  int lastMatchTime = 0;
+  println("Start TaskTeleplot");
+  Timeout robotPosTO, mapTO;
+  robotPosTO.Start(100);
+  mapTO.Start(200);
+
+  while (1)
+  {
+    if (robotPosTO.IsTimeOut())
+    {
+      teleplot("Position", robot);
+      teleplot("Orient", degrees(robot.h));
+
+      // teleplot("Direction", linear.direction)
+      // println(">fixeScale:0:0;0:2000;3000:2000;3000:0;|xy");
+      // otos.Teleplot();
+      // linear.Teleplot("linear");
+      // angular.Teleplot("angular");
+
+      // teleplot("v1", motor.GetMotorSpeed(1));
+      // teleplot("v2", motor.GetMotorSpeed(2));
+      // teleplot("v3", motor.GetMotorSpeed(3));
+      // teleplot("Servo_Up Pos", ServoAX12::Servo_Up.position);
+      // teleplot("Servo_Left Pos", ServoAX12::Servo_Left.position);
+      // teleplot("Servo_Up Cmd", ServoAX12::Servo_Up.command_position);
+      // teleplot("Servo_Left Cmd", ServoAX12::Servo_Left.command_position);
+    }
+
+    if (mapTO.IsTimeOut())
+    {
+      Obstacle::PrintObstacleList();
+      Mapping::PrintVertex0();
+    }
+
+    vTaskDelay(10);
+  }
+}
+
 [[noreturn]] void TaskMain(void *pvParameters)
 {
   while (true)
@@ -188,42 +219,6 @@ void timerMotionCallback(TimerHandle_t xTimer)
     //    SetRobotPosition(goTo.x, goTo.y, goTo.h);
     //    delay(5000);
     //   //while(linear.isRunning || angular.isRunning) ;//doWhileWaiting();
-
-    if (startChrono - teleplotChrono > 1000 * 100) // Update time
-    {
-      teleplotChrono = startChrono;
-      teleplot("Position", robot);
-      teleplot("Orient", degrees(robot.h));
-
-      //// teleplot("Direction", linear.direction);
-      // println(">fixeScale:0:0;0:2000;3000:2000;3000:0;|xy");
-      //// otos.Teleplot();
-      //// linear.Teleplot("linear");
-      //// angular.Teleplot("angular");
-
-      //// teleplot("v1", motor.GetMotorSpeed(1));
-      //// teleplot("v2", motor.GetMotorSpeed(2));
-      //// teleplot("v3", motor.GetMotorSpeed(3));
-      // teleplot("Servo_Up Pos", ServoAX12::Servo_Up.position);
-      // teleplot("Servo_Left Pos", ServoAX12::Servo_Left.position);
-      // teleplot("Servo_Up Cmd", ServoAX12::Servo_Up.command_position);
-      // teleplot("Servo_Left Cmd", ServoAX12::Servo_Left.command_position);
-    }
-
-    if (startChrono - mappingChrono > 1000 * 500) // Update every 1 sec
-    {
-      mappingChrono = startChrono;
-      Obstacle::PrintObstacleList();
-      Mapping::Update_Start_Vertex((int16_t)robot.x, (int16_t)robot.y);
-      // Mapping::Update_Passability_Graph();
-      // Mapping::PrintVertex0();
-      // Mapping::PrintVertexList();
-    }
-
-    if (startChrono - rgbChrono > 1000 * 100) // Update every 100ms
-    {
-      rgbChrono = startChrono;
-    }
 
     if (ESP32_Helper::HasWaitingCommand())
     {
@@ -245,9 +240,7 @@ void timerMotionCallback(TimerHandle_t xTimer)
         // GoToPose:50;50;0
         // GoToPose:0;0;45
         // GoToPose:0;0;0
-        goTo.x = cmd.data[0];
-        goTo.y = cmd.data[1];
-        goTo.h = radians(cmd.data[2]);
+        Pose goTo = Pose(cmd.data[0], cmd.data[1], radians(cmd.data[2]));
         print("Robot go to x=", goTo.x);
         print(" y=", goTo.y);
         print(" h=", goTo.h);
@@ -260,9 +253,7 @@ void timerMotionCallback(TimerHandle_t xTimer)
         // SetPose:500;500;0
         // SetPose:1500;1000;0
         timerMotion.WaitForDisable();
-        goTo.x = cmd.data[0];
-        goTo.y = cmd.data[1];
-        goTo.h = radians(cmd.data[2]);
+        Pose goTo = Pose(cmd.data[0], cmd.data[1], radians(cmd.data[2]));
         print("Robot set to x=", goTo.x);
         print(" y=", goTo.y);
         print(" h=", goTo.h);
@@ -307,6 +298,10 @@ void timerMotionCallback(TimerHandle_t xTimer)
         {
           print("PF Not Found");
         }
+      }
+      else if (cmd.cmd == "Nav" && cmd.size == 1)
+      {
+        Trajectory::Navigate_To_Vertex(cmd.data[0], linear.speed_max, 0);
       }
       else if (cmd.cmd == "VertexList")
       {
@@ -396,7 +391,8 @@ void TaskMatch(void *pvParameters)
     if (Match::matchState == State::MATCH_WAIT)
     {
       IHM::UpdateHMI();
-      // Update robot position
+      // TODO : Update robot position
+      // TODO : update mapping according to color
       if (IHM::team == Team::Jaune)
       {
         println("Team Jaune");

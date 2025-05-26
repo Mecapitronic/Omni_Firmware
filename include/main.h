@@ -48,6 +48,7 @@ const bool simulation = false;
 extern TimerThread timerMotion;
 void timerMotionCallback(TimerHandle_t xTimer);
 
+[[noreturn]] void TaskTeleplot(void *pvParameters);
 [[noreturn]] void TaskMain(void *pvParameters);
 [[noreturn]] void TaskMatch(void *pvParameters);
 [[noreturn]] void TaskLed(void *pvParameters);
