@@ -97,7 +97,7 @@ void LedRGB::update()
         // get the led number corresponding to the obstacle position
         if (obstacle_led >= 0 && obstacle_led < NUM_LEDS)
         {
-            leds[obstacle_led] = CRGB::Violet; // Example: Violet for obstacles
+            leds[obstacle_led] = CRGB::White;
         }
         else
         {
@@ -182,27 +182,27 @@ Point LedRGB::PolarToCartesian(PolarPoint polarPoint, PoseF robotPosition)
 
 PolarPoint LedRGB::CartesianToPolar(Point point, PoseF robotPosition)
 {
+
     PolarPoint polarPoint;
 
-    float angle = atan2(point.y - robotPosition.y, point.x - robotPosition.x) * 180 / PI;
+    int16_t angle = degrees(atan2(point.y - robotPosition.y, point.x - robotPosition.x));
+
     if (angle < 0)
     {
         angle += 360; // Ensure angle is positive
     }
-    polarPoint.angle = static_cast<float>(angle * 100); // Convert to centi-degrees
-    polarPoint.distance = static_cast<int16_t>(sqrt(pow(point.x - robotPosition.x, 2) + pow(point.y - robotPosition.y, 2)));
-
+    println("Cartesian to Polar angle: ", angle);
+    polarPoint.angle = angle;
+    // polarPoint.distance = static_cast<int16_t>(sqrt(pow(point.x - robotPosition.x, 2) + pow(point.y - robotPosition.y, 2)));
+    polarPoint.distance = 0;
     return polarPoint;
 }
 
 uint8_t LedRGB::polarPointToLedNumber(PolarPoint polarPoint)
 {
-    // Convert polar angle to led number
-    float angle = polarPoint.angle / 100.0; // Convert centi-degrees to degrees
-    if (angle < 0)
-    {
-        angle += 360; // Ensure angle is positive
-    }
-    // Map the angle to the number of LEDs
-    return static_cast<uint8_t>((angle / 360.0) * NUM_LEDS);
+    print("PolarPoint angle: ", polarPoint.angle);
+    println(" distance: ", polarPoint.distance);
+    uint8_t led_number = static_cast<uint8_t>((polarPoint.angle / 360.0) * NUM_LEDS);
+    println("PolarPoint led number: ", led_number);
+    return led_number;
 }

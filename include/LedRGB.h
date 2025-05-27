@@ -78,6 +78,13 @@ public:
 
   Point PolarToCartesian(PolarPoint polarPoint, PoseF robotPosition);
   PolarPoint CartesianToPolar(Point point, PoseF robotPosition);
+
+  /**
+   * @brief Map the angle to the LED number to turn on
+   *
+   * @param polarPoint the polar point containing the angle and distance
+   * @return uint8_t the LED number corresponding to the angle
+   */
   uint8_t polarPointToLedNumber(PolarPoint polarPoint);
 
 private:
