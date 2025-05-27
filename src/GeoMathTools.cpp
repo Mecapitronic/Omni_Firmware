@@ -25,6 +25,11 @@ float DistanceBetweenPoints(PointF pA, PointF pB)
   return Norm2D((pB.x - pA.x), (pB.y - pA.y));
 }
 
+float DistanceBetweenPoints(Point pA, Point pB)
+{
+  return Norm2D((pB.x - pA.x), (pB.y - pA.y));
+}
+
 float NormalizeAngle(float a_rad)
 {
   while (a_rad > PI)

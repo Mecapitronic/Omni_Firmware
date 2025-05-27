@@ -72,6 +72,8 @@ float DistanceBetweenPositions(float xA, float yA, float xB, float yB);
  */
 float DistanceBetweenPoints(PointF pA, PointF pB);
 
+float DistanceBetweenPoints(Point pA, Point pB);
+
 /**
  * @brief Normalisation of angle in radians between [-π, π]
  *

@@ -11,6 +11,15 @@
 
 namespace Trajectory
 {
+    constexpr float ArrivalTriggerDistance = 20.0; // distance seuil à partir de laquelle on considère qu'on est arrivé à un point donné (tolérance)
+    constexpr uint16_t OBSTACLE_TOO_CLOSE = 20;    // distance en dessous de laquelle on robot adversaire est considéré trop prêt de nous = risque de collision
+
+    PolarPoint CartesianToPolar(Point point, PoseF robotPosition);
+
+    bool isTheObstacleToClose(Circle obstacle);
+
+    bool isThereAnObstacleInFrontOfMe(float current_direction);
+
     /**
      * @brief Trajectory initialisation
      *

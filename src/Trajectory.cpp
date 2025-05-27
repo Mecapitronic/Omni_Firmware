@@ -12,8 +12,9 @@ namespace Trajectory
 
     // current target pose to go
     PoseF target;
-    // current target vertex ID to go
-    t_vertexID target_vertex = 0;
+
+    Timeout collision_prevention_timer; // timer d'attente lorsque l'on detecte un obstacle avant de reprendre notre course
+    PoseF pending_target;               // backup de la target courrante lorsqu'on s'arrête pour éviter un robot (car on reset la target)
   }
 
   void Initialisation(Motion *_linear, Motion *_angular, Robot *_robot)
@@ -28,22 +29,66 @@ namespace Trajectory
     target.h = robot->h;
   }
 
+  PolarPoint CartesianToPolar(Point point, PoseF robotPosition)
+  {
+
+    PolarPoint polarPoint;
+
+    int16_t angle = degrees(atan2(point.y - robotPosition.y, point.x - robotPosition.x));
+
+    if (angle < 0)
+    {
+      angle += 360; // Ensure angle is positive
+    }
+    println("Cartesian to Polar angle: ", angle);
+    polarPoint.angle = angle;
+    // polarPoint.distance = static_cast<int16_t>(sqrt(pow(point.x - robotPosition.x, 2) + pow(point.y - robotPosition.y, 2)));
+    polarPoint.distance = 0;
+    return polarPoint;
+  }
+
+  bool isTheObstacleToClose(Circle obstacle)
+  {
+    return DistanceBetweenPoints(robot->GetPoint(), obstacle.p) < OBSTACLE_TOO_CLOSE;
+  }
+
+  bool isThereAnObstacleInFrontOfMe(float current_direction)
+  {
+    for (auto obstacle : Obstacle::obstacle)
+    {
+      if (isTheObstacleToClose(obstacle))
+      {
+        PolarPoint adversary = CartesianToPolar(obstacle.p, *robot);
+        // on considère un cone de 30° devant nous
+        if (current_direction - radians(15) < adversary.angle || adversary.angle < current_direction + radians(15))
+        {
+          // il est devant nous
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
   void Update()
   {
-    if (target_vertex != 0)
+
+    if (isThereAnObstacleInFrontOfMe(linear->direction))
     {
-      Point p = Mapping::Get_Vertex_Point(target_vertex);
-      if (DistanceBetweenPositions(robot->x, robot->y, p.x, p.y) < 10)
+      if (pending_target == PoseF())
       {
-        // If we are close enough to the vertex, stop the trajectory
-        target_vertex = 0;
+        // on attend 2 secondes si on détecte un obstacle (surprise) devant nous lorsque l'on avance
+        collision_prevention_timer.Start(2000);
+        pending_target = target;
       }
-      else
+      Reset();
+      if (collision_prevention_timer.IsTimeOut())
       {
-        // If we are navigating to a vertex, update the target pose to the vertex position
-        target.x = p.x;
-        target.y = p.y;
-        // target.h = robot->h; // Keep current orientation
+        // restore target
+        target = pending_target;
+        pending_target = PoseF();
+        collision_prevention_timer.Stop();
+        // reset pending_target ?
       }
     }
     // Direction of the linear motion vector, in local robot reference
@@ -62,7 +107,6 @@ namespace Trajectory
     target.x = robot->x;
     target.y = robot->y;
     target.h = robot->h;
-    target_vertex = 0;
 
     // Reset linear and angular motion parameters
     linear->position_error = 0;
@@ -80,7 +124,6 @@ namespace Trajectory
     // Update target position
     target.x = x;
     target.y = y;
-    target_vertex = 0;
 
     // Update linear speeds
     linear->speed_limit = speed_limit;
@@ -96,7 +139,6 @@ namespace Trajectory
   {
     // Update target orientation
     target.h = h_rad;
-    target_vertex = 0;
 
     // Update linear speeds
     angular->speed_limit = speed_limit;
@@ -119,7 +161,6 @@ namespace Trajectory
     target.x = x;
     target.y = y;
     target.h = h;
-    target_vertex = 0;
     // TODO: adapter vitesse de rotation selon distance : vitesse angular = angle * Vitesse linear / distance
     // if (linear.position_error != 0)
     // {
@@ -133,30 +174,32 @@ namespace Trajectory
 
   void GoToVertex(t_vertexID id, float speed_limit, float speed_final)
   {
-    target_vertex = id;
+    Point p = Mapping::Get_Vertex_Point(id);
+    target.x = p.x;
+    target.y = p.y;
     linear->speed_limit = speed_limit;
     linear->speed_final = speed_final;
   }
 
   void Navigate_To_Vertex(t_vertexID id, float speed_limit, float speed_final)
   {
-    if (PathFinding::PathFinding((int16_t)robot->x, (int16_t)robot->y, id) && PathFinding::solution.size() > 0)
+    t_vertexID target_vertex = 0;
+    Point p = Mapping::Get_Vertex_Point(id);
+    // TODO: dans l'idéal on regarde uniquement les obstacles dans la moitié du terrain où on est pour éviter le flicker de la trajectoire
+    while (PathFinding::PathFinding((int16_t)robot->x, (int16_t)robot->y, id) && DistanceBetweenPositions(robot->x, robot->y, p.x, p.y) > ArrivalTriggerDistance)
     {
-      if (target_vertex != PathFinding::solution.front() || target_vertex == 0)
+      if (target_vertex != PathFinding::solution.front())
       {
         print("Path to vertex ", id);
         println(" found with ", PathFinding::solution.size(), " points.");
         PathFinding::ListVertexPrint(PathFinding::solution, "solution");
         println("Next point: ", PathFinding::solution.front());
+
         target_vertex = PathFinding::solution.front();
+        GoToVertex(PathFinding::solution.front(), speed_limit, speed_final);
       }
+      vTaskDelay(5);
     }
-    else
-    {
-      println("Path to vertex ", id, " not found.");
-      target_vertex = 0;
-    }
-    linear->speed_limit = speed_limit;
-    linear->speed_final = speed_final;
+    println("End of PF");
   }
 }
