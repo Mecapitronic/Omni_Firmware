@@ -15,11 +15,6 @@ Robot robot;
 
 OpticalTrackingOdometrySensor otos;
 
-unsigned long startChrono = 0;
-unsigned long endChrono = 0;
-unsigned long deltaChrono = 0;
-int nbrLoop = 0;
-
 void setup()
 {
   pinMode(PIN_EN_MCU, OUTPUT);
@@ -84,9 +79,11 @@ void setup()
                             (1000 * Motion::dt_motion) / portTICK_PERIOD_MS);
   timerMotion.Start();
 
-  TaskThread(TaskMatch, "TaskMatch", 20000, 10, 1);
-  TaskThread(TaskUpdate, "TaskUpdate", 10000, 5, 1);
+  // Put at least the 1 Tick delay, this is needed so the watchdog doesn't trigger
   TaskThread(TaskTeleplot, "TaskTeleplot", 10000, 10, 0);
+  TaskThread(TaskUpdate, "TaskUpdate", 10000, 15, 1);
+  TaskThread(TaskHandleCommand, "TaskHandleCommand", 20000, 5, 1);
+  TaskThread(TaskMatch, "TaskMatch", 20000, 10, 1);
 
   // Send to PC all the mapping data
   ESP32_Helper::HandleCommand(Command("UpdateMapping"));
@@ -94,6 +91,9 @@ void setup()
 
 void loop()
 {
+  // HACK Vérifier qu'on n'utilise pas les serialEvent !!!
+  // C:\Users\xxx\.platformio\packages\framework-arduinoespressif32\cores\esp32\main.cpp
+  // https://github.com/espressif/arduino-esp32/blob/master/cores/esp32/main.cpp
   vTaskDelete(NULL); // Supprime immédiatement le task Arduino "loop"
 }
 
@@ -208,7 +208,6 @@ void TaskUpdate(void *pvParameters)
 {
   while (true)
   {
-    startChrono = micros();
     Match::updateMatch();
     IHM::UpdateBAU();
     IHM::Blink();
@@ -246,7 +245,14 @@ void TaskUpdate(void *pvParameters)
       println("Enable Com");
       Lidar::enableComLidar = true;
     }
+    vTaskDelay(10);
+  }
+}
 
+void TaskHandleCommand(void *pvParameters)
+{
+  while (true)
+  {
     if (ESP32_Helper::HasWaitingCommand())
     {
       Command cmd = ESP32_Helper::GetCommand();
@@ -373,27 +379,10 @@ void TaskUpdate(void *pvParameters)
         Obstacle::PrintObstacleList();
       }
     }
-
-    endChrono = micros();
-    deltaChrono += endChrono - startChrono;
-    nbrLoop++;
-
-    if (nbrLoop == 1)
-    {
-      // println("Chrono : ", (float)deltaChrono, " µs/func (1)");
-    }
-    if (nbrLoop >= 1000)
-    {
-      // println("Chrono : ", (float)deltaChrono / 1000, " µs/func (1000)");
-      nbrLoop = 0;
-      deltaChrono = 0;
-    }
-    vTaskDelay(1); // Allow other tasks to run
+    vTaskDelay(10); // Allow other tasks to run
   }
 }
 
-// TASK => MATCH
-// Note the 1 Tick delay, this is need  so the watchdog doesn't get confused
 void TaskMatch(void *pvParameters)
 {
   println("Start TaskMatch");
@@ -455,7 +444,6 @@ void TaskMatch(void *pvParameters)
 }
 
 //**************************************************************************************************************************/
-
 void functionChrono(int nbrLoop)
 {
   unsigned long startChrono = micros();
