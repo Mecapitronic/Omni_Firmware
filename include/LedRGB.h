@@ -14,6 +14,7 @@
 
 #define TRANSITION_DELAY_MS 500
 #define TRANSITION_STEPS 100
+#define RING_BRIGHTNESS 255 // Brightness of the LED ring
 
 using namespace Printer;
 
@@ -86,8 +87,11 @@ private:
   // Amount of blending between two colors,that changes over time
   uint8_t blendAmount = 0;
 
+  // repère pour la rotation de couleur ou d'arc en ciel
   uint8_t current_hue = 0;
   CRGB team_color = CRGB::Black; // Default color for the team
+  // Couleur de fond
+  CRGB filling_color = CRGB::Black;
 
   // numero de la led a allumer pour indiquer le temps de match écoulé
   uint8_t match_time_led = 0;

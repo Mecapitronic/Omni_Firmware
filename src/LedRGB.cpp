@@ -8,7 +8,7 @@ void LedRGB::Initialisation()
     println(" on pin ", PIN_WS2812_LED);
 
     ring_controller = &FastLED.addLeds<NEOPIXEL, PIN_WS2812_LED>(leds, NUM_LEDS);
-    FastLED.setBrightness(RGB_BRIGHTNESS);
+    FastLED.setBrightness(RING_BRIGHTNESS);
 
     changeColorTimer.Start(TRANSITION_DELAY_MS / TRANSITION_STEPS);
 }
@@ -34,25 +34,27 @@ void LedRGB::update()
         return;
     }
 
-    // Default color for the emergency stop button
-    CRGB color_de_fond = CRGB::Black;
-
     // si le bouton d'arrêt d'urgence est enclenché on voit rouge
     if (IHM::bauReady == 0)
     {
-        color_de_fond = CRGB::Red;
+        filling_color = CRGB::Red;
     }
     else
     {
         if (Match::matchState == State::MATCH_WAIT || Match::matchState == State::MATCH_BEGIN)
         {
-            color_de_fond = team_color; // Set the team color when waiting for the match to start
+            filling_color = team_color; // Set the team color when waiting for the match to start
+        }
+        else
+        {
+            // Blend the team color with black for a lighter shade
+            filling_color = team_color.lerp8(CRGB::Black, 128);
         }
     }
-    fill_solid(leds, NUM_LEDS, color_de_fond); // Clear all LEDs
+    fill_solid(leds, NUM_LEDS, filling_color); // Clear all LEDs
 
     // update led ring display according to current robot state
-    if (Match::matchState != State::MATCH_WAIT)
+    if (Match::matchState == State::MATCH_BEGIN && Match::matchState == State::MATCH_RUN)
     {
         match_time_led = (NUM_LEDS * Match::getMatchTimeMs()) / Match::time_end_match;
         // Ensure we don't go out of bounds
@@ -60,7 +62,14 @@ void LedRGB::update()
         {
             leds[match_time_led] = CRGB::Green; // Set the time in green
         }
-        println("LED TIME: ", match_time_led);
+    }
+    if (Match::matchState == State::MATCH_WAIT)
+    {
+        if (current_hue >= NUM_LEDS)
+        {
+            current_hue = 0; // Reset hue to avoid overflow
+        }
+        leds[current_hue++] = CRGB::Green;
     }
 
     // // calculate obstacles orientation relative to the robot position and orientation
@@ -94,7 +103,7 @@ void LedRGB::update()
     //     color_team = CRGB::Black;
     // }
 
-    ring_controller->showLeds(RGB_BRIGHTNESS / 2);
+    ring_controller->showLeds(RING_BRIGHTNESS);
 }
 
 int LedRGB::obstacleRelativePosition(PoseF robotPosition, Point obstaclePosition)
@@ -127,8 +136,8 @@ void LedRGB::rainbow()
     if (changeColorTimer.IsTimeOut())
     {
         fill_rainbow_circular(leds, NUM_LEDS, current_hue, false);
-        ring_controller->showLeds(RGB_BRIGHTNESS); // Show the current color
-        current_hue += 2;                          // Increment hue for the next cycle
+        ring_controller->showLeds(RING_BRIGHTNESS); // Show the current color
+        current_hue += 2;                           // Increment hue for the next cycle
     }
 }
 
@@ -139,7 +148,7 @@ inline void LedRGB::TwoColorsTransition(CRGB color1, CRGB color2)
         // uint8_t blendAmount = map(i, 0, steps, 0, 255); // 0 → 255
         CRGB color = blend(color1, color2, blendAmount);
         fill_solid(leds, NUM_LEDS, color);
-        ring_controller->showLeds(RGB_BRIGHTNESS); // Show the current color
+        ring_controller->showLeds(RING_BRIGHTNESS); // Show the current color
 
         blendAmount++;
         if (blendAmount > 255)
@@ -163,13 +172,13 @@ inline void LedRGB::glowOneColor(CRGB color)
 inline void LedRGB::emergencyStop()
 {
     fill_solid(leds, NUM_LEDS, CRGB::Red);
-    for (uint8_t i = RGB_BRIGHTNESS / 2; i > 0; i--)
+    for (uint8_t i = RING_BRIGHTNESS; i > 0; i--)
     {
         ring_controller->showLeds(i);
         delay(30);
     }
     ring_controller->showLeds(0); // Turn off all LEDs
-    for (uint8_t i = 0; i < RGB_BRIGHTNESS / 2; i++)
+    for (uint8_t i = 0; i < RING_BRIGHTNESS; i++)
     {
         ring_controller->showLeds(i);
         delay(30);
