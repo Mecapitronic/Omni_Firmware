@@ -9,6 +9,7 @@
 #include "Match.h"
 #include "pins.h"
 #include "Structure.h"
+#include "PathPlanning/Obstacle.h"
 
 #define NUM_LEDS 24
 
@@ -39,18 +40,18 @@ class LedRGB
 {
 
 public:
-  void Initialisation();
-
   /**
-   * @brief update the current robot state from value in other modules
-   * get the adversaries and obstacles positions, robot position, robot state.
-   * This function is called by the update() function.
+   * @brief initialise the RGB LED ring, sets the brightness and prepares the ring controller.
+   *
+   * @param robotPosition pointer to robot position in order to display the obstacles and adversaries positions relative to the robot
    */
-  void updateState(PoseF position, std::array<Circle, 10> obstacles_list);
+  void Initialisation(Robot *robotPosition);
 
   /**
    * @brief update led ring display according to current robot state.
-   * @description Takes into account: enemies position, obstacles position, robot position, robot state.
+   * @details update the current robot state from value in other modules
+   * get the adversaries and obstacles positions, robot position, robot state.
+   * Takes into account: enemies position, obstacles position, robot position, robot state.
    * The informaitons are stored in robot_state private variables and translated into colors
    * and leds positions.
    *
@@ -80,25 +81,16 @@ public:
   uint8_t polarPointToLedNumber(PolarPoint polarPoint);
 
 private:
-  CLEDController *ring_controller;
-  CRGB leds[NUM_LEDS];
-
-  // Timer to switch colors
-  Timeout changeColorTimer;
-  Timeout rotationTimer;
-  // Amount of blending between two colors,that changes over time
-  uint8_t blendAmount = 0;
-
-  // repère pour la rotation de couleur ou d'arc en ciel
-  uint8_t current_hue = 0;
-  CRGB team_color = CRGB::Black; // Default color for the team
-  // Couleur de fond
-  CRGB filling_color = CRGB::Black;
-
-  // numero de la led a allumer pour indiquer le temps de match écoulé
-  uint8_t match_time_led = 0;
-
-  std::vector<uint8_t> m_obstacles_list;
+  CLEDController *ring_controller;  // Pointer to the FastLED controller for the ring
+  CRGB filling_color = CRGB::Black; // Couleur de fond
+  CRGB leds[NUM_LEDS];              // Array to hold the colors of the LEDs
+  CRGB team_color = CRGB::Black;    // Default color for the team
+  Robot *robot_position;            // Pointer to the robot position for obstacle and adversary display
+  Timeout changeColorTimer;         // Timer to switch colors
+  Timeout rotationTimer;            // Timer to rotate colors
+  uint8_t blendAmount = 0;          // Amount of blending between two colors,that changes over time
+  uint8_t current_hue = 0;          // repère pour la rotation de couleur ou d'arc en ciel
+  uint8_t match_time_led = 0;       // numero de la led a allumer pour indiquer le temps de match écoulé
 };
 
 #endif

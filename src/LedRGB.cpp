@@ -2,40 +2,33 @@
 
 using namespace Printer;
 
-void LedRGB::Initialisation()
+void LedRGB::Initialisation(Robot *robotPosition)
 {
+    // Initialize timers for color transitions and rotation
     print("RGB initialisation of ", NUM_LEDS, " pixels");
     println(" on pin ", PIN_WS2812_LED);
 
+    // Initialize the FastLED library
     ring_controller = &FastLED.addLeds<NEOPIXEL, PIN_WS2812_LED>(leds, NUM_LEDS);
     FastLED.setBrightness(RING_BRIGHTNESS);
+    // Set the initial color of the LEDs to black
+    fill_solid(leds, NUM_LEDS, CRGB::Black);
+    ring_controller->showLeds(RING_BRIGHTNESS);
 
+    // Initialize the robot position pointer
+    robot_position = robotPosition;
+
+    // Initialize the timers
     changeColorTimer.Start(TRANSITION_DELAY_MS / TRANSITION_STEPS);
     rotationTimer.Start(100);
-}
-
-// This function would update the current state based on the robot's state
-void LedRGB::updateState(PoseF position, std::array<Circle, 10> obstacles_list)
-{
-    IHM::team == Team::Jaune ? team_color = CRGB::Gold : team_color = CRGB::DodgerBlue;
-
-    m_obstacles_list.clear();
-    for (const auto &obstacle : obstacles_list)
-    {
-        uint8_t obstacle_led = polarPointToLedNumber(CartesianToPolar(obstacle.p, position));
-        println("Obstacle at led number: ", obstacle_led);
-        if (obstacle_led >= NUM_LEDS)
-        {
-            println("OBSTACLE LED NUMBER OUT OF BOUNDS: ", obstacle_led);
-            continue; // Skip if the led number is out of bounds
-        }
-        m_obstacles_list.emplace_back(obstacle_led);
-    }
 }
 
 // pour faire un clignotement on stock 2 couleurs pour alterner
 void LedRGB::update()
 {
+    // Update data
+    IHM::team == Team::Jaune ? team_color = CRGB::Gold : team_color = CRGB::DodgerBlue;
+
     if (Match::matchState == State::MATCH_END)
     {
         rainbow();
@@ -84,27 +77,41 @@ void LedRGB::update()
         }
     }
 
-    // calculate obstacles orientation relative to the robot position and orientation
-    for (size_t i = 0; i < m_obstacles_list.size(); i++)
+    // display obstacles around the robot
+    PoseF robot_current_position = robot_position->GetPoseF();
+    for (const auto &obstacle : Obstacle::obstacle)
     {
-        // get the led number corresponding to the obstacle position
-
-        if (m_obstacles_list[i] >= 0 && m_obstacles_list[i] < NUM_LEDS)
+        if (obstacle.r == 0)
         {
-            leds[i] = CRGB::Violet; // Example: Violet for obstacles
+            continue; // Skip if the obstacle radius is invalid
+        }
+
+        // calculate obstacles orientation relative to the robot position and orientation
+        uint8_t obstacle_led = polarPointToLedNumber(CartesianToPolar(obstacle.p, robot_current_position));
+        if (obstacle_led >= NUM_LEDS)
+        {
+            println("OBSTACLE LED NUMBER OUT OF BOUNDS: ", obstacle_led);
+            continue; // Skip if the led number is out of bounds
+        }
+
+        // get the led number corresponding to the obstacle position
+        if (obstacle_led >= 0 && obstacle_led < NUM_LEDS)
+        {
+            leds[obstacle_led] = CRGB::Violet; // Example: Violet for obstacles
         }
         else
         {
-            println("Obstacle LED number out of bounds: ", m_obstacles_list[i]);
+            println("Obstacle LED number out of bounds: ", obstacle_led);
         }
-
-        // else if (i < adversaries.size() + obstacles.size())
-        // {
-        //     // Set color based on adversary position
-        //     leds[i] = CRGB::Red; // Example: Blue for adversaries
-        // }
     }
+
     ring_controller->showLeds(RING_BRIGHTNESS);
+
+    // else if (i < adversaries.size() + obstacles.size())
+    // {
+    //     // Set color based on adversary position
+    //     leds[i] = CRGB::Red; // Example: Blue for adversaries
+    // }
 }
 
 void LedRGB::rainbow()

@@ -38,7 +38,7 @@ void setup()
 
   ServoAX12::Initialisation();
 
-  led_ring.Initialisation();
+  led_ring.Initialisation(&robot);
 
   Lidar::Initialisation(&robot);
 
@@ -219,8 +219,6 @@ void TaskUpdate(void *pvParameters)
     Match::updateMatch();
     IHM::UpdateBAU();
     IHM::Blink();
-
-    led_ring.updateState(robot.GetPoseF(), Obstacle::obstacle);
     led_ring.update();
 
     // take some time to update the servo, maybe move it elsewhere
