@@ -166,9 +166,11 @@ void TaskTeleplot(void *pvParameters)
   Timeout robotPosTimeOut, mapTimeOut;
   robotPosTimeOut.Start(100);
   mapTimeOut.Start(200);
+  Chrono chrono("Teleplot", 1000);
 
-  while (1)
+  while (true)
   {
+    chrono.Start();
     if (robotPosTimeOut.IsTimeOut())
     {
       teleplot("Position", robot);
@@ -199,15 +201,21 @@ void TaskTeleplot(void *pvParameters)
     {
       Obstacle::PrintObstacleList();
     }
-
+    if (chrono.Check())
+    {
+      println("Chrono " + chrono.name + " : ", chrono.elapsedTime / chrono.loopNbr, " µs/loop");
+    }
     vTaskDelay(10);
   }
 }
 
 void TaskUpdate(void *pvParameters)
 {
+  println("Start TaskUpdate");
+  Chrono chrono("Update", 1000);
   while (true)
   {
+    chrono.Start();
     Match::updateMatch();
     IHM::UpdateBAU();
     IHM::Blink();
@@ -245,14 +253,21 @@ void TaskUpdate(void *pvParameters)
       println("Enable Com");
       Lidar::enableComLidar = true;
     }
+    if (chrono.Check())
+    {
+      println("Chrono " + chrono.name + " : ", chrono.elapsedTime / chrono.loopNbr, " µs/loop");
+    }
     vTaskDelay(10);
   }
 }
 
 void TaskHandleCommand(void *pvParameters)
 {
+  println("Start TaskHandleCommand");
+  Chrono chrono("HandleCommand", 1000);
   while (true)
   {
+    chrono.Start();
     if (ESP32_Helper::HasWaitingCommand())
     {
       Command cmd = ESP32_Helper::GetCommand();
@@ -379,6 +394,10 @@ void TaskHandleCommand(void *pvParameters)
         Obstacle::PrintObstacleList();
       }
     }
+    if (chrono.Check())
+    {
+      println("Chrono " + chrono.name + " : ", chrono.elapsedTime / chrono.loopNbr, " µs/loop");
+    }
     vTaskDelay(10); // Allow other tasks to run
   }
 }
@@ -386,8 +405,10 @@ void TaskHandleCommand(void *pvParameters)
 void TaskMatch(void *pvParameters)
 {
   println("Start TaskMatch");
+  Chrono chrono("Match", 1000);
   while (true)
   {
+    chrono.Start();
     // Attente du démarrage du match par la tirette
     if (Match::matchState == State::MATCH_WAIT)
     {
@@ -438,6 +459,10 @@ void TaskMatch(void *pvParameters)
       timerMotion.WaitForDisable();
       motor.Update(0, 0, 0);
       ServoAX12::StopAllServo();
+    }
+    if (chrono.Check())
+    {
+      println("Chrono " + chrono.name + " : ", chrono.elapsedTime / chrono.loopNbr, " µs/loop");
     }
     vTaskDelay(10);
   }

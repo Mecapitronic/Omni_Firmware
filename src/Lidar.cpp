@@ -27,7 +27,7 @@ namespace Lidar
     void TaskLidar(void *pvParameters)
     {
         println("Start TaskLidar");
-        while (1)
+        while (true)
         {
             PoseF p = robot->GetPoseF();
             // Starting char : '!'
