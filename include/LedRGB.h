@@ -71,12 +71,13 @@ public:
    */
   inline void emergencyStop();
 
-  int lidarPositionToLedNumber(float position, float min, float max);
-  int obstacleRelativePosition(PoseF robotPosition, Point obstaclePosition);
-
   inline void TwoColorsTransition(CRGB color1, CRGB color2);
   inline void glowTwoColors(CRGB color1, CRGB color2);
   inline void glowOneColor(CRGB color);
+
+  Point PolarToCartesian(PolarPoint polarPoint, PoseF robotPosition);
+  PolarPoint CartesianToPolar(Point point, PoseF robotPosition);
+  uint8_t polarPointToLedNumber(PolarPoint polarPoint);
 
 private:
   CLEDController *ring_controller;
@@ -84,6 +85,7 @@ private:
 
   // Timer to switch colors
   Timeout changeColorTimer;
+  Timeout rotationTimer;
   // Amount of blending between two colors,that changes over time
   uint8_t blendAmount = 0;
 
@@ -96,7 +98,7 @@ private:
   // numero de la led a allumer pour indiquer le temps de match écoulé
   uint8_t match_time_led = 0;
 
-  std::vector<Point> m_obstacles_list;
+  std::vector<uint8_t> m_obstacles_list;
 };
 
 #endif

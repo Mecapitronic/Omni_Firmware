@@ -11,6 +11,7 @@ void LedRGB::Initialisation()
     FastLED.setBrightness(RING_BRIGHTNESS);
 
     changeColorTimer.Start(TRANSITION_DELAY_MS / TRANSITION_STEPS);
+    rotationTimer.Start(100);
 }
 
 // This function would update the current state based on the robot's state
@@ -21,7 +22,14 @@ void LedRGB::updateState(PoseF position, std::array<Circle, 10> obstacles_list)
     m_obstacles_list.clear();
     for (const auto &obstacle : obstacles_list)
     {
-        m_obstacles_list.emplace_back(obstacle.p.x, obstacle.p.y);
+        uint8_t obstacle_led = polarPointToLedNumber(CartesianToPolar(obstacle.p, position));
+        println("Obstacle at led number: ", obstacle_led);
+        if (obstacle_led >= NUM_LEDS)
+        {
+            println("OBSTACLE LED NUMBER OUT OF BOUNDS: ", obstacle_led);
+            continue; // Skip if the led number is out of bounds
+        }
+        m_obstacles_list.emplace_back(obstacle_led);
     }
 }
 
@@ -48,7 +56,7 @@ void LedRGB::update()
         else
         {
             // Blend the team color with black for a lighter shade
-            filling_color = team_color.lerp8(CRGB::Black, 128);
+            filling_color = team_color.lerp8(CRGB::Black, 200);
         }
     }
     fill_solid(leds, NUM_LEDS, filling_color); // Clear all LEDs
@@ -60,7 +68,7 @@ void LedRGB::update()
         // Ensure we don't go out of bounds
         if (match_time_led <= NUM_LEDS)
         {
-            leds[match_time_led] = CRGB::Green; // Set the time in green
+            leds[match_time_led] = CRGB::ForestGreen; // Set the time in green
         }
     }
     if (Match::matchState == State::MATCH_WAIT)
@@ -69,67 +77,34 @@ void LedRGB::update()
         {
             current_hue = 0; // Reset hue to avoid overflow
         }
-        leds[current_hue++] = CRGB::Green;
+        if (rotationTimer.IsTimeOut())
+        {
+            leds[current_hue++] = CRGB::ForestGreen;
+        }
     }
 
-    // // calculate obstacles orientation relative to the robot position and orientation
-    // for (size_t i = 0; i < m_obstacles_list.size(); i++)
-    // {
-    //     // get the led number corresponding to the obstacle position
-    //     int ledNumber = lidarPositionToLedNumber(m_obstacles_list[i].x, -200, 200);
-    //     if (ledNumber >= 0 && ledNumber < NUM_LEDS)
-    //     {
-    //         leds[ledNumber] = CRGB::Violet; // Example: Violet for obstacles
-    //     }
-    //     else
-    //     {
-    //         leds[0] = CRGB::Violet;
-    //     }
-    // }
+    // calculate obstacles orientation relative to the robot position and orientation
+    for (size_t i = 0; i < m_obstacles_list.size(); i++)
+    {
+        // get the led number corresponding to the obstacle position
 
-    // else if (i < adversaries.size() + obstacles.size())
-    // {
-    //     // Set color based on adversary position
-    //     leds[i] = CRGB::Red; // Example: Blue for adversaries
-    // }
+        if (m_obstacles_list[i] >= 0 && m_obstacles_list[i] < NUM_LEDS)
+        {
+            leds[i] = CRGB::Violet; // Example: Violet for obstacles
+        }
+        else
+        {
+            println("Obstacle LED number out of bounds: ", m_obstacles_list[i]);
+        }
 
-    // si le match n'est pas démarré on affiche la couleur de l'équipe
-    // if (Match::matchState == State::MATCH_WAIT || Match::matchState == State::MATCH_BEGIN)
-    // {
-    //     color_team = team_color;
-    // }
-    // else
-    // {
-    //     color_team = CRGB::Black;
-    // }
-
+        // else if (i < adversaries.size() + obstacles.size())
+        // {
+        //     // Set color based on adversary position
+        //     leds[i] = CRGB::Red; // Example: Blue for adversaries
+        // }
+    }
     ring_controller->showLeds(RING_BRIGHTNESS);
 }
-
-int LedRGB::obstacleRelativePosition(PoseF robotPosition, Point obstaclePosition)
-{
-    // get angle between h and the vector formed by robotposition x,y and obstaclePosition x,y
-
-    //     DirectionFromPoint(robotPosition.x, robotPosition.y, obstaclePosition.x, obstaclePosition.y)
-
-    //     atan2((object 1 Y - object 2 Y) / (object 1 X - object 2 X)) + 180}
-
-    return 0;
-}
-
-int LedRGB::lidarPositionToLedNumber(float position, float min, float max)
-{
-    // Convert the position to a value between 0 and NUM_LEDS
-    auto ledNumber = static_cast<int>((position - min) / (max - min) * NUM_LEDS);
-    // Ensure the ledNumber is within bounds
-    if (ledNumber < 0)
-        ledNumber = 0;
-    else if (ledNumber >= NUM_LEDS)
-        ledNumber = NUM_LEDS - 1;
-    return ledNumber;
-}
-
-// ANIMATIONS
 
 void LedRGB::rainbow()
 {
@@ -183,4 +158,43 @@ inline void LedRGB::emergencyStop()
         ring_controller->showLeds(i);
         delay(30);
     }
+}
+
+Point LedRGB::PolarToCartesian(PolarPoint polarPoint, PoseF robotPosition)
+{
+    Point point;
+
+    float angle = polarPoint.angle + robotPosition.h;
+    angle /= 100;
+    point.x = robotPosition.x + polarPoint.distance * cos(angle * PI / 180);
+    point.y = robotPosition.y + polarPoint.distance * sin(angle * PI / 180);
+
+    return point;
+}
+
+PolarPoint LedRGB::CartesianToPolar(Point point, PoseF robotPosition)
+{
+    PolarPoint polarPoint;
+
+    float angle = atan2(point.y - robotPosition.y, point.x - robotPosition.x) * 180 / PI;
+    if (angle < 0)
+    {
+        angle += 360; // Ensure angle is positive
+    }
+    polarPoint.angle = static_cast<float>(angle * 100); // Convert to centi-degrees
+    polarPoint.distance = static_cast<int16_t>(sqrt(pow(point.x - robotPosition.x, 2) + pow(point.y - robotPosition.y, 2)));
+
+    return polarPoint;
+}
+
+uint8_t LedRGB::polarPointToLedNumber(PolarPoint polarPoint)
+{
+    // Convert polar angle to led number
+    float angle = polarPoint.angle / 100.0; // Convert centi-degrees to degrees
+    if (angle < 0)
+    {
+        angle += 360; // Ensure angle is positive
+    }
+    // Map the angle to the number of LEDs
+    return static_cast<uint8_t>((angle / 360.0) * NUM_LEDS);
 }
