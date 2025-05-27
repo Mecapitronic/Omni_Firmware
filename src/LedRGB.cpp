@@ -77,9 +77,10 @@ void LedRGB::update()
         {
             current_hue = 0; // Reset hue to avoid overflow
         }
+        leds[current_hue] = CRGB::ForestGreen;
         if (rotationTimer.IsTimeOut())
         {
-            leds[current_hue++] = CRGB::ForestGreen;
+            current_hue++; // Increment hue for the next cycle
         }
     }
 
