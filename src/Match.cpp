@@ -33,12 +33,15 @@ namespace Match
 
     long getMatchTimeSec()
     {
-        return (millis() - startTime) / 1000;
+        return (getMatchTimeMs()) / 1000;
     }
 
     long getMatchTimeMs()
     {
-        return millis() - startTime;
+        if (matchState != State::MATCH_WAIT)
+            return millis() - startTime;
+        else
+            return 0; // Match not started yet
     } 
 
     void updateMatch()
