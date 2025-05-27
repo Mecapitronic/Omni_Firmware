@@ -43,8 +43,22 @@ namespace ServoAX12
             dxl.torqueOn(servo.id);
 
             // Limit the maximum velocity in Position Control Mode. Use 0 for Max speed
-            dxl.writeControlTableItem(ControlTableItem::PROFILE_VELOCITY, servo.id, servo.vitesse);
-            dxl.writeControlTableItem(ControlTableItem::PROFILE_ACCELERATION, servo.id, servo.acceleration);
+            if (dxl.writeControlTableItem(ControlTableItem::PROFILE_VELOCITY, servo.id, servo.vitesse))
+            {
+                println("Vitesse set to : ", servo.vitesse);
+            }
+            else
+            {
+                println("Failed to set Vitesse");
+            }
+            if (dxl.writeControlTableItem(ControlTableItem::PROFILE_ACCELERATION, servo.id, servo.acceleration))
+            {
+                println("Acceleration set to : ", servo.acceleration);
+            }
+            else
+            {
+                println("Failed to set Acceleration");
+            }
 
             servo.position = servo.command_position = dxl.getPresentPosition(servo.id, UNIT_DEGREE);
 
@@ -191,7 +205,14 @@ namespace ServoAX12
             {
                 println(" Vitesse : ", cmd.data[1]);
                 Servos[id].vitesse = cmd.data[1];
-                dxl.writeControlTableItem(ControlTableItem::PROFILE_VELOCITY, cmd.data[0], cmd.data[1]);
+                if (dxl.writeControlTableItem(ControlTableItem::PROFILE_VELOCITY, cmd.data[0], cmd.data[1]))
+                {
+                    println(" Vitesse set successfully");
+                }
+                else
+                {
+                    println(" Failed to set Vitesse");
+                }
             }
         }
         else if (cmd.cmd == "AX12Acc" && cmd.size == 2)
@@ -207,7 +228,14 @@ namespace ServoAX12
             {
                 println(" Accel : ", cmd.data[1]);
                 Servos[id].acceleration = cmd.data[1];
-                dxl.writeControlTableItem(ControlTableItem::PROFILE_ACCELERATION, cmd.data[0], cmd.data[1]);
+                if (dxl.writeControlTableItem(ControlTableItem::PROFILE_ACCELERATION, cmd.data[0], cmd.data[1]))
+                {
+                    println(" Accel set successfully");
+                }
+                else
+                {
+                    println(" Failed to set Accel");
+                }
             }
         }
         else if (cmd.cmd == "AX12Stop")
@@ -327,7 +355,7 @@ namespace ServoAX12
     {
         for (auto &[id, servo] : Servos)
         {
-            teleplot("Servo_" + servo.id, servo.position);
+            teleplot("Servo_" + String(servo.id), servo.position);
         }
     }
 }
