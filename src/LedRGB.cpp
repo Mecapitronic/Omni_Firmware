@@ -202,7 +202,9 @@ uint8_t LedRGB::polarPointToLedNumber(PolarPoint polarPoint)
 {
     print("PolarPoint angle: ", polarPoint.angle);
     println(" distance: ", polarPoint.distance);
-    uint8_t led_number = static_cast<uint8_t>((polarPoint.angle / 360.0) * NUM_LEDS);
+    // l'angle 0 est à droite du robot, on doit donc le convertir pour que 0 soit en haut
+    // on doit aussi inverser le sens pour suivre le sens horaire et non trigonométrique
+    uint8_t led_number = static_cast<uint8_t>(-((polarPoint.angle - 90) / 360.0) * NUM_LEDS);
     println("PolarPoint led number: ", led_number);
     return led_number;
 }
