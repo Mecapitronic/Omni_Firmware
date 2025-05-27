@@ -6,9 +6,7 @@ namespace ServoAX12
 {
     Dynamixel2Arduino dxl(SERIAL_SERVO, PIN_SERVO_DIR);
 
-    ServoMotion Servo_Up = {6, 30, 20, 0, 0, false};
-    ServoMotion Servo_Left = {5, 30, 50, 0, 0, false};
-    ServoMotion Servo_Right = {3, 30, 50, 0, 0, false};
+    std::unordered_map<ServoID, ServoMotion, std::hash<ServoID>> Servos;
 
     void Initialisation()
     {
@@ -18,14 +16,20 @@ namespace ServoAX12
         // Set Port Protocol Version. This has to match with DYNAMIXEL protocol version.
         dxl.setPortProtocolVersion((float)DxlProtocolVersion::PROTOCOL_1);
 
-        InitServo(Servo_Up);
-        InitServo(Servo_Left);
-        InitServo(Servo_Right);
+        Servos.clear();
+        Servos[ServoID::Up] = ServoMotion(ServoID::Up, 30, 20);
+        Servos[ServoID::Left] = ServoMotion(ServoID::Left, 30, 50);
+        Servos[ServoID::Right] = ServoMotion(ServoID::Right, 30, 50);
+
+        for (auto &[id, servo] : Servos)
+        {
+            InitServo(servo);
+        }
     }
 
     void InitServo(ServoMotion &servo)
     {
-        if (dxl.ping(servo.id))
+        if (dxl.ping((uint8_t)servo.id))
         {
             println("Init Servo ID : ", servo.id);
             PrintDxlInfo(servo.id);
@@ -60,9 +64,10 @@ namespace ServoAX12
     void StopAllServo()
     {
         println("Stop All Servo");
-        StopServo(Servo_Up);
-        StopServo(Servo_Left);
-        StopServo(Servo_Right);
+        for (auto &[id, servo] : Servos)
+        {
+            StopServo(servo);
+        }
     }
 
     void StopServo(ServoMotion &servo)
@@ -74,14 +79,15 @@ namespace ServoAX12
     void Update()
     {
         // 1 ms / servo
-        UpdateServo(Servo_Up);
-        UpdateServo(Servo_Left);
-        UpdateServo(Servo_Right);
+        for (auto &[id, servo] : Servos)
+        {
+            UpdateServo(servo);
+        }
     }
 
     void UpdateServo(ServoMotion &servo)
     {
-        if (servo.position >= servo.command_position + 1 || servo.position <= servo.command_position - 1)
+        if (servo.position >= servo.command_position + 0.5 || servo.position <= servo.command_position - 0.5)
         {
             servo.position = dxl.getPresentPosition(servo.id, UNIT_DEGREE);
             if (!servo.ledState)
@@ -89,6 +95,7 @@ namespace ServoAX12
                 servo.ledState = true;
                 dxl.ledOn(servo.id);
             }
+            servo.IsMoving = true;
         }
         else
         {
@@ -97,37 +104,39 @@ namespace ServoAX12
                 servo.ledState = false;
                 dxl.ledOff(servo.id);
             }
+            servo.IsMoving = false;
         }
     }
 
     void SetServoPosition(ServoMotion &servo, float position)
     {
         servo.command_position = position;
+        servo.IsMoving = true;
         dxl.setGoalPosition(servo.id, servo.command_position, UNIT_DEGREE);
     }
 
     void Prise()
     {
-        SetServoPosition(Servo_Left, (float)ServoPosition::GauchePrise);
-        SetServoPosition(Servo_Right, (float)ServoPosition::DroitePrise);
+        SetServoPosition(Servos[ServoID::Left], (float)ServoPosition::GauchePrise);
+        SetServoPosition(Servos[ServoID::Right], (float)ServoPosition::DroitePrise);
     }
     void Depose()
     {
-        SetServoPosition(Servo_Left, (float)ServoPosition::GaucheDepose);
-        SetServoPosition(Servo_Right, (float)ServoPosition::DroiteDepose);
+        SetServoPosition(Servos[ServoID::Left], (float)ServoPosition::GaucheDepose);
+        SetServoPosition(Servos[ServoID::Right], (float)ServoPosition::DroiteDepose);
     }
     void Tourne()
     {
-        SetServoPosition(Servo_Left, (float)ServoPosition::GaucheTourne);
-        SetServoPosition(Servo_Right, (float)ServoPosition::DroiteTourne);
+        SetServoPosition(Servos[ServoID::Left], (float)ServoPosition::GaucheTourne);
+        SetServoPosition(Servos[ServoID::Right], (float)ServoPosition::DroiteTourne);
     }
     void Haut()
     {
-        SetServoPosition(Servo_Up, (float)ServoPosition::Haut);
+        SetServoPosition(Servos[ServoID::Up], (float)ServoPosition::Haut);
     }
     void Bas()
     {
-        SetServoPosition(Servo_Up, (float)ServoPosition::Bas);
+        SetServoPosition(Servos[ServoID::Up], (float)ServoPosition::Bas);
     }
 
     void HandleCommand(Command cmd)
@@ -141,7 +150,9 @@ namespace ServoAX12
         else if (cmd.cmd == "AX12PrintInfo")
         {
             if (cmd.size == 1)
+            {
                 PrintDxlInfo(cmd.data[0]);
+            }
             else
                 PrintDxlInfo();
         }
@@ -150,28 +161,54 @@ namespace ServoAX12
             if (cmd.size == 2)
             {
                 // AX12Pos:3:100
-                dxl.setGoalPosition(cmd.data[0], cmd.data[1], UNIT_DEGREE);
+                ServoID id = (ServoID)cmd.data[0];
+                print("AX12 Servo id : ", cmd.data[0]);
+                if (Servos.count(id) == 0)
+                {
+                    println(" is not initialized");
+                }
+                else
+                {
+                    println(" Position : ", cmd.data[1]);
+                    SetServoPosition(Servos[id], (float)cmd.data[1]);
+                }
             }
             else
             {
-                println("Servo_Up : ", dxl.getPresentPosition(Servo_Up.id, UNIT_DEGREE));
-                println("Servo_Left : ", dxl.getPresentPosition(Servo_Left.id, UNIT_DEGREE));
-                println("Servo_Right : ", dxl.getPresentPosition(Servo_Right.id, UNIT_DEGREE));
+                TeleplotPosition();
             }
         }
         else if (cmd.cmd == "AX12Vit" && cmd.size == 2)
         {
             // AX12Vit:5:30
+            ServoID id = (ServoID)cmd.data[0];
             println("AX12 Servo id : ", cmd.data[0]);
-            println(" Vitesse : ", cmd.data[1]);
-            dxl.writeControlTableItem(ControlTableItem::PROFILE_VELOCITY, cmd.data[0], cmd.data[1]);
+            if (Servos.count(id) == 0)
+            {
+                println(" is not initialized");
+            }
+            else
+            {
+                println(" Vitesse : ", cmd.data[1]);
+                Servos[id].vitesse = cmd.data[1];
+                dxl.writeControlTableItem(ControlTableItem::PROFILE_VELOCITY, cmd.data[0], cmd.data[1]);
+            }
         }
         else if (cmd.cmd == "AX12Acc" && cmd.size == 2)
         {
             // AX12Acc:5:50
+            ServoID id = (ServoID)cmd.data[0];
             println("AX12 Servo id : ", cmd.data[0]);
-            println(" Accel : ", cmd.data[1]);
-            dxl.writeControlTableItem(ControlTableItem::PROFILE_ACCELERATION, cmd.data[0], cmd.data[1]);
+            if (Servos.count(id) == 0)
+            {
+                println(" is not initialized");
+            }
+            else
+            {
+                println(" Accel : ", cmd.data[1]);
+                Servos[id].acceleration = cmd.data[1];
+                dxl.writeControlTableItem(ControlTableItem::PROFILE_ACCELERATION, cmd.data[0], cmd.data[1]);
+            }
         }
         else if (cmd.cmd == "AX12Stop")
         {
@@ -210,6 +247,33 @@ namespace ServoAX12
 
     const void PrintCommandHelp()
     {
+        Printer::println("AX12 Command Help :");
+        Printer::println(" > AX12Scan");
+        Printer::println("      Scan all Dynamixel servos on all protocols and baudrates");
+        Printer::println(" > AX12PrintInfo[:id]");
+        Printer::println("      Print info for all servos or for the given id");
+        Printer::println(" > AX12Pos[:id]:[position]");
+        Printer::println("      Set servo [id] to [position] (in degrees)");
+        Printer::println("      If no argument, print current positions");
+        Printer::println(" > AX12Vit:[id]:[vitesse]");
+        Printer::println("      Set velocity for servo [id] to [vitesse]");
+        Printer::println(" > AX12Acc:[id]:[acceleration]");
+        Printer::println("      Set acceleration for servo [id] to [acceleration]");
+        Printer::println(" > AX12Stop");
+        Printer::println("      Stop all servos (torque off)");
+        Printer::println(" > AX12Prise");
+        Printer::println("      Move left and right servos to 'prise' position");
+        Printer::println(" > AX12Depose");
+        Printer::println("      Move left and right servos to 'depose' position");
+        Printer::println(" > AX12Tourne");
+        Printer::println("      Move left and right servos to 'tourne' position");
+        Printer::println(" > AX12Haut");
+        Printer::println("      Move up servo to 'haut' position");
+        Printer::println(" > AX12Bas");
+        Printer::println("      Move up servo to 'bas' position");
+        Printer::println(" > AX12Help");
+        Printer::println("      Print this help");
+        Printer::println();
     }
 
     int16_t Scan()
@@ -256,6 +320,14 @@ namespace ServoAX12
         {
             print("ID : ", id);
             println(", Model Number: ", dxl.getModelNumber(id));
+        }
+    }
+
+    void TeleplotPosition()
+    {
+        for (auto &[id, servo] : Servos)
+        {
+            teleplot("Servo_" + servo.id, servo.position);
         }
     }
 }
