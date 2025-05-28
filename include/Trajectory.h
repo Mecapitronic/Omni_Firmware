@@ -18,7 +18,15 @@ namespace Trajectory
       20; // distance en dessous de laquelle on robot adversaire est considéré trop prêt
           // de nous = risque de collision
 
-  PolarPoint CartesianToPolar(Point point, PoseF robotPosition);
+  /**
+   * @brief give the relative (to the robot) direction of the point without distance
+   *
+   * @param point the point we want to convert to polar direction
+   * @param robotPosition the position of the robot in the field
+   * @return PolarPoint the polar direction of the point relative to the robot position.
+   * Distance is always 0.
+   */
+  PolarPoint CartesianToPolarDirection(Point point, PoseF robotPosition);
 
   /**
    * @brief Give the polar position of an object relative to the robot position
@@ -29,8 +37,8 @@ namespace Trajectory
   PolarPoint CartesianToRelativePolar(Point obstacle);
 
   bool isTheObstacleToClose(Circle obstacle);
-
   bool isThereAnObstacleInFrontOfMe(float current_direction);
+  void FallBackIfWeAreWithinObstacleLimits();
 
   /**
    * @brief Trajectory initialisation

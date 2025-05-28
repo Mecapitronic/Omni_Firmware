@@ -31,22 +31,16 @@ namespace Trajectory
     target.h = robot->h;
   }
 
-  PolarPoint CartesianToPolar(Point point, PoseF robotPosition)
+  PolarPoint CartesianToPolarDirection(Point point, PoseF robotPosition)
   {
+    PolarPoint polarPoint = {0, 0};
+    polarPoint.angle =
+        degrees(atan2(point.y - robotPosition.y, point.x - robotPosition.x));
 
-    PolarPoint polarPoint;
-
-    int16_t angle = degrees(atan2(point.y - robotPosition.y, point.x - robotPosition.x));
-
-    if (angle < 0)
+    if (polarPoint.angle < 0)
     {
-      angle += 360; // Ensure angle is positive
+      polarPoint.angle += 360; // Ensure angle is positive
     }
-    println("Cartesian to Polar angle: ", angle);
-    polarPoint.angle = angle;
-    // polarPoint.distance = static_cast<int16_t>(sqrt(pow(point.x - robotPosition.x, 2) +
-    // pow(point.y - robotPosition.y, 2)));
-    polarPoint.distance = 0;
     return polarPoint;
   }
 
@@ -96,8 +90,8 @@ namespace Trajectory
     {
       if (pending_target == PoseF())
       {
-        // on attend 2 secondes si on détecte un obstacle (surprise) devant nous lorsque
-        // l'on avance
+        // si on détecte un obstacle (surprise) devant nous lorsque l'on avance
+        // on attend 2 secondes
         collision_prevention_timer.Start(2000);
         pending_target = target;
       }
@@ -108,7 +102,6 @@ namespace Trajectory
         target = pending_target;
         pending_target = PoseF();
         collision_prevention_timer.Stop();
-        // reset pending_target ?
       }
     }
     // Direction of the linear motion vector, in local robot reference
@@ -178,6 +171,14 @@ namespace Trajectory
     RotateTowardsPosition(point.x, point.y, speed_limit, speed_final);
   }
 
+  void GoToPose(float x, float y, float h)
+  {
+    // Update target position
+    target.x = x;
+    target.y = y;
+    target.h = h;
+  }
+
   void GoToPose(float x, float y, float h, float speed_limit, float speed_final)
   {
     // Update target position
@@ -205,6 +206,27 @@ namespace Trajectory
     linear->speed_final = speed_final;
   }
 
+  void FallBackIfWeAreWithinObstacleLimits()
+  {
+    for (auto obstacle : Obstacle::obstacle)
+    {
+      if (isTheObstacleToClose(obstacle))
+      {
+        // si on est dans un obstacle, on recule de 10cm
+        println("Obstacle too close, going back");
+        // on recule de 10cm dans la direction opposée de l'obstacle
+        PoseF linear_target = robot->GetPoseF();
+        PolarPoint adversary = CartesianToRelativePolar(obstacle.p);
+        linear_target.x -= 100 * cos(radians(adversary.angle + 180));
+        linear_target.y -= 100 * sin(radians(adversary.angle + 180));
+
+        // TODO: checker si il n'y a pas d'obstacle dans la direction opposée
+        GoToPose(linear_target.x, linear_target.y, robot->h);
+        return;
+      }
+    }
+  }
+
   void Navigate_To_Vertex(t_vertexID id, float speed_limit, float speed_final)
   {
     t_vertexID target_vertex = 0;
@@ -229,6 +251,6 @@ namespace Trajectory
       }
       vTaskDelay(5);
     }
-    println("End of PF");
+    println("End of Path Finding");
   }
 } // namespace Trajectory
