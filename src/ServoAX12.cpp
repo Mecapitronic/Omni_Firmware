@@ -17,9 +17,14 @@ namespace ServoAX12
         dxl.setPortProtocolVersion((float)DxlProtocolVersion::PROTOCOL_1);
 
         Servos.clear();
-        Servos[ServoID::Up] = ServoMotion(ServoID::Up, 30, 20, ServoPosition::Min, ServoPosition::Max);
-        Servos[ServoID::Left] = ServoMotion(ServoID::Left, 30, 50, ServoPosition::GaucheMin, ServoPosition::GaucheMax);
-        Servos[ServoID::Right] = ServoMotion(ServoID::Right, 30, 50, ServoPosition::DroiteMin, ServoPosition::DroiteMax);
+        Servos[ServoID::UpPlank] =
+            ServoMotion(ServoID::UpPlank, 30, 20, ServoPosition::Min, ServoPosition::Max);
+        Servos[ServoID::UpCan] =
+            ServoMotion(ServoID::UpCan, 30, 20, ServoPosition::Min, ServoPosition::Max);
+        Servos[ServoID::Left] = ServoMotion(
+            ServoID::Left, 30, 50, ServoPosition::LeftMin, ServoPosition::LeftMax);
+        Servos[ServoID::Right] = ServoMotion(
+            ServoID::Right, 30, 50, ServoPosition::RightMin, ServoPosition::RightMax);
 
         for (auto &[id, servo] : Servos)
         {
@@ -139,26 +144,26 @@ namespace ServoAX12
 
     void Prise()
     {
-        SetServoPosition(Servos[ServoID::Left], (float)ServoPosition::GauchePrise);
-        SetServoPosition(Servos[ServoID::Right], (float)ServoPosition::DroitePrise);
+      SetServoPosition(Servos[ServoID::Left], (float)ServoPosition::LeftPrise);
+      SetServoPosition(Servos[ServoID::Right], (float)ServoPosition::RightPrise);
     }
     void Depose()
     {
-        SetServoPosition(Servos[ServoID::Left], (float)ServoPosition::GaucheDepose);
-        SetServoPosition(Servos[ServoID::Right], (float)ServoPosition::DroiteDepose);
+      SetServoPosition(Servos[ServoID::Left], (float)ServoPosition::LeftDepose);
+      SetServoPosition(Servos[ServoID::Right], (float)ServoPosition::RightDepose);
     }
     void Tourne()
     {
-        SetServoPosition(Servos[ServoID::Left], (float)ServoPosition::GaucheTourne);
-        SetServoPosition(Servos[ServoID::Right], (float)ServoPosition::DroiteTourne);
+      SetServoPosition(Servos[ServoID::Left], (float)ServoPosition::LeftTourne);
+      SetServoPosition(Servos[ServoID::Right], (float)ServoPosition::RightTourne);
     }
     void Haut()
     {
-        SetServoPosition(Servos[ServoID::Up], (float)ServoPosition::Haut);
+      SetServoPosition(Servos[ServoID::UpCan], (float)ServoPosition::Haut);
     }
     void Bas()
     {
-        SetServoPosition(Servos[ServoID::Up], (float)ServoPosition::Bas);
+      SetServoPosition(Servos[ServoID::UpCan], (float)ServoPosition::Bas);
     }
 
     void HandleCommand(Command cmd)

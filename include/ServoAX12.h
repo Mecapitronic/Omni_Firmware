@@ -36,17 +36,17 @@ namespace ServoAX12
         Haut = 270,
         Bas = 0,
 
-        GaucheMax = 197,
-        GaucheDepose = 185,
-        GauchePrise = 150,
-        GaucheTourne = 80,
-        GaucheMin = 70,
+        LeftMax = 197,
+        LeftDepose = 185,
+        LeftPrise = 150,
+        LeftTourne = 80,
+        LeftMin = 70,
 
-        DroiteMin = 100,
-        DroiteDepose = 112,
-        DroitePrise = 149,
-        DroiteTourne = 220,
-        DroiteMax = 290,
+        RightMin = 100,
+        RightDepose = 112,
+        RightPrise = 149,
+        RightTourne = 220,
+        RightMax = 290,
 
         Min = 0,
         Max = 290
@@ -54,10 +54,11 @@ namespace ServoAX12
 
     enum class ServoID
     {
-        Up = 6,                      // Servo pour lever le bras
-        Left = 5,                    // Servo pour la pince gauche
-        Right = 3,                   // Servo pour la pince droite
-        BroadCast = DXL_BROADCAST_ID // Broadcast ID pour communiquer avec tous les servos
+      UpPlank = 6,                 // Servo pour soulever la planche
+      UpCan = 15,                  // Servo pour lever les conserves
+      Left = 5,                    // Servo pour la pince gauche
+      Right = 3,                   // Servo pour la pince droite
+      BroadCast = DXL_BROADCAST_ID // Broadcast ID pour communiquer avec tous les servos
     };
 
     // id vitesse acceleration position command_position ledState
