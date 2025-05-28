@@ -1,0 +1,10 @@
+Language: Cpp
+BasedOnStyle: Microsoft
+IndentWidth: 2
+TabWidth: 2
+UseTab: Never
+MaxEmptyLinesToKeep: 2
+NamespaceIndentation: All
+ColumnLimit: 99
+PenaltyBreakAssignment: 2
+PenaltyReturnTypeOnItsOwnLine: 200
