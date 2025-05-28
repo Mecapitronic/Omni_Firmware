@@ -171,13 +171,15 @@ Point LedRGB::PolarToCartesian(PolarPoint polarPoint, PoseF robotPosition)
 PolarPoint LedRGB::CartesianToPolar(Point point, PoseF robotPosition)
 {
   PolarPoint polarPoint = {0, 0};
-  polarPoint.angle = atan2(point.y - robotPosition.y, point.x - robotPosition.x);
+  polarPoint.angle = degrees(atan2(point.y - robotPosition.y, point.x - robotPosition.x));
 
-  if (polarPoint.angle < -180)
-    polarPoint.angle += 360;
-  else if (polarPoint.angle > 180)
-    polarPoint.angle -= 360;
+  println("Polar Point angle before adjustment: ", polarPoint.angle);
+  if (polarPoint.angle < 0)
+  {
+    polarPoint.angle += 180; // Ensure angle is positive
+  }
 
+  println("Polar Point angle after adjustment: ", polarPoint.angle);
   return polarPoint;
 }
 
@@ -186,20 +188,18 @@ uint8_t LedRGB::polarPointToLedNumber(PolarPoint polarPoint)
   // l'angle 0 est à droite du robot, on doit donc le convertir pour que 0 soit en haut
   // on doit aussi inverser le sens pour suivre le sens horaire et non trigonométrique
   polarPoint.angle -= 90;
-  if (polarPoint.angle < 0)
-  {
-    polarPoint.angle += 360; // Ensure angle is positive
-  }
+  // if (polarPoint.angle < 0)
+  // {
+  //   polarPoint.angle += 360; // Ensure angle is positive
+  // }
 
   // do not directly cast you idiot!
-  int8_t led_number = static_cast<int8_t>(round((polarPoint.angle / 360.0) * NUM_LEDS));
+  int8_t led_number = static_cast<int8_t>(round((-polarPoint.angle / 360.0) * NUM_LEDS));
 
-  print("POLAR POINT: ", polarPoint.angle);
   println(" LED NUMBER : ", led_number);
 
   if (led_number >= NUM_LEDS)
   {
-    println("LED NUM OUT OF BOUND");
     return 12;
   }
   return led_number;
