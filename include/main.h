@@ -3,22 +3,22 @@
 
 using namespace std;
 
-#include <math.h>
-#include "pins.h"
 #include "ESP32_Helper.h"
+#include "pins.h"
+#include <math.h>
 using namespace Printer;
-#include "Structure.h"
 #include "GeoMathTools.h"
-#include "OTOS.h"
-#include "Motor.h"
+#include "IHM.h"
+#include "LedRGB.h"
+#include "Lidar.h"
+#include "Match.h"
 #include "Motion.h"
+#include "Motor.h"
+#include "OTOS.h"
+#include "ServoAX12.h"
+#include "Structure.h"
 #include "Timer.h"
 #include "Trajectory.h"
-#include "LedRGB.h"
-#include "IHM.h"
-#include "Match.h"
-#include "ServoAX12.h"
-#include "Lidar.h"
 
 #include "PathPlanning/PathFinding.h"
 

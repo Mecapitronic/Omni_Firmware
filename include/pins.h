@@ -1,8 +1,8 @@
 #ifndef PIN_H
 #define PIN_H
 
-#include <pins_arduino.h>
 #include <HardwareSerial.h>
+#include <pins_arduino.h>
 
 //******************** Pins Undefined
 constexpr size_t PIN_11 = 11;

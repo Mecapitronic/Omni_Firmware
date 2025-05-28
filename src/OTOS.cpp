@@ -30,7 +30,8 @@ void OpticalTrackingOdometrySensor::Initialisation(bool simulation)
     {
         println("OTOS connected!");
 
-        println("Ensure the OTOS is flat and stationary, then enter any key to calibrate the IMU");
+        println("Ensure the OTOS is flat and stationary, then enter any key to calibrate "
+                "the IMU");
 
         // Clear the serial buffer
         // while (available()) read();
@@ -116,55 +117,56 @@ void OpticalTrackingOdometrySensor::Initialisation(bool simulation)
 
 bool OpticalTrackingOdometrySensor::IsConnected()
 {
-  return connected;
+    return connected;
 }
 
 void OpticalTrackingOdometrySensor::Update()
 {
-  if (connected)
-  {
-    sfTkError_t error;
-    sfe_otos_pose2d_t myPosition;
-    sfe_otos_pose2d_t myVelocity;
-    sfe_otos_pose2d_t myAcceleration;
-    // Get the latest position, which includes the x and y coordinates, plus the
-    // heading angle
-    // sfe_otos_pose2d_t myPosition;
-    // error = myOtos.getPosition(myPosition);
-    // if (error != 0)
-    //    print("Error Pos : ", error);
-
-    // Create structs for velocity, and acceleration
-    // sfe_otos_pose2d_t myVelocity;
-    // error = myOtos.getVelocity(myVelocity);
-    // if (error != 0)
-    //    print("Error Vel : ", error);
-
-    // sfe_otos_pose2d_t myAcceleration;
-    // error = myOtos.getAcceleration(myAcceleration);
-    // if (error != 0)
-    //     print("Error Acc : ", error);
-
-    // If Velocity and Acceleration are not needed, use getPosition to decrease blocking
-    // time currently blocking time of getPosVelAcc with 400 000 speed : 600µS
-    error = myOtos.getPosVelAcc(myPosition, myVelocity, myAcceleration);
-    if (error != 0)
+    if (connected)
     {
-      print("Error getPosVelAcc : ", error);
+        sfTkError_t error;
+        sfe_otos_pose2d_t myPosition;
+        sfe_otos_pose2d_t myVelocity;
+        sfe_otos_pose2d_t myAcceleration;
+        // Get the latest position, which includes the x and y coordinates, plus the
+        // heading angle
+        // sfe_otos_pose2d_t myPosition;
+        // error = myOtos.getPosition(myPosition);
+        // if (error != 0)
+        //    print("Error Pos : ", error);
+
+        // Create structs for velocity, and acceleration
+        // sfe_otos_pose2d_t myVelocity;
+        // error = myOtos.getVelocity(myVelocity);
+        // if (error != 0)
+        //    print("Error Vel : ", error);
+
+        // sfe_otos_pose2d_t myAcceleration;
+        // error = myOtos.getAcceleration(myAcceleration);
+        // if (error != 0)
+        //     print("Error Acc : ", error);
+
+        // If Velocity and Acceleration are not needed, use getPosition to decrease
+        // blocking time currently blocking time of getPosVelAcc with 400 000 speed :
+        // 600µS
+        error = myOtos.getPosVelAcc(myPosition, myVelocity, myAcceleration);
+        if (error != 0)
+        {
+            print("Error getPosVelAcc : ", error);
+        }
+        else
+        {
+            position.x = myPosition.x * 1000;
+            position.y = myPosition.y * 1000;
+            position.h = myPosition.h;
+            velocity.x = myVelocity.x * 1000;
+            velocity.y = myVelocity.y * 1000;
+            velocity.h = myVelocity.h;
+            acceleration.x = myAcceleration.x * 1000;
+            acceleration.y = myAcceleration.y * 1000;
+            acceleration.h = myAcceleration.h;
+        }
     }
-    else
-    {
-      position.x = myPosition.x * 1000;
-      position.y = myPosition.y * 1000;
-      position.h = myPosition.h;
-      velocity.x = myVelocity.x * 1000;
-      velocity.y = myVelocity.y * 1000;
-      velocity.h = myVelocity.h;
-      acceleration.x = myAcceleration.x * 1000;
-      acceleration.y = myAcceleration.y * 1000;
-      acceleration.h = myAcceleration.h;
-    }
-  }
 }
 
 void OpticalTrackingOdometrySensor::HandleCommand(Command cmd)

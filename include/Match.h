@@ -13,7 +13,7 @@ namespace Match
     static constexpr int time_end_train = time_start_train + 999000;
     static constexpr int time_end_match = time_start_match + 100000;
 
-    
+
     extern State matchState;
     extern Enable matchMode;
 
@@ -23,5 +23,5 @@ namespace Match
     long getMatchTimeMs();
     void updateMatch();
     void printMatch();
-}
+} // namespace Match
 #endif

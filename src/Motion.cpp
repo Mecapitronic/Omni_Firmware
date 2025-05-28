@@ -8,16 +8,16 @@
  ****************************************************************************************/
 void Motion::Initialisation(float speedMax, float accelMax)
 {
-  isRunning = false;
+    isRunning = false;
 
-  accel_max = accelMax;
-  speed_max = speedMax;
-  speed_limit = speed_max;
-  speed_final = 0;
-  velocity_actual = 0;
-  velocity_command = 0;
-  position_error = 0;
-  position_margin = 0;
+    accel_max = accelMax;
+    speed_max = speedMax;
+    speed_limit = speed_max;
+    speed_final = 0;
+    velocity_actual = 0;
+    velocity_command = 0;
+    position_error = 0;
+    position_margin = 0;
 }
 
 /****************************************************************************************
@@ -25,47 +25,50 @@ void Motion::Initialisation(float speedMax, float accelMax)
  ****************************************************************************************/
 void Motion::Update()
 {
-  isRunning = true;
+    isRunning = true;
 
-  // Check end of motion
-  if (fabsf(position_error) >= position_margin)
-  {
-    TrapezoidalProfile();
-    AntiOverspeed();
-  }
-  else
-  {
-    Stop();
-  }
+    // Check end of motion
+    if (fabsf(position_error) >= position_margin)
+    {
+        TrapezoidalProfile();
+        AntiOverspeed();
+    }
+    else
+    {
+        Stop();
+    }
 }
 
 /****************************************************************************************
- * Trapezoidal velocity controller for smoothly motion profile, based on kinematic motion laws : 
- * distance_deceleration = |velocity_real^2 - velocity_final^2| / (2 * accel_max) 
+ * Trapezoidal velocity controller for smoothly motion profile, based on kinematic motion
+ *laws : distance_deceleration = |velocity_real^2 - velocity_final^2| / (2 * accel_max)
  * -OR- velocity_setpoint = sqrt(velocity_final^2 + 2 * accel_max * distance_remaining)
  ****************************************************************************************/
 void Motion::TrapezoidalProfile()
 {
-  // Speed setpoint
-  float velocity_setpoint = sqrtf((speed_final * speed_final) + 2 * accel_max * fabsf(position_error));
+    // Speed setpoint
+    float velocity_setpoint =
+        sqrtf((speed_final * speed_final) + 2 * accel_max * fabsf(position_error));
 
-  // Speed limitation (in any case, setpoint is limited by the absolute speed max)
-  velocity_setpoint = fmin(velocity_setpoint, fmin(speed_limit, speed_max));
+    // Speed limitation (in any case, setpoint is limited by the absolute speed max)
+    velocity_setpoint = fmin(velocity_setpoint, fmin(speed_limit, speed_max));
 
-  // Velocity (speed with sign)
-  velocity_setpoint = copysignf(velocity_setpoint, position_error); 
+    // Velocity (speed with sign)
+    velocity_setpoint = copysignf(velocity_setpoint, position_error);
 
-  // Velocity smoothing by integration of acceleration
-  if (velocity_actual < velocity_setpoint)
-  {
-    // Velocity increase
-    velocity_command = fmin(velocity_command + (accel_max * dt_motion), velocity_setpoint);
-  }
-  else
-  {
-    // Velocity decrease
-    velocity_command = fmax(velocity_command - (accel_max * dt_motion), velocity_setpoint);
-  }
+    // Velocity smoothing by integration of acceleration
+    if (velocity_actual < velocity_setpoint)
+    {
+        // Velocity increase
+        velocity_command =
+            fmin(velocity_command + (accel_max * dt_motion), velocity_setpoint);
+    }
+    else
+    {
+        // Velocity decrease
+        velocity_command =
+            fmax(velocity_command - (accel_max * dt_motion), velocity_setpoint);
+    }
 }
 
 /****************************************************************************************
@@ -73,19 +76,19 @@ void Motion::TrapezoidalProfile()
  ****************************************************************************************/
 void Motion::AntiOverspeed()
 {
-  // TODO : sortir les variables et ajuster la fonction...
-  float delta_v_min = 50.0;   // Augmentation minimale par cycle (mm/s)
-  float k = 0.5;              // Facteur d’augmentation relative
+    // TODO : sortir les variables et ajuster la fonction...
+    float delta_v_min = 50.0; // Augmentation minimale par cycle (mm/s)
+    float k = 0.5;            // Facteur d’augmentation relative
 
-  // Max velocity delta
-  float seuil_vit = fabsf(velocity_actual * k) + delta_v_min;
-  float delta_vit = velocity_command - velocity_actual;
+    // Max velocity delta
+    float seuil_vit = fabsf(velocity_actual * k) + delta_v_min;
+    float delta_vit = velocity_command - velocity_actual;
 
-  // Velocity command limitation
-  if (fabsf(delta_vit) > seuil_vit) 
-  {
-      velocity_command = velocity_actual + copysign(seuil_vit, delta_vit);
-  }
+    // Velocity command limitation
+    if (fabsf(delta_vit) > seuil_vit)
+    {
+        velocity_command = velocity_actual + copysign(seuil_vit, delta_vit);
+    }
 }
 
 /****************************************************************************************
@@ -93,8 +96,8 @@ void Motion::AntiOverspeed()
  ****************************************************************************************/
 void Motion::Stop()
 {
-  isRunning = false;
-  velocity_command = 0;
+    isRunning = false;
+    velocity_command = 0;
 }
 
 /****************************************************************************************
@@ -102,7 +105,7 @@ void Motion::Stop()
  ****************************************************************************************/
 void Motion::SetMargin(float margin_mm_or_rad)
 {
-  position_margin = margin_mm_or_rad;
+    position_margin = margin_mm_or_rad;
 }
 
 /****************************************************************************************
@@ -118,7 +121,7 @@ void Motion::SetMargin(float margin_mm_or_rad)
  ****************************************************************************************/
 void Motion::Teleplot(String name)
 {
-  teleplot(name + " pos.error", position_error);
-  teleplot(name + " vel.com", velocity_command);
-  teleplot(name + " vel.actual", velocity_actual);
+    teleplot(name + " pos.error", position_error);
+    teleplot(name + " vel.com", velocity_command);
+    teleplot(name + " vel.actual", velocity_actual);
 }

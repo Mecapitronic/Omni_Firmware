@@ -2,10 +2,10 @@
 #define IHM_H
 
 #include "ESP32_Helper.h"
-#include "pins.h"
 #include "Match.h"
-#include <FastLED.h>
 #include "Structure.h"
+#include "pins.h"
+#include <FastLED.h>
 
 #define BUILTIN_BRIGHTNESS 50 // Brightness of the built-in LED
 
@@ -15,9 +15,9 @@ namespace IHM
     extern Enable tirettePresent;
     extern int switchMode;
     extern int bauReady;
-    
+
     extern bool useBlink;
-    
+
     void InitIHM();
     void UpdateHMI();
     void UpdateBAU();
@@ -29,5 +29,5 @@ namespace IHM
     void PrintBAU();
     void PrintStart();
 
-}
+} // namespace IHM
 #endif

@@ -1,8 +1,8 @@
 #ifndef GEOMATHTOOLS_H
 #define GEOMATHTOOLS_H
 
-#include "Structure.h"
 #include "ESP32_Helper.h"
+#include "Structure.h"
 
 #ifndef SQRT2
 #define SQRT2 (1.41421356237) // SQRT(2) racine carrée de 2
@@ -21,7 +21,8 @@
  * @brief Approximation de distance euclidienne. Attention: dx et dy doivent être positifs
  *
  */
-#define Approx_Distance(dx, dy) ((dy < dx) ? (dx + (dy >> 2) + (dy >> 3)) : (dy + (dx >> 2) + (dx >> 3)))
+#define Approx_Distance(dx, dy)                                                          \
+    ((dy < dx) ? (dx + (dy >> 2) + (dy >> 3)) : (dy + (dx >> 2) + (dx >> 3)))
 
 /**
  * @brief  Norm of 2D vector given by dx and dy => magnitude or Euclidean distance

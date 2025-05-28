@@ -9,15 +9,14 @@ namespace Match
     {
         long elapsedTime = 0;
         long startTime = 0;
-    }
-    
+    } // namespace
+
     // Get the current state of the match
     State matchState = State::MATCH_WAIT;
 
     // Get the mode : ENABLE_TRUE is Match, ENABLE_FALSE is Train (default)
     Enable matchMode = Enable::ENABLE_NONE;
 
-    
     void startMatch()
     {
         startTime = millis();
@@ -42,7 +41,7 @@ namespace Match
             return millis() - startTime;
         else
             return 0; // Match not started yet
-    } 
+    }
 
     void updateMatch()
     {
@@ -52,21 +51,22 @@ namespace Match
         }
         else if (matchState == State::MATCH_BEGIN)
         {
-          // Match started, wait for elapsed time to reach the start threshold
-          // elapsedTime = millis() - startTime;
-          // if ((elapsedTime >= time_start_match && matchMode == Enable::ENABLE_TRUE) ||
-          // (elapsedTime >= time_start_train && matchMode == Enable::ENABLE_FALSE))
-          //{
-          // matchState = State::MATCH_RUN;
-          // printMatch();
-          //}
+            // Match started, wait for elapsed time to reach the start threshold
+            // elapsedTime = millis() - startTime;
+            // if ((elapsedTime >= time_start_match && matchMode == Enable::ENABLE_TRUE)
+            // || (elapsedTime >= time_start_train && matchMode == Enable::ENABLE_FALSE))
+            //{
+            // matchState = State::MATCH_RUN;
+            // printMatch();
+            //}
         }
         else if ((matchState == State::MATCH_RUN) || (matchState == State::MATCH_STOP))
         {
             // PAMI still running or waiting for end of match
             elapsedTime = millis() - startTime;
 
-            if ((elapsedTime >= time_end_match && matchMode == Enable::ENABLE_TRUE) || (elapsedTime >= time_end_train && matchMode == Enable::ENABLE_FALSE))
+            if ((elapsedTime >= time_end_match && matchMode == Enable::ENABLE_TRUE)
+                || (elapsedTime >= time_end_train && matchMode == Enable::ENABLE_FALSE))
             {
                 matchState = State::MATCH_END;
                 printMatch();
@@ -102,4 +102,4 @@ namespace Match
         else
             println("None");
     }
-}
+} // namespace Match

@@ -4,10 +4,10 @@
 /****************************************************************************************
  * Includes
  ****************************************************************************************/
-#include "Structure.h"
 #include "Mapping.h"
 #include "NodeItem.h"
 #include "QueueThread.h"
+#include "Structure.h"
 
 /****************************************************************************************
  * Parameters
@@ -40,5 +40,5 @@ namespace Obstacle
     boolean Is_In_Map(Point p);
     void Add_Obstacle(uint8_t id, Point p);
     void PrintObstacleList();
-}
+} // namespace Obstacle
 #endif

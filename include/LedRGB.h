@@ -48,81 +48,82 @@ class LedRGB
 {
 
 public:
-  /**
-   * @brief initialise the RGB LED ring, sets the brightness and prepares the ring
-   * controller.
-   *
-   * @param robotPosition pointer to robot position in order to display the obstacles and
-   * adversaries positions relative to the robot
-   */
-  void Initialisation(Robot *robotPosition);
+    /**
+     * @brief initialise the RGB LED ring, sets the brightness and prepares the ring
+     * controller.
+     *
+     * @param robotPosition pointer to robot position in order to display the obstacles
+     * and adversaries positions relative to the robot
+     */
+    void Initialisation(Robot *robotPosition);
 
-  /**
-   * @brief update led ring display according to current robot state.
-   * @details update the current robot state from value in other modules
-   * get the adversaries and obstacles positions, robot position, robot state.
-   * Takes into account: enemies position, obstacles position, robot position, robot
-   * state. The informaitons are stored in robot_state private variables and translated
-   * into colors and leds positions.
-   *
-   */
-  void update();
+    /**
+     * @brief update led ring display according to current robot state.
+     * @details update the current robot state from value in other modules
+     * get the adversaries and obstacles positions, robot position, robot state.
+     * Takes into account: enemies position, obstacles position, robot position, robot
+     * state. The informaitons are stored in robot_state private variables and translated
+     * into colors and leds positions.
+     *
+     */
+    void update();
 
-  /**
-   * @brief display a circular rainbow as a loading circle on the RGB LEDs ring
-   * the rainbow is circling
-   *
-   * @return * void
-   */
-  void rainbow();
+    /**
+     * @brief display a circular rainbow as a loading circle on the RGB LEDs ring
+     * the rainbow is circling
+     *
+     * @return * void
+     */
+    void rainbow();
 
-  /**
-   * @brief set all leds to red and glow smoothly
-   * inline function
-   */
-  inline void emergencyStop();
+    /**
+     * @brief set all leds to red and glow smoothly
+     * inline function
+     */
+    inline void emergencyStop();
 
-  inline void TwoColorsTransition(CRGB color1, CRGB color2);
-  inline void glowTwoColors(CRGB color1, CRGB color2);
-  inline void glowOneColor(CRGB color);
+    inline void TwoColorsTransition(CRGB color1, CRGB color2);
+    inline void glowTwoColors(CRGB color1, CRGB color2);
+    inline void glowOneColor(CRGB color);
 
-  /**
-   * @brief give the relative direction (in radians) of a given object from the robot
-   * perspective. Use robot origin and 0° (robot right)
-   *
-   * @param point the object we want the direction from (the robot)
-   * @return float direction of the object in radians
-   */
-  float RelativeDirection(Point point);
+    /**
+     * @brief give the relative direction (in radians) of a given object from the robot
+     * perspective. Use robot origin and 0° (robot right)
+     *
+     * @param point the object we want the direction from (the robot)
+     * @return float direction of the object in radians
+     */
+    float RelativeDirection(Point point);
 
-  /**
-   * @brief convert a polar point to the corresponding LED number
-   * @details takes the angle in radians starting from 0 trigo (on the right) and going
-   * counter clockwise and gives the corresponding led number, starting from 0 in front of
-   * the robot and going clockwise.
-   *
-   * @note l'angle 0 est à droite du robot, on doit donc le convertir pour que 0 soit en
-   * haut on doit aussi inverser le sens pour suivre le sens horaire et non
-   * trigonométrique
-   *
-   * @param angle the angle in radians starting from 0 trigo
-   * @return uint8_t the LED number corresponding to the angle
-   * @note The angle is normalized to be in the range [0, 2π] before conversion.
-   */
-  uint8_t directionToLedNumber(float angle);
+    /**
+     * @brief convert a polar point to the corresponding LED number
+     * @details takes the angle in radians starting from 0 trigo (on the right) and going
+     * counter clockwise and gives the corresponding led number, starting from 0 in front
+     * of the robot and going clockwise.
+     *
+     * @note l'angle 0 est à droite du robot, on doit donc le convertir pour que 0 soit en
+     * haut on doit aussi inverser le sens pour suivre le sens horaire et non
+     * trigonométrique
+     *
+     * @param angle the angle in radians starting from 0 trigo
+     * @return uint8_t the LED number corresponding to the angle
+     * @note The angle is normalized to be in the range [0, 2π] before conversion.
+     */
+    uint8_t directionToLedNumber(float angle);
 
 private:
-  CLEDController *ring_controller;  // Pointer to the FastLED controller for the ring
-  CRGB filling_color = CRGB::Black; // Couleur de fond
-  CRGB leds[NUM_LEDS];              // Array to hold the colors of the LEDs
-  CRGB team_color = CRGB::Black;    // Default color for the team
-  Robot *robot_position;            // Pointer to the robot position
-  Timeout changeColorTimer;         // Timer to switch colors
-  Timeout rotationTimer;            // Timer to rotate colors
-  uint8_t blendAmount = 0; // Amount of blending between two colors,that changes over time
-  uint8_t current_hue = 0; // repère pour la rotation de couleur ou d'arc en ciel
-  uint8_t match_time_led =
-      0; // numero de la led a allumer pour indiquer le temps de match écoulé
+    CLEDController *ring_controller;  // Pointer to the FastLED controller for the ring
+    CRGB filling_color = CRGB::Black; // Couleur de fond
+    CRGB leds[NUM_LEDS];              // Array to hold the colors of the LEDs
+    CRGB team_color = CRGB::Black;    // Default color for the team
+    Robot *robot_position;            // Pointer to the robot position
+    Timeout changeColorTimer;         // Timer to switch colors
+    Timeout rotationTimer;            // Timer to rotate colors
+    uint8_t blendAmount =
+        0; // Amount of blending between two colors,that changes over time
+    uint8_t current_hue = 0; // repère pour la rotation de couleur ou d'arc en ciel
+    uint8_t match_time_led =
+        0; // numero de la led a allumer pour indiquer le temps de match écoulé
 };
 
 #endif

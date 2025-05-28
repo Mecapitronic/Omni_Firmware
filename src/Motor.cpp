@@ -32,7 +32,8 @@ void Motor::Initialisation(MotorBaseType _motorBaseType, float _centerToWheel)
     print("Starting ESP32_FAST_PWM: ");
     println(ESP32_FAST_PWM_VERSION);
 
-    // pin, frequency = 500 Hz, dutyCycle = 0 %, choose channel with independent timer, resolution to go up to desire frequency
+    // pin, frequency = 500 Hz, dutyCycle = 0 %, choose channel with independent timer,
+    // resolution to go up to desire frequency
     stepper1 = new ESP32_FAST_PWM(PIN_STEP_M1, 500, 0, 2, BIT_RESOLUTION);
 
     stepper2 = new ESP32_FAST_PWM(PIN_STEP_M2, 500, 0, 4, BIT_RESOLUTION);
@@ -42,8 +43,9 @@ void Motor::Initialisation(MotorBaseType _motorBaseType, float _centerToWheel)
     }
 }
 
-
-void Motor::Update(float linear_speed_mms, float linear_direction_rad, float angular_speed_rad)
+void Motor::Update(float linear_speed_mms,
+                   float linear_direction_rad,
+                   float angular_speed_rad)
 {
     if (motorBaseType == DIFFERENTIAL_2_MOTORS)
     {
@@ -65,19 +67,22 @@ void Motor::Update(float linear_speed_mms, float linear_direction_rad, float ang
         //    o     -> X
         //    3
 
-        // Get speeds components from linear speed and direction => /!\ Must be in local robot reference !
-        float x_speed_mms = linear_speed_mms * cos(linear_direction_rad); 
+        // Get speeds components from linear speed and direction => /!\ Must be in local
+        // robot reference !
+        float x_speed_mms = linear_speed_mms * cos(linear_direction_rad);
         float y_speed_mms = linear_speed_mms * sin(linear_direction_rad);
 
         // preliminary calculations
         float ang_component = centerToWheel * angular_speed_rad; // d*ωz
-        float x_component = x_speed_mms / 2;                 // 1/2*x_speed
-        float y_component = y_speed_mms * SQRT3_2;           // √3/2*y_speed
+        float x_component = x_speed_mms / 2;                     // 1/2*x_speed
+        float y_component = y_speed_mms * SQRT3_2;               // √3/2*y_speed
 
         // Speeds calculations for each motor
-        float motor1_speed = x_component - y_component - ang_component; // V1 = 1/2*x_speed − √3/2*y_speed − d*ωz
-        float motor2_speed = x_component + y_component - ang_component; // V2 = 1/2*x_speed + √3/2*y_speed − d*ωz
-        float motor3_speed = -x_component - ang_component;              // V3 = -x_speed − d*ωz       
+        float motor1_speed = x_component - y_component
+                             - ang_component; // V1 = 1/2*x_speed − √3/2*y_speed − d*ωz
+        float motor2_speed = x_component + y_component
+                             - ang_component; // V2 = 1/2*x_speed + √3/2*y_speed − d*ωz
+        float motor3_speed = -x_component - ang_component; // V3 = -x_speed − d*ωz
 
         SetMotorSpeed(1, motor1_speed);
         SetMotorSpeed(2, motor2_speed);
@@ -100,7 +105,7 @@ void Motor::HandleCommand(Command cmd)
         print("Motor ", cmd.data[0]);
         print(" with freq ", cmd.data[1], " Hz");
         println(" with duty ", cmd.data[2], " %");
-        
+
         if (cmd.data[0] == 1)
             stepper1->setPWM(cmd.data[1], cmd.data[2]);
         if (cmd.data[0] == 2)
@@ -114,7 +119,8 @@ void Motor::PrintCommandHelp()
 {
     Printer::println("Motor Command Help :");
     Printer::println(" > Motor:[int];[int];[int]");
-    Printer::println("      [int] number of motor, frequency of motor in Hz, duty cycle of motor between 0 and 100");
+    Printer::println("      [int] number of motor, frequency of motor in Hz, duty cycle "
+                     "of motor between 0 and 100");
     Printer::println();
 }
 
@@ -130,8 +136,8 @@ void Motor::SetMotorSpeed(int motor_ID, float speed_mms)
     {
         if (freq == 0 || freq < FREQ_MIN_STEPPER)
         {
-            // stop motor do not use freq 0 : IntegefromrDivideByZero in ledc.c line 318 with ESP IDF Version : v4.4.7-dirty
-            // use : duty cycle = 0 to put pin to LOW
+            // stop motor do not use freq 0 : IntegefromrDivideByZero in ledc.c line 318
+            // with ESP IDF Version : v4.4.7-dirty use : duty cycle = 0 to put pin to LOW
             stepper1->setPWM(FREQ_MIN_STEPPER, 0);
         }
         else
@@ -168,6 +174,7 @@ void Motor::SetMotorSpeed(int motor_ID, float speed_mms)
         }
     }
 }
+
 /*
 void Motor::SetMotorsSpeed(float speed_1_mms, float speed_2_mms, float speed_3_mms)
 {
@@ -287,10 +294,15 @@ void Motor::test_ledc()
     for (uint8_t r = 1; r <= SOC_LEDC_TIMER_BIT_WIDTH; ++r)
     {
         size_t max_len = std::to_string(UINT32_MAX).length();
-        printf(
-            "            %s%d |         %s%lu |         %s%lu\n", std::string(2 - std::to_string(r).length(), ' ').c_str(), r,
-            std::string(max_len - std::to_string(min_freq_array[r - 1]).length(), ' ').c_str(), min_freq_array[r - 1],
-            std::string(max_len - std::to_string(max_freq_array[r - 1]).length(), ' ').c_str(), max_freq_array[r - 1]);
+        printf("            %s%d |         %s%lu |         %s%lu\n",
+               std::string(2 - std::to_string(r).length(), ' ').c_str(),
+               r,
+               std::string(max_len - std::to_string(min_freq_array[r - 1]).length(), ' ')
+                   .c_str(),
+               min_freq_array[r - 1],
+               std::string(max_len - std::to_string(max_freq_array[r - 1]).length(), ' ')
+                   .c_str(),
+               max_freq_array[r - 1]);
     }
     ledcDetachPin(PIN);
 }
