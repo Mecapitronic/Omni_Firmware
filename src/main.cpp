@@ -43,7 +43,11 @@ void setup()
   Lidar::Initialisation(&robot);
 
   // Init sensors
-  otos.Initialisation();
+  otos.Initialisation(simulation);
+  if (!otos.IsConnected() && !simulation)
+  {
+    // error = true;
+  }
 
   // Init motors
   motor.Initialisation(Motor::OMNIDIRECTIONAL_3_MOTORS, CENTER_WHEEL_DISTANCE);

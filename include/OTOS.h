@@ -12,21 +12,22 @@ typedef sfeTkError_t sfTkError_t;
 class OpticalTrackingOdometrySensor
 {
 public:
-    void Initialisation();
-    void Update();
-    void HandleCommand(Command cmd);
-    const void PrintCommandHelp();
+  void Initialisation(bool simulation = false);
+  bool IsConnected();
+  void Update();
+  void HandleCommand(Command cmd);
+  const void PrintCommandHelp();
 
-    void SetPose(float x, float y, float h);
-    void Teleplot();
+  void SetPose(float x, float y, float h);
+  void Teleplot();
 
-    PoseF position;
-    PoseF velocity;
-    PoseF acceleration;
+  PoseF position;
+  PoseF velocity;
+  PoseF acceleration;
 
 private:
-    bool isConnected = false;
-    QwiicOTOS myOtos;
+  bool connected = false;
+  QwiicOTOS myOtos;
 };
 
 #endif

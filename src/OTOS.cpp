@@ -2,7 +2,7 @@
 
 using namespace Printer;
 
-void OpticalTrackingOdometrySensor::Initialisation()
+void OpticalTrackingOdometrySensor::Initialisation(bool simulation)
 {
     println("Init QwiicOTOS");
 
@@ -17,16 +17,16 @@ void OpticalTrackingOdometrySensor::Initialisation()
 
     int retryConnect = 0;
     // Attempt to begin the sensor
-    isConnected = myOtos.begin();
-    while (!isConnected && retryConnect < 3)
+    connected = myOtos.begin();
+    while (!connected && retryConnect < 5 && !simulation)
     {
         println("OTOS not connected, check your wiring and I2C address!");
         delay(1000);
-        isConnected = myOtos.begin();
+        connected = myOtos.begin();
         retryConnect++;
     }
 
-    if (isConnected)
+    if (connected)
     {
         println("OTOS connected!");
 
@@ -114,52 +114,57 @@ void OpticalTrackingOdometrySensor::Initialisation()
     }
 }
 
+bool OpticalTrackingOdometrySensor::IsConnected()
+{
+  return connected;
+}
+
 void OpticalTrackingOdometrySensor::Update()
 {
-    if (isConnected)
+  if (connected)
+  {
+    sfTkError_t error;
+    sfe_otos_pose2d_t myPosition;
+    sfe_otos_pose2d_t myVelocity;
+    sfe_otos_pose2d_t myAcceleration;
+    // Get the latest position, which includes the x and y coordinates, plus the
+    // heading angle
+    // sfe_otos_pose2d_t myPosition;
+    // error = myOtos.getPosition(myPosition);
+    // if (error != 0)
+    //    print("Error Pos : ", error);
+
+    // Create structs for velocity, and acceleration
+    // sfe_otos_pose2d_t myVelocity;
+    // error = myOtos.getVelocity(myVelocity);
+    // if (error != 0)
+    //    print("Error Vel : ", error);
+
+    // sfe_otos_pose2d_t myAcceleration;
+    // error = myOtos.getAcceleration(myAcceleration);
+    // if (error != 0)
+    //     print("Error Acc : ", error);
+
+    // If Velocity and Acceleration are not needed, use getPosition to decrease blocking
+    // time currently blocking time of getPosVelAcc with 400 000 speed : 600µS
+    error = myOtos.getPosVelAcc(myPosition, myVelocity, myAcceleration);
+    if (error != 0)
     {
-        sfTkError_t error;
-        sfe_otos_pose2d_t myPosition;
-        sfe_otos_pose2d_t myVelocity;
-        sfe_otos_pose2d_t myAcceleration;
-        // Get the latest position, which includes the x and y coordinates, plus the
-        // heading angle
-        // sfe_otos_pose2d_t myPosition;
-        // error = myOtos.getPosition(myPosition);
-        // if (error != 0)
-        //    print("Error Pos : ", error);
-
-        // Create structs for velocity, and acceleration
-        // sfe_otos_pose2d_t myVelocity;
-        // error = myOtos.getVelocity(myVelocity);
-        // if (error != 0)
-        //    print("Error Vel : ", error);
-
-        // sfe_otos_pose2d_t myAcceleration;
-        // error = myOtos.getAcceleration(myAcceleration);
-        // if (error != 0)
-        //     print("Error Acc : ", error);
-
-        // If Velocity and Acceleration are not needed, use getPosition to decrease blocking time
-        // currently blocking time of getPosVelAcc with 400 000 speed : 600µS
-        error = myOtos.getPosVelAcc(myPosition, myVelocity, myAcceleration);
-        if (error != 0)
-        {
-            print("Error getPosVelAcc : ", error);
-        }
-        else
-        {
-            position.x = myPosition.x * 1000;
-            position.y = myPosition.y * 1000;
-            position.h = myPosition.h;
-            velocity.x = myVelocity.x * 1000;
-            velocity.y = myVelocity.y * 1000;
-            velocity.h = myVelocity.h;
-            acceleration.x = myAcceleration.x * 1000;
-            acceleration.y = myAcceleration.y * 1000;
-            acceleration.h = myAcceleration.h;
-        }
+      print("Error getPosVelAcc : ", error);
     }
+    else
+    {
+      position.x = myPosition.x * 1000;
+      position.y = myPosition.y * 1000;
+      position.h = myPosition.h;
+      velocity.x = myVelocity.x * 1000;
+      velocity.y = myVelocity.y * 1000;
+      velocity.h = myVelocity.h;
+      acceleration.x = myAcceleration.x * 1000;
+      acceleration.y = myAcceleration.y * 1000;
+      acceleration.h = myAcceleration.h;
+    }
+  }
 }
 
 void OpticalTrackingOdometrySensor::HandleCommand(Command cmd)
@@ -193,7 +198,7 @@ void OpticalTrackingOdometrySensor::SetPose(float x, float y, float h)
     // the OTOS location to match and it will continue to track from there.
     sfe_otos_pose2d_t currentPose = {x / 1000, y / 1000, h};
 
-    if (isConnected)
+    if (connected)
     {
         int retrySetPose = 0;
         error = myOtos.setPosition(currentPose);
