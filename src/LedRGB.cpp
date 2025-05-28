@@ -93,8 +93,7 @@ void LedRGB::update()
     }
 
     // calculate obstacles orientation relative to the robot position and orientation
-    leds[polarPointToLedNumber(CartesianToPolar(obstacle.p, robot_current_position))] =
-        CRGB::White;
+    leds[directionToLedNumber(RelativeDirection(obstacle.p))] = CRGB::White;
   }
 
   ring_controller->showLeds(RING_BRIGHTNESS);
@@ -154,25 +153,48 @@ inline void LedRGB::emergencyStop()
   }
 }
 
-Point LedRGB::PolarToCartesian(PolarPoint polarPoint, PoseF robotPosition)
-{
-  Point point;
-
-  float angle = polarPoint.angle + robotPosition.h;
-  angle /= 100;
-  point.x = robotPosition.x + polarPoint.distance * cos(angle * PI / 180);
-  point.y = robotPosition.y + polarPoint.distance * sin(angle * PI / 180);
-
-  return point;
-}
-
 PolarPoint LedRGB::CartesianToPolar(Point point, PoseF robotPosition)
 {
   PolarPoint polarPoint = {0, 0};
-  polarPoint.angle =
-      (atan2(point.y - robotPosition.y, point.x - robotPosition.x) - robot_position->h)
-      * 180 / M_PI;
+  polarPoint.angle = (atan2(point.y - robotPosition.y, point.x - robotPosition.x));
   return polarPoint;
+}
+
+float LedRGB::RelativeDirection(Point point)
+{
+  return atan2(point.y - robot_position->y, point.x - robot_position->x);
+}
+
+// takes the direction in radians starting from 0 trigo (on the right) and going counter
+// clockwise and give the corresponding led number, starting from 0 in front of the robot
+// and going clockwise
+uint8_t LedRGB::directionToLedNumber(float angle)
+{
+  // Normalize the angle to be in the range [0, 2π]
+  while (angle < 0)
+    angle += 2 * M_PI;
+  while (angle >= 2 * M_PI)
+    angle -= 2 * M_PI;
+
+  // shift the angle from 90
+  angle -= 90;
+
+  // Convert the angle to a value between 0 and NUM_LEDS
+  int led_number = static_cast<int>(round(angle / (2 * M_PI) * NUM_LEDS));
+
+  // Adjust for clockwise direction
+  led_number = (NUM_LEDS - led_number) % NUM_LEDS;
+
+  // println("received angle: ", angle);
+  // println("calculated led number: ", led_number);
+
+  if (led_number >= NUM_LEDS || led_number < 0)
+  {
+    // If the angle is out of bounds, return a default value
+    return 12; // Default LED number, can be adjusted as needed
+  }
+
+  return static_cast<uint8_t>(led_number);
 }
 
 uint8_t LedRGB::polarPointToLedNumber(PolarPoint polarPoint)

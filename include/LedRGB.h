@@ -40,8 +40,8 @@ using namespace Printer;
  * La LED 1 est sa droite et la LED 24 est à gauche
  *
  * Le 0 du robot et à droite à 90°, c'est le 0 trigonométrique. Les angles sont
- * compris dans [ -180; 180 ] en partant de ce 0. Des conversions et inversions sont à
- * prévoir
+ * compris dans [ -pi; pi ] en partant de ce 0.
+ * Il faut inverser le sens de rotations.
  *
  */
 class LedRGB
@@ -86,8 +86,29 @@ public:
   inline void glowTwoColors(CRGB color1, CRGB color2);
   inline void glowOneColor(CRGB color);
 
-  Point PolarToCartesian(PolarPoint polarPoint, PoseF robotPosition);
   PolarPoint CartesianToPolar(Point point, PoseF robotPosition);
+
+  /**
+   * @brief give the relative direction (in radians) of a given object from the robot
+   * perspective. Use robot origin and 0° (robot right)
+   *
+   * @param point the object we want the direction from (the robot)
+   * @return float direction of the object in radians
+   */
+  float RelativeDirection(Point point);
+
+
+  /**
+   * @brief convert a polar point to the corresponding LED number
+   * @details takes the angle in radians starting from 0 trigo (on the right) and going
+   * counter clockwise and gives the corresponding led number, starting from 0 in front of
+   * the robot and going clockwise.
+   *
+   * @param angle the angle in radians starting from 0 trigo
+   * @return uint8_t the LED number corresponding to the angle
+   * @note The angle is normalized to be in the range [0, 2π] before conversion.
+   */
+  uint8_t directionToLedNumber(float angle);
 
   /**
    * @brief Map the angle to the LED number to turn on
