@@ -138,6 +138,9 @@ namespace ServoAX12
   void Update();
   void UpdateServo(ServoMotion &servo);
 
+  bool AreAllServoMoving();
+  bool IsServoMoving(ServoMotion &servo);
+
   void SetServoPosition(ServoMotion &servo, float position);
   void Prise();
   void Depose();

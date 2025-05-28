@@ -120,6 +120,23 @@ namespace ServoAX12
     }
   }
 
+  bool AreAllServoMoving()
+  {
+    for (const auto &[id, servo] : Servos)
+    {
+      if (servo.IsMoving)
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool IsServoMoving(ServoMotion &servo)
+  {
+    return servo.IsMoving;
+  }
+
   void SetServoPosition(ServoMotion &servo, float position)
   {
     if (position < (float)servo.positionMin || position > (float)servo.positionMax)
