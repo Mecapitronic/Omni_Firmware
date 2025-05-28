@@ -36,9 +36,9 @@ void setup()
     // Init IHM
     IHM::InitIHM();
 
-    ServoAX12::Initialisation();
-
     led_ring.Initialisation(&robot);
+
+    ServoAX12::Initialisation();
 
     Lidar::Initialisation(&robot);
 
