@@ -55,16 +55,6 @@ void LedRGB::update()
   }
   fill_solid(leds, NUM_LEDS, filling_color); // Clear all LEDs
 
-  // update led ring display according to current robot state
-  if (Match::matchState == State::MATCH_BEGIN && Match::matchState == State::MATCH_RUN)
-  {
-    match_time_led = (NUM_LEDS * Match::getMatchTimeMs()) / Match::time_end_match;
-    // Ensure we don't go out of bounds
-    if (match_time_led <= NUM_LEDS)
-    {
-      leds[match_time_led] = CRGB::ForestGreen; // Set the time in green
-    }
-  }
   if (Match::matchState == State::MATCH_WAIT)
   {
     if (current_hue >= NUM_LEDS)
@@ -78,6 +68,17 @@ void LedRGB::update()
     }
   }
 
+  // update led ring display according to current robot state
+  if (Match::matchState == State::MATCH_BEGIN || Match::matchState == State::MATCH_RUN)
+  {
+    match_time_led = (NUM_LEDS * Match::getMatchTimeMs()) / Match::time_end_match;
+    // Ensure we don't go out of bounds
+    if (match_time_led <= NUM_LEDS)
+    {
+      leds[match_time_led] = CRGB::ForestGreen; // Set the time in green
+    }
+  }
+
   // display obstacles around the robot
   PoseF robot_current_position = robot_position->GetPoseF();
   for (const auto &obstacle : Obstacle::obstacle)
@@ -88,14 +89,8 @@ void LedRGB::update()
     }
 
     // calculate obstacles orientation relative to the robot position and orientation
-    uint8_t obstacle_led =
-        polarPointToLedNumber(CartesianToPolar(obstacle.p, robot_current_position));
-    if (obstacle_led < 0 || obstacle_led >= NUM_LEDS)
-    {
-      // println("OBSTACLE LED NUMBER OUT OF BOUNDS: ", obstacle_led);
-      continue; // Skip if the led number is out of bounds
-    }
-    leds[obstacle_led] = CRGB::White;
+    leds[polarPointToLedNumber(CartesianToPolar(obstacle.p, robot_current_position))] =
+        CRGB::White;
   }
 
   ring_controller->showLeds(RING_BRIGHTNESS);
@@ -195,18 +190,22 @@ uint8_t LedRGB::polarPointToLedNumber(PolarPoint polarPoint)
 {
   // l'angle 0 est à droite du robot, on doit donc le convertir pour que 0 soit en haut
   // on doit aussi inverser le sens pour suivre le sens horaire et non trigonométrique
-  float angle = polarPoint.angle - 90;
-  if (angle < 0)
+  polarPoint.angle -= 90;
+  if (polarPoint.angle < 0)
   {
-    angle += 360; // Ensure angle is positive
+    polarPoint.angle += 360; // Ensure angle is positive
   }
 
-  uint8_t led_number = static_cast<uint8_t>(-(angle / 360.0) * NUM_LEDS);
+  // do not directly cast you idiot!
+  int8_t led_number = round(-(polarPoint.angle / 360.0) * NUM_LEDS);
 
-  // debug
-  // print("PolarPoint angle: ", polarPoint.angle);
-  // println(" distance: ", polarPoint.distance);
-  // println("PolarPoint led number: ", led_number);
+  print("POLAR POINT: ", polarPoint.angle);
+  println(" LED NUMBER : ", led_number);
 
+  if (led_number >= NUM_LEDS)
+  {
+    println("LED NUM OUT OF BOUND");
+    return 12;
+  }
   return led_number;
 }
