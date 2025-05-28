@@ -21,7 +21,7 @@ void OpticalTrackingOdometrySensor::Initialisation(bool simulation)
     while (!connected && retryConnect < 5 && !simulation)
     {
         println("OTOS not connected, check your wiring and I2C address!");
-        delay(1000);
+        delay(100);
         connected = myOtos.begin();
         retryConnect++;
     }

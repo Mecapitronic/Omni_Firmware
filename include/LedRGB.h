@@ -80,11 +80,11 @@ public:
      * @brief set all leds to red and glow smoothly
      * inline function
      */
-    inline void emergencyStop();
-
     inline void TwoColorsTransition(CRGB color1, CRGB color2);
     inline void glowTwoColors(CRGB color1, CRGB color2);
     inline void glowOneColor(CRGB color);
+
+    void emergencyStop();
 
     /**
      * @brief give the relative direction (in radians) of a given object from the robot

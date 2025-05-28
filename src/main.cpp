@@ -15,8 +15,6 @@ Robot robot;
 
 OpticalTrackingOdometrySensor otos;
 
-bool global_error = false;
-
 void setup()
 {
     pinMode(PIN_EN_MCU, OUTPUT);
@@ -40,15 +38,24 @@ void setup()
 
     led_ring.Initialisation(&robot);
 
+    while (IHM::bauReady != 1)
+    {
+        IHM::UpdateBAU();
+        led_ring.emergencyStop();
+        vTaskDelay(1);
+    }
+
     ServoAX12::Initialisation();
 
     Lidar::Initialisation(&robot);
 
-    // Init sensors
     otos.Initialisation(simulation);
-    if (!otos.IsConnected() && !simulation)
+    // Init sensors
+    while (!otos.IsConnected() && !simulation)
     {
-        global_error = true;
+        otos.Initialisation(simulation);
+        led_ring.emergencyStop();
+        vTaskDelay(1);
     }
 
     // Init motors

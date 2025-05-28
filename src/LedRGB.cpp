@@ -36,7 +36,7 @@ void LedRGB::update()
     }
 
     // si le bouton d'arrêt d'urgence est enclenché on voit rouge
-    if (IHM::bauReady == 0)
+    if (IHM::bauReady != 1)
     {
         filling_color = CRGB::Red;
     }
@@ -138,19 +138,19 @@ inline void LedRGB::glowOneColor(CRGB color)
     LedRGB::glowTwoColors(CRGB::Black, color);
 }
 
-inline void LedRGB::emergencyStop()
+void LedRGB::emergencyStop()
 {
     fill_solid(leds, NUM_LEDS, CRGB::Red);
     for (uint8_t i = RING_BRIGHTNESS; i > 0; i--)
     {
         ring_controller->showLeds(i);
-        delay(30);
+        delay(1);
     }
     ring_controller->showLeds(0); // Turn off all LEDs
     for (uint8_t i = 0; i < RING_BRIGHTNESS; i++)
     {
         ring_controller->showLeds(i);
-        delay(30);
+        delay(1);
     }
 }
 
