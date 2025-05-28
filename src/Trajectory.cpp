@@ -64,11 +64,10 @@ namespace Trajectory
         if (current_direction - radians(20.0) < adversary.angle
             && adversary.angle < current_direction + radians(20.0))
         {
-          float dir = degrees(current_direction);
-          println("current direction: ", dir);
-          float deg = degrees(adversary.angle);
-          println("un adversaire est là: ", deg);
-
+          // float dir = degrees(current_direction);
+          // println("current direction: ", dir);
+          // float deg = degrees(adversary.angle);
+          // println("un adversaire est là: ", deg);
           return true;
         }
       }
