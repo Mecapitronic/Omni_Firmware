@@ -232,6 +232,7 @@ namespace Trajectory
     }
   }
 
+  // Does not return until arrived
   void Navigate_To_Vertex(t_vertexID id, float speed_limit, float speed_final)
   {
     t_vertexID target_vertex = 0;
@@ -240,10 +241,10 @@ namespace Trajectory
     // on est pour éviter le flicker de la trajectoire
     // TODO: checker si on est dans un obstacle avant path planning et reculer dans la
     // direction opposée de l'obstacle
-    while (PathFinding::PathFinding((int16_t)robot->x, (int16_t)robot->y, id)
-           && DistanceBetweenPositions(robot->x, robot->y, p.x, p.y)
-                  > ArrivalTriggerDistance)
+    while (DistanceBetweenPositions(robot->x, robot->y, p.x, p.y)
+           > ArrivalTriggerDistance)
     {
+      PathFinding::PathFinding((int16_t)robot->x, (int16_t)robot->y, id);
       if (target_vertex != PathFinding::solution.front())
       {
         print("Path to vertex ", id);
