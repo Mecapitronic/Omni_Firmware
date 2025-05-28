@@ -170,19 +170,14 @@ Point LedRGB::PolarToCartesian(PolarPoint polarPoint, PoseF robotPosition)
 
 PolarPoint LedRGB::CartesianToPolar(Point point, PoseF robotPosition)
 {
+  PolarPoint polarPoint = {0, 0};
+  polarPoint.angle = atan2(point.y - robotPosition.y, point.x - robotPosition.x);
 
-  PolarPoint polarPoint;
+  if (polarPoint.angle < -180)
+    polarPoint.angle += 360;
+  else if (polarPoint.angle > 180)
+    polarPoint.angle -= 360;
 
-  int16_t angle = degrees(atan2(point.y - robotPosition.y, point.x - robotPosition.x));
-
-  if (angle < 0)
-  {
-    angle += 360; // Ensure angle is positive
-  }
-  polarPoint.angle = angle;
-  // polarPoint.distance = static_cast<int16_t>(sqrt(pow(point.x - robotPosition.x, 2) +
-  // pow(point.y - robotPosition.y, 2)));
-  polarPoint.distance = 0;
   return polarPoint;
 }
 
@@ -197,7 +192,7 @@ uint8_t LedRGB::polarPointToLedNumber(PolarPoint polarPoint)
   }
 
   // do not directly cast you idiot!
-  int8_t led_number = round(-(polarPoint.angle / 360.0) * NUM_LEDS);
+  int8_t led_number = static_cast<int8_t>(round((polarPoint.angle / 360.0) * NUM_LEDS));
 
   print("POLAR POINT: ", polarPoint.angle);
   println(" LED NUMBER : ", led_number);
