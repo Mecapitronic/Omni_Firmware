@@ -67,6 +67,8 @@ namespace ServoAX12
      * @param vitesse Vitesse maximale du servo moteur en degrés par seconde.
      * @param acceleration Accélération maximale du servo moteur en degrés par seconde carrée.
      * @param position Position actuelle du servo moteur.
+     * @param positionMin Position minimale du servo moteur.
+     * @param positionMax Position maximale du servo moteur.
      * @param command_position Position cible du servo moteur.
      * @param ledState État de la LED du servo moteur (allumée en mouvement, éteinte sinon).
      */
@@ -76,6 +78,8 @@ namespace ServoAX12
         int32_t vitesse;
         int32_t acceleration;
         float position;
+        ServoPosition positionMin;
+        ServoPosition positionMax;
         float command_position;
         bool IsMoving;
         bool ledState;
@@ -85,6 +89,8 @@ namespace ServoAX12
             vitesse = 0;
             acceleration = 0;
             position = 0;
+            positionMin = ServoPosition::Min;
+            positionMax = ServoPosition::Max;
             command_position = 0;
             IsMoving = false;
             ledState = false;
@@ -96,13 +102,15 @@ namespace ServoAX12
          * @param _vitesse Vitesse maximale du servo moteur en degrés par seconde
          * @param _acceleration Accélération maximale du servo moteur en degrés par seconde carrée
          */
-        ServoMotion(ServoID _id, int _vitesse, int _acceleration)
+        ServoMotion(ServoID _id, int _vitesse, int _acceleration, ServoPosition _positionMin, ServoPosition _positionMax)
         {
             // Initialisation des valeurs
             id = (uint8_t)_id;
             vitesse = _vitesse;
             acceleration = _acceleration;
             position = 0;
+            positionMin = _positionMin;
+            positionMax = _positionMax;
             command_position = 0;
             IsMoving = false;
             ledState = false;

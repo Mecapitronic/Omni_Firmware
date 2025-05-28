@@ -17,9 +17,9 @@ namespace ServoAX12
         dxl.setPortProtocolVersion((float)DxlProtocolVersion::PROTOCOL_1);
 
         Servos.clear();
-        Servos[ServoID::Up] = ServoMotion(ServoID::Up, 30, 20);
-        Servos[ServoID::Left] = ServoMotion(ServoID::Left, 30, 50);
-        Servos[ServoID::Right] = ServoMotion(ServoID::Right, 30, 50);
+        Servos[ServoID::Up] = ServoMotion(ServoID::Up, 30, 20, ServoPosition::Min, ServoPosition::Max);
+        Servos[ServoID::Left] = ServoMotion(ServoID::Left, 30, 50, ServoPosition::GaucheMin, ServoPosition::GaucheMax);
+        Servos[ServoID::Right] = ServoMotion(ServoID::Right, 30, 50, ServoPosition::DroiteMin, ServoPosition::DroiteMax);
 
         for (auto &[id, servo] : Servos)
         {
@@ -124,6 +124,14 @@ namespace ServoAX12
 
     void SetServoPosition(ServoMotion &servo, float position)
     {
+        if (position < (float)servo.positionMin || position > (float)servo.positionMax)
+        {
+            println("Position out of range for Servo ID : ", servo.id);
+            println("Position : ", position);
+            println("Min : ", (float)servo.positionMin);
+            println("Max : ", (float)servo.positionMax);
+            return;
+        }
         servo.command_position = position;
         servo.IsMoving = true;
         dxl.setGoalPosition(servo.id, servo.command_position, UNIT_DEGREE);
