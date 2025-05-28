@@ -467,6 +467,19 @@ void TaskMatch(void *pvParameters)
     {
       // Enable Motor & Servo Power
       digitalWrite(PIN_EN_MCU, HIGH);
+
+      Trajectory::Navigate_To_Vertex(6, linear.speed_max, 0);
+      Point p = Mapping::Get_Vertex_Point(6);
+      Trajectory::TranslateToPosition(p.x, p.y + 140, linear.speed_max, 0);
+      Trajectory::Navigate_To_Vertex(1, linear.speed_max, 0);
+      Trajectory::RotateToOrientation(radians(180), 150, 0);
+      ServoAX12::Depose();
+      delay(1000); // Attente de 1 sec pour la dépose
+
+      Trajectory::Navigate_To_Vertex(10, linear.speed_max, 0);
+      Trajectory::Navigate_To_Vertex(11, linear.speed_max, 0);
+
+      Match::stopMatch();
       // TODO 5 sec avant la fin du match aller dans la zone de back stage
     }
 
