@@ -189,18 +189,18 @@ uint8_t LedRGB::polarPointToLedNumber(PolarPoint polarPoint)
   // }
 
   // do not directly cast you idiot!
-  int intfromfloat = static_cast<int8_t>(round(polarPoint.angle / 360.0));
-  int8_t led_number = (1 - intfromfloat) * NUM_LEDS;
+  int intfromfloat = static_cast<int8_t>(round(polarPoint.angle / 360.0) * NUM_LEDS);
+  int8_t led_number = NUM_LEDS - intfromfloat;
 
-  println("received angle: ", polarPoint.angle);
-  println("calculated int: ", intfromfloat);
-  println("led number : ", led_number);
+  // println("received angle: ", polarPoint.angle);
+  // println("calculated int: ", intfromfloat);
+  // println("led number : ", led_number);
 
   if (led_number >= NUM_LEDS || led_number < 0)
   {
     // If the angle is out of bounds, return a default value
     // This can happen if the angle is not in the range of 0 to 360 degrees
-    println("LED number out of bounds, returning default value");
+    // println("LED number out of bounds, returning default value");
     return 12; // Default LED number, can be adjusted as needed
   }
   return led_number;
