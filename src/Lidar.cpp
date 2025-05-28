@@ -114,9 +114,9 @@ namespace Lidar
             }
             if (chrono.Check())
             {
-              println("Chrono " + chrono.name + " : ",
-                      chrono.elapsedTime / chrono.loopNbr,
-                      " µs/loop");
+              // println("Chrono " + chrono.name + " : ",
+              //         chrono.elapsedTime / chrono.loopNbr,
+              //         " µs/loop");
             }
             vTaskDelay(10);
         }

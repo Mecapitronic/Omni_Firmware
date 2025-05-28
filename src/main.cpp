@@ -203,7 +203,8 @@ void TaskTeleplot(void *pvParameters)
     }
     if (chrono.Check())
     {
-      println("Chrono " + chrono.name + " : ", chrono.elapsedTime / chrono.loopNbr, " µs/loop");
+      // println("Chrono " + chrono.name + " : ", chrono.elapsedTime / chrono.loopNbr, "
+      // µs/loop");
     }
     vTaskDelay(10);
   }
@@ -253,7 +254,8 @@ void TaskUpdate(void *pvParameters)
     }
     if (chrono.Check())
     {
-      println("Chrono " + chrono.name + " : ", chrono.elapsedTime / chrono.loopNbr, " µs/loop");
+      // println("Chrono " + chrono.name + " : ", chrono.elapsedTime / chrono.loopNbr, "
+      // µs/loop");
     }
     vTaskDelay(10);
   }
@@ -397,7 +399,8 @@ void TaskHandleCommand(void *pvParameters)
     }
     if (chrono.Check())
     {
-      println("Chrono " + chrono.name + " : ", chrono.elapsedTime / chrono.loopNbr, " µs/loop");
+      // println("Chrono " + chrono.name + " : ", chrono.elapsedTime / chrono.loopNbr, "
+      // µs/loop");
     }
     vTaskDelay(10); // Allow other tasks to run
   }
@@ -463,7 +466,8 @@ void TaskMatch(void *pvParameters)
     }
     if (chrono.Check())
     {
-      println("Chrono " + chrono.name + " : ", chrono.elapsedTime / chrono.loopNbr, " µs/loop");
+      // println("Chrono " + chrono.name + " : ", chrono.elapsedTime / chrono.loopNbr, "
+      // µs/loop");
     }
     vTaskDelay(10);
   }
