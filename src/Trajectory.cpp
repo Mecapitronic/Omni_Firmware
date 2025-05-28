@@ -186,6 +186,7 @@ namespace Trajectory
     t_vertexID target_vertex = 0;
     Point p = Mapping::Get_Vertex_Point(id);
     // TODO: dans l'idéal on regarde uniquement les obstacles dans la moitié du terrain où on est pour éviter le flicker de la trajectoire
+    // TODO: checker si on est dans un obstacle avant path planning et reculer dans la direction opposée de l'obstacle
     while (PathFinding::PathFinding((int16_t)robot->x, (int16_t)robot->y, id) && DistanceBetweenPositions(robot->x, robot->y, p.x, p.y) > ArrivalTriggerDistance)
     {
       if (target_vertex != PathFinding::solution.front())
