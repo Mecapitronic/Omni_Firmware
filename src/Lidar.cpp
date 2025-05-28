@@ -27,8 +27,14 @@ namespace Lidar
     void TaskLidar(void *pvParameters)
     {
         println("Start TaskLidar");
+        Chrono chrono("Lidar", 1000);
+        Timeout toSendLidar;
+        toSendLidar.Start(50);
         while (true)
         {
+          chrono.Start();
+          if (toSendLidar.IsTimeOut())
+          {
             PoseF p = robot->GetPoseF();
             // Starting char : '!'
             SERIAL_LIDAR.write(0x21);
@@ -49,25 +55,26 @@ namespace Lidar
             // Ending char : '\n'
             SERIAL_LIDAR.write(0x0A);
             // println("Lidar sent : ", p);
+          }
 
-            if (enableComLidar || disableComLidar)
-            {
-                // Starting char : '!'
-                SERIAL_LIDAR.write(0x21);
+          if (enableComLidar || disableComLidar)
+          {
+            // Starting char : '!'
+            SERIAL_LIDAR.write(0x21);
 
-                SERIAL_LIDAR.write('C');
-                SERIAL_LIDAR.write('o');
-                SERIAL_LIDAR.write('M');
-                if (enableComLidar)
-                    SERIAL_LIDAR.write('1');
-                else
-                    SERIAL_LIDAR.write('0');
+            SERIAL_LIDAR.write('C');
+            SERIAL_LIDAR.write('o');
+            SERIAL_LIDAR.write('M');
+            if (enableComLidar)
+              SERIAL_LIDAR.write('1');
+            else
+              SERIAL_LIDAR.write('0');
 
-                // Ending char : '\n'
-                SERIAL_LIDAR.write(0x0A);
-                enableComLidar = false;
-                disableComLidar = false;
-            }
+            // Ending char : '\n'
+            SERIAL_LIDAR.write(0x0A);
+            enableComLidar = false;
+            disableComLidar = false;
+          }
 
             while (SERIAL_LIDAR.available())
             {
@@ -104,6 +111,12 @@ namespace Lidar
                         cursor = 0;
                     }
                 }
+            }
+            if (chrono.Check())
+            {
+              println("Chrono " + chrono.name + " : ",
+                      chrono.elapsedTime / chrono.loopNbr,
+                      " µs/loop");
             }
             vTaskDelay(10);
         }
