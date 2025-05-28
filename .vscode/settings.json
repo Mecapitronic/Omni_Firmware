@@ -132,5 +132,7 @@
     "vscode-serial-monitor.customBaudRates": [
         921600
     ],
+    "editor.indentSize": "tabSize",
+    "editor.tabSize": 4,
     "C_Cpp.clang_format_sortIncludes": true,
 }
