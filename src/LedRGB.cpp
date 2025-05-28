@@ -153,21 +153,11 @@ inline void LedRGB::emergencyStop()
   }
 }
 
-PolarPoint LedRGB::CartesianToPolar(Point point, PoseF robotPosition)
-{
-  PolarPoint polarPoint = {0, 0};
-  polarPoint.angle = (atan2(point.y - robotPosition.y, point.x - robotPosition.x));
-  return polarPoint;
-}
-
 float LedRGB::RelativeDirection(Point point)
 {
   return atan2(point.y - robot_position->y, point.x - robot_position->x);
 }
 
-// takes the direction in radians starting from 0 trigo (on the right) and going counter
-// clockwise and give the corresponding led number, starting from 0 in front of the robot
-// and going clockwise
 uint8_t LedRGB::directionToLedNumber(float angle)
 {
   // Normalize the angle to be in the range [0, 2π]
@@ -195,43 +185,4 @@ uint8_t LedRGB::directionToLedNumber(float angle)
   }
 
   return static_cast<uint8_t>(led_number);
-}
-
-uint8_t LedRGB::polarPointToLedNumber(PolarPoint polarPoint)
-{
-  // l'angle 0 est à droite du robot, on doit donc le convertir pour que 0 soit en haut
-  // on doit aussi inverser le sens pour suivre le sens horaire et non trigonométrique
-
-
-  // polarPoint.angle -= 90;
-  // if (polarPoint.angle < 0)
-  // {
-  //   polarPoint.angle += 360; // Ensure angle is positive
-  // }
-
-
-  // Normaliser dans [0, 2π]
-  while (polarPoint.angle < 0)
-    polarPoint.angle += 360;
-  while (polarPoint.angle >= 360)
-    polarPoint.angle -= 360;
-
-  // Convertir en index (0-23)
-  // int led_index = static_cast<int>(relative_angle / (2 * M_PI / 24));
-  // do not directly cast you idiot!
-  int intfromfloat = static_cast<int8_t>(round(polarPoint.angle / 360 / 24));
-  int8_t led_number = NUM_LEDS - intfromfloat;
-
-  // println("received angle: ", polarPoint.angle);
-  // println("calculated int: ", intfromfloat);
-  // println("led number : ", led_number);
-
-  if (led_number >= NUM_LEDS || led_number < 0)
-  {
-    // If the angle is out of bounds, return a default value
-    // This can happen if the angle is not in the range of 0 to 360 degrees
-    // println("LED number out of bounds, returning default value");
-    return 12; // Default LED number, can be adjusted as needed
-  }
-  return led_number;
 }

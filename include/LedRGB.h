@@ -86,8 +86,6 @@ public:
   inline void glowTwoColors(CRGB color1, CRGB color2);
   inline void glowOneColor(CRGB color);
 
-  PolarPoint CartesianToPolar(Point point, PoseF robotPosition);
-
   /**
    * @brief give the relative direction (in radians) of a given object from the robot
    * perspective. Use robot origin and 0° (robot right)
@@ -97,26 +95,21 @@ public:
    */
   float RelativeDirection(Point point);
 
-
   /**
    * @brief convert a polar point to the corresponding LED number
    * @details takes the angle in radians starting from 0 trigo (on the right) and going
    * counter clockwise and gives the corresponding led number, starting from 0 in front of
    * the robot and going clockwise.
    *
+   * @note l'angle 0 est à droite du robot, on doit donc le convertir pour que 0 soit en
+   * haut on doit aussi inverser le sens pour suivre le sens horaire et non
+   * trigonométrique
+   *
    * @param angle the angle in radians starting from 0 trigo
    * @return uint8_t the LED number corresponding to the angle
    * @note The angle is normalized to be in the range [0, 2π] before conversion.
    */
   uint8_t directionToLedNumber(float angle);
-
-  /**
-   * @brief Map the angle to the LED number to turn on
-   *
-   * @param polarPoint the polar point containing the angle and distance
-   * @return uint8_t the LED number corresponding to the angle
-   */
-  uint8_t polarPointToLedNumber(PolarPoint polarPoint);
 
 private:
   CLEDController *ring_controller;  // Pointer to the FastLED controller for the ring
