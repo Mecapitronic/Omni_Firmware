@@ -9,7 +9,7 @@ PenaltyBreakAssignment: 2
 PenaltyReturnTypeOnItsOwnLine: 200
 # bilberry
 AccessModifierOffset: -2
-AllowShortFunctionsOnASingleLine: Inline
+AllowShortFunctionsOnASingleLine: Empty
 AllowShortIfStatementsOnASingleLine: Never
 AlwaysBreakBeforeMultilineStrings: false
 BinPackArguments: false
