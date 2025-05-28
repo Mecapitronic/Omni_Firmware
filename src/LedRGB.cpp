@@ -94,12 +94,6 @@ void LedRGB::update()
   }
 
   ring_controller->showLeds(RING_BRIGHTNESS);
-
-  // else if (i < adversaries.size() + obstacles.size())
-  // {
-  //     // Set color based on adversary position
-  //     leds[i] = CRGB::Red; // Example: Blue for adversaries
-  // }
 }
 
 void LedRGB::rainbow()

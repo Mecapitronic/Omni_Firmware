@@ -49,7 +49,7 @@ namespace Trajectory
     float distance = sqrt((obstacle.x - robot->x) * (obstacle.x - robot->x)
                           + (obstacle.y - robot->y) * (obstacle.y - robot->y));
     float angle =
-        atan2(obstacle.y - robot->y, obstacle.x - robot->x) * 180 / PI - robot->h;
+        atan2(obstacle.y - robot->y, obstacle.x - robot->x) * 180 / M_PI - robot->h;
 
     if (angle < -180)
       angle += 360;
