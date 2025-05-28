@@ -434,8 +434,8 @@ void TaskMatch(void *pvParameters)
         timerMotion.WaitForDisable();
         Mapping::Initialize_Map(IHM::team);
         Point p = Mapping::Get_Vertex_Point(1);
-        robot.SetPose(p.x, p.y, 0);
-        otos.SetPose(p.x, p.y, 0);
+        robot.SetPose(p.x, p.y, radians(0));
+        otos.SetPose(p.x, p.y, radians(0));
         Trajectory::Reset();
         timerMotion.Enable();
       }
@@ -449,8 +449,8 @@ void TaskMatch(void *pvParameters)
       timerMotion.WaitForDisable();
       Mapping::Initialize_Map(IHM::team);
       Point p = Mapping::Get_Vertex_Point(1);
-      robot.SetPose(p.x, p.y, 0);
-      otos.SetPose(p.x, p.y, 0);
+      robot.SetPose(p.x, p.y, radians(0));
+      otos.SetPose(p.x, p.y, radians(0));
       Trajectory::Reset();
       timerMotion.Enable();
 
