@@ -61,7 +61,9 @@ namespace Trajectory
 
   bool isTheObstacleToClose(Circle obstacle)
   {
-    return DistanceBetweenPoints(robot->GetPoint(), obstacle.p) < OBSTACLE_TOO_CLOSE;
+    return DistanceBetweenPoints(robot->GetPoint(), obstacle.p)
+           < OBSTACLE_TOO_CLOSE + ROBOT_RADIUS + ROBOT_MARGIN + OBSTACLE_RADIUS
+                 + OBSTACLE_MARGIN;
   }
 
   bool isThereAnObstacleInFrontOfMe(float current_direction)
@@ -85,25 +87,28 @@ namespace Trajectory
 
   void Update()
   {
-
     if (isThereAnObstacleInFrontOfMe(linear->direction))
     {
       if (pending_target == PoseF())
       {
         // si on détecte un obstacle (surprise) devant nous lorsque l'on avance
         // on attend 2 secondes
-        collision_prevention_timer.Start(2000);
+        // collision_prevention_timer.Start(2000);
         pending_target = target;
       }
       Reset();
-      if (collision_prevention_timer.IsTimeOut())
+    }
+    else
+    {
+      if (pending_target != PoseF())
       {
         // restore target
         target = pending_target;
         pending_target = PoseF();
-        collision_prevention_timer.Stop();
+        // collision_prevention_timer.Stop();
       }
     }
+
     // Direction of the linear motion vector, in local robot reference
     linear->direction = NormalizeAngle(
         DirectionFromPositions(robot->x, robot->y, target.x, target.y) - robot->h);

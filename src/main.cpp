@@ -315,6 +315,10 @@ void TaskHandleCommand(void *pvParameters)
         Trajectory::Reset();
         timerMotion.Enable();
       }
+      else if (cmd.cmd == "TrajReset")
+      {
+        Trajectory::Reset();
+      }
       else if (cmd.cmd == "UpdateMapping")
       {
         Mapping::Update_Start_Vertex((int16_t)robot.x, (int16_t)robot.y);
