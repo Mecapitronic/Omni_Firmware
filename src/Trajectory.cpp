@@ -74,6 +74,12 @@ namespace Trajectory
       {
         PolarPoint adversary = CartesianToRelativePolar(obstacle.p);
         // on considère un cone de 30° devant nous
+        println("obstacle direction: ", adversary.angle);
+        float limit = current_direction - radians(15);
+        println("cone limit 1: ", limit);
+        limit = current_direction + radians(15);
+        println("cone limit 2: ", limit);
+
         if (current_direction - radians(15) < adversary.angle
             || adversary.angle < current_direction + radians(15))
         {

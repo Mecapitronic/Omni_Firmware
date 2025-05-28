@@ -68,6 +68,10 @@ void LedRGB::update()
     }
   }
 
+  // TODO add red leds for errors (like otos not connected)
+  // we could have an error counters and increment or decrement outside ledrgb
+  // and turn on the number of leds equivalent to the number of errors
+
   // update led ring display according to current robot state
   if (Match::matchState == State::MATCH_BEGIN || Match::matchState == State::MATCH_RUN)
   {
