@@ -48,7 +48,10 @@ namespace Lidar
             SERIAL_LIDAR.write((int)p.y >> 8);
 
             // Robot Angle * 100
+            // Robot is -180 to +180 deg, lidar is 0 to 360 deg
             int angle = (int)(degrees(p.h) * 100);
+            if(angle<0)
+              angle+=360;
             SERIAL_LIDAR.write(angle % 256);
             SERIAL_LIDAR.write(angle >> 8);
 
