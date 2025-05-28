@@ -200,6 +200,7 @@ void TaskTeleplot(void *pvParameters)
     if (mapTimeOut.IsTimeOut())
     {
       Obstacle::PrintObstacleList();
+      ServoAX12::TeleplotPosition();
     }
     if (chrono.Check())
     {
