@@ -436,9 +436,16 @@ void TaskMatch(void *pvParameters)
                 digitalWrite(PIN_EN_MCU, LOW);
                 timerMotion.WaitForDisable();
                 Mapping::Initialize_Map(IHM::team);
-                Point p = Mapping::Get_Vertex_Point(1);
-                robot.SetPose(p.x, p.y, radians(0));
-                otos.SetPose(p.x, p.y, radians(0));
+                if (IHM::team == Team::Jaune)
+                {
+                    robot.SetPose(1200, 170, radians(0));
+                    otos.SetPose(1200, 170, radians(0));
+                }
+                else
+                {
+                    robot.SetPose(3000 - 1200, 170, radians(0));
+                    otos.SetPose(3000 - 1200, 170, radians(0));
+                }
                 Trajectory::Reset();
                 timerMotion.Enable();
             }
@@ -451,9 +458,16 @@ void TaskMatch(void *pvParameters)
         {
             timerMotion.WaitForDisable();
             Mapping::Initialize_Map(IHM::team);
-            Point p = Mapping::Get_Vertex_Point(1);
-            robot.SetPose(p.x, p.y, radians(0));
-            otos.SetPose(p.x, p.y, radians(0));
+            if (IHM::team == Team::Jaune)
+            {
+                robot.SetPose(1200, 170, radians(0));
+                otos.SetPose(1200, 170, radians(0));
+            }
+            else
+            {
+                robot.SetPose(3000 - 1200, 170, radians(0));
+                otos.SetPose(3000 - 1200, 170, radians(0));
+            }
             Trajectory::Reset();
             timerMotion.Enable();
 
@@ -463,6 +477,7 @@ void TaskMatch(void *pvParameters)
             digitalWrite(PIN_EN_MCU, HIGH);
             ServoAX12::Bas();
             ServoAX12::Prise();
+            delay(1000);
         }
 
         // Démarrage du robot
@@ -470,18 +485,28 @@ void TaskMatch(void *pvParameters)
         {
             // Enable Motor & Servo Power
             digitalWrite(PIN_EN_MCU, HIGH);
+            ServoAX12::Bas();
+            ServoAX12::Prise();
+            delay(1000);
 
             Trajectory::Navigate_To_Vertex(6, linear.speed_max, 0);
             Point p = Mapping::Get_Vertex_Point(6);
             Trajectory::TranslateToPosition(p.x, p.y + 140, linear.speed_max, 0);
+            delay(3000);
+            ServoAX12::Mid();
+            delay(1000);
             Trajectory::Navigate_To_Vertex(1, linear.speed_max, 0);
-            Trajectory::RotateToOrientation(radians(180), 150, 0);
+            Trajectory::RotateToOrientation(radians(180), 10, 0);
+            delay(3000);
+            Trajectory::RotateToOrientation(radians(180), angular.speed_max, 0);
+            ServoAX12::Bas();
+            delay(1000);
             ServoAX12::Depose();
             ServoAX12::AreAllServoMoving();
-
+            delay(2000);
             Trajectory::Navigate_To_Vertex(10, linear.speed_max, 0);
 
-            while (Match::time_end_match - Match::getMatchTimeMs() < 5000)
+            while (Match::time_end_match - Match::getMatchTimeMs() > 5000)
             {
                 // Wait for 5 sec before end of match
                 vTaskDelay(100);
