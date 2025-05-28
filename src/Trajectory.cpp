@@ -31,31 +31,19 @@ namespace Trajectory
     target.h = robot->h;
   }
 
-  PolarPoint CartesianToPolarDirection(Point point, PoseF robotPosition)
-  {
-    PolarPoint polarPoint = {0, 0};
-    polarPoint.angle =
-        degrees(atan2(point.y - robotPosition.y, point.x - robotPosition.x));
-
-    if (polarPoint.angle < 0)
-    {
-      polarPoint.angle += 360; // Ensure angle is positive
-    }
-    return polarPoint;
-  }
-
   PolarPoint CartesianToRelativePolar(Point obstacle)
   {
-    float distance = sqrt((obstacle.x - robot->x) * (obstacle.x - robot->x)
-                          + (obstacle.y - robot->y) * (obstacle.y - robot->y));
-    float angle =
-        atan2(obstacle.y - robot->y, obstacle.x - robot->x) * 180 / M_PI - robot->h;
+    return CartesianToRelativePolar(obstacle.x, obstacle.y);
+  }
 
-    if (angle < -180)
-      angle += 360;
-    else if (angle > 180)
-      angle -= 360;
+  PolarPoint CartesianToRelativePolar(float x, float y)
+  {
+    float distance =
+        sqrt((x - robot->x) * (x - robot->x) + (y - robot->y) * (y - robot->y));
+    float angle = atan2(y - robot->y, x - robot->x) * 180 / M_PI - robot->h;
 
+    // on ne corrige pas l'angle, on conserve entre -180 et 180
+    // pour faciliter la définition du cone de tolérance
     return PolarPoint(angle, distance);
   }
 
@@ -72,16 +60,20 @@ namespace Trajectory
     {
       if (isTheObstacleToClose(obstacle))
       {
+        float direction = current_direction * 180 / M_PI;
         PolarPoint adversary = CartesianToRelativePolar(obstacle.p);
-        // on considère un cone de 30° devant nous
+
+        print("obstacle position: ", obstacle.p.x);
+        println(" : ", obstacle.p.y);
         println("obstacle direction: ", adversary.angle);
-        float limit = current_direction - radians(15);
+
+        // on considère un cone de 30° devant nous
+        float limit = direction - 15.0;
         println("cone limit 1: ", limit);
-        limit = current_direction + radians(15);
+        limit = direction + 15.0;
         println("cone limit 2: ", limit);
 
-        if (current_direction - radians(15) < adversary.angle
-            || adversary.angle < current_direction + radians(15))
+        if (direction - 15.0 < adversary.angle || adversary.angle < direction + 15.0)
         {
           // il est devant nous
           return true;
@@ -116,8 +108,8 @@ namespace Trajectory
     }
 
     // Direction of the linear motion vector, in local robot reference
-    linear->direction = NormalizeAngle(
-        DirectionFromPositions(robot->x, robot->y, target.x, target.y) - robot->h);
+    linear->direction =
+        NormalizeAngle(CartesianToRelativePolar(target.x, target.y).angle - robot->h);
 
     // Magnitude of the linear motion vector => Distance error
     linear->position_error =

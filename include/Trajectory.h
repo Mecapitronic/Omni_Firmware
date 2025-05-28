@@ -19,24 +19,35 @@ namespace Trajectory
           // de nous = risque de collision
 
   /**
-   * @brief give the relative (to the robot) direction of the point without distance
-   *
-   * @param point the point we want to convert to polar direction
-   * @param robotPosition the position of the robot in the field
-   * @return PolarPoint the polar direction of the point relative to the robot position.
-   * Distance is always 0.
-   */
-  PolarPoint CartesianToPolarDirection(Point point, PoseF robotPosition);
-
-  /**
    * @brief Give the polar position of an object relative to the robot position
+   * @details la direction est donnée en degrés compris entre -180° et 180° depuis
+   * l'origine trigonométrique
    *
    * @param obstacle the object we want to relative position from
    * @return PolarPoint the relative (to the robot) position of the object
+   * in degrees from 0 trigo and between [-180, 180]
    */
   PolarPoint CartesianToRelativePolar(Point obstacle);
+  PolarPoint CartesianToRelativePolar(float x, float y);
 
+  /**
+   * @brief TODO
+   *
+   * @param obstacle
+   * @return true
+   * @return false
+   */
   bool isTheObstacleToClose(Circle obstacle);
+
+  /**
+   * @brief detecte si on obstacle se trouve devant la direction actuelle du robot
+   * @details défini un cone de 30° autour de la direction (cone de tolérance)
+   * ~ les calculs sont effectués en [-180;180] ~
+   *
+   * @param current_direction la direction du robot (h) en radian
+   * @return true si on obstacle se trouve sur le chemin (dans le cone de tolérance)
+   * @return false si aucun obstacle n'est détecté devant le robot
+   */
   bool isThereAnObstacleInFrontOfMe(float current_direction);
   void FallBackIfWeAreWithinObstacleLimits();
 
