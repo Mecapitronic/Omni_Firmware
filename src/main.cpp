@@ -21,7 +21,7 @@ void setup()
   digitalWrite(PIN_EN_MCU, LOW);
 
   ESP32_Helper::Initialisation();
-  delay(3000);
+  // delay(3000);
   println("Board : ", String(ARDUINO_BOARD));
   print("Arduino Version : ", ESP_ARDUINO_VERSION_MAJOR);
   print(".", ESP_ARDUINO_VERSION_MINOR);
@@ -54,9 +54,9 @@ void setup()
 
   // Init Motion
   // Linear max speed 1500 mm/s and acceleration 1000 mm/s²
-  linear.Initialisation(1500, 1000);
+  linear.Initialisation(1000, 500);
   // Angular max speed 500 °/s and acceleration 1000 °/s²
-  angular.Initialisation(radians(500), radians(1000));
+  angular.Initialisation(radians(200), radians(500));
   // Init end position tolerance
   linear.SetMargin(1);           // 1 mm
   angular.SetMargin(radians(1)); // 1 deg
