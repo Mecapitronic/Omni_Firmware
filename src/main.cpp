@@ -474,9 +474,15 @@ void TaskMatch(void *pvParameters)
       Trajectory::Navigate_To_Vertex(1, linear.speed_max, 0);
       Trajectory::RotateToOrientation(radians(180), 150, 0);
       ServoAX12::Depose();
-      delay(1000); // Attente de 1 sec pour la dépose
+      ServoAX12::AreAllServoMoving();
 
       Trajectory::Navigate_To_Vertex(10, linear.speed_max, 0);
+
+      while (Match::time_end_match - Match::getMatchTimeMs() < 5000)
+      {
+        // Wait for 5 sec before end of match
+        vTaskDelay(100);
+      }
       Trajectory::Navigate_To_Vertex(11, linear.speed_max, 0);
 
       Match::stopMatch();
