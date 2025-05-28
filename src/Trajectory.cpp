@@ -40,11 +40,11 @@ namespace Trajectory
   {
     float distance =
         sqrt((x - robot->x) * (x - robot->x) + (y - robot->y) * (y - robot->y));
-    float angle = atan2(y - robot->y, x - robot->x) * 180 / M_PI - robot->h;
+    float angle = atan2(y - robot->y, x - robot->x);
 
     // on ne corrige pas l'angle, on conserve entre -180 et 180
     // pour faciliter la définition du cone de tolérance
-    return PolarPoint(angle, distance);
+    return PolarPoint(angle, distance, 0);
   }
 
   bool isTheObstacleToClose(Circle obstacle)
@@ -60,22 +60,15 @@ namespace Trajectory
     {
       if (isTheObstacleToClose(obstacle))
       {
-        float direction = current_direction * 180 / M_PI;
         PolarPoint adversary = CartesianToRelativePolar(obstacle.p);
-
-        print("obstacle position: ", obstacle.p.x);
-        println(" : ", obstacle.p.y);
-        println("obstacle direction: ", adversary.angle);
-
-        // on considère un cone de 30° devant nous
-        float limit = direction - 15.0;
-        println("cone limit 1: ", limit);
-        limit = direction + 15.0;
-        println("cone limit 2: ", limit);
-
-        if (direction - 15.0 < adversary.angle || adversary.angle < direction + 15.0)
+        if (current_direction - radians(20.0) < adversary.angle
+            && adversary.angle < current_direction + radians(20.0))
         {
-          // il est devant nous
+          float dir = degrees(current_direction);
+          println("current direction: ", dir);
+          float deg = degrees(adversary.angle);
+          println("un adversaire est là: ", deg);
+
           return true;
         }
       }

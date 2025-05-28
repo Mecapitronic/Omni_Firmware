@@ -19,13 +19,15 @@ namespace Trajectory
           // de nous = risque de collision
 
   /**
-   * @brief Give the polar position of an object relative to the robot position
-   * @details la direction est donnée en degrés compris entre -180° et 180° depuis
-   * l'origine trigonométrique
+   * @brief Give the polar position of an object relative to the robot position and
+   * direction
+   * @details la direction est donnée en radians compris entre -pi et +pi
+   * L'angle est donne la position de l'obstacle relative au robot. l'origine de l'angle
+   * est le 0 trigonométrique.
    *
    * @param obstacle the object we want to relative position from
-   * @return PolarPoint the relative (to the robot) position of the object
-   * in degrees from 0 trigo and between [-180, 180]
+   * @return PolarPoint the relative (to the robot) position and
+   * direction of the object in degrees from 0 trigo and between [-pi, pi]
    */
   PolarPoint CartesianToRelativePolar(Point obstacle);
   PolarPoint CartesianToRelativePolar(float x, float y);
