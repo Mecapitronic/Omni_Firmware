@@ -20,7 +20,7 @@ void LedRGB::Initialisation(Robot *robotPosition)
 
   // Initialize the timers
   changeColorTimer.Start(TRANSITION_DELAY_MS / TRANSITION_STEPS);
-  rotationTimer.Start(80);
+  rotationTimer.Start(50);
 }
 
 // pour faire un clignotement on stock 2 couleurs pour alterner
@@ -102,7 +102,7 @@ void LedRGB::update()
 
 void LedRGB::rainbow()
 {
-  if (changeColorTimer.IsTimeOut())
+  if (rotationTimer.IsTimeOut())
   {
     fill_rainbow_circular(leds, NUM_LEDS, current_hue, false);
     ring_controller->showLeds(RING_BRIGHTNESS); // Show the current color
@@ -200,9 +200,9 @@ uint8_t LedRGB::polarPointToLedNumber(PolarPoint polarPoint)
   int intfromfloat = static_cast<int8_t>(round(polarPoint.angle / 360 / 24));
   int8_t led_number = NUM_LEDS - intfromfloat;
 
-  println("received angle: ", polarPoint.angle);
-  println("calculated int: ", intfromfloat);
-  println("led number : ", led_number);
+  // println("received angle: ", polarPoint.angle);
+  // println("calculated int: ", intfromfloat);
+  // println("led number : ", led_number);
 
   if (led_number >= NUM_LEDS || led_number < 0)
   {

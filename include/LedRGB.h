@@ -35,6 +35,14 @@ using namespace Printer;
  * Les fonctions d'initialisation sont appelées par la fonction Initialisation()
  * qui est appelée au démarrage du robot.
  *
+ * Pour l'orientation
+ * la LED 0 est devant le robot. Les LED sont numérotées dans le sens horaire.
+ * La LED 1 est sa droite et la LED 24 est à gauche
+ *
+ * Le 0 du robot et à droite à 90°, c'est le 0 trigonométrique. Les angles sont
+ * compris dans [ -180; 180 ] en partant de ce 0. Des conversions et inversions sont à
+ * prévoir
+ *
  */
 class LedRGB
 {
