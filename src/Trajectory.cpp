@@ -210,9 +210,9 @@ namespace Trajectory
   {
     for (auto obstacle : Obstacle::obstacle)
     {
-      if (isTheObstacleToClose(obstacle))
+      // si on est "dans" l'obstacle,  on recule de 10cm
+      if (DistanceBetweenPoints(robot->GetPoint(), obstacle.p) < obstacle.r)
       {
-        // si on est dans un obstacle, on recule de 10cm
         println("Obstacle too close, going back");
         // on recule de 10cm dans la direction opposée de l'obstacle
         PoseF linear_target = robot->GetPoseF();
