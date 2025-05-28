@@ -272,7 +272,10 @@ void TaskHandleCommand(void *pvParameters)
 
       otos.HandleCommand(cmd);
       motor.HandleCommand(cmd);
-      ServoAX12::HandleCommand(cmd);
+      if (cmd.cmd.startsWith("AX12"))
+      {
+        ServoAX12::HandleCommand(cmd);
+      }
 
       if (cmd.cmd == "Help")
       {
