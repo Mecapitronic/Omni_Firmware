@@ -426,17 +426,19 @@ void TaskMatch(void *pvParameters)
     if (Match::matchState == State::MATCH_WAIT)
     {
       IHM::UpdateHMI();
-      // TODO : Update robot position
-      // TODO : update mapping according to color
-      if (IHM::team == Team::Jaune)
-      {
-      }
-      else
-      {
-      }
+      Mapping::Initialize_Map(IHM::team);
       // Disable Motor & Servo Power in Match mode during waiting
       if (Match::matchMode == Enable::ENABLE_TRUE)
+      {
         digitalWrite(PIN_EN_MCU, LOW);
+        timerMotion.WaitForDisable();
+        Mapping::Initialize_Map(IHM::team);
+        Point p = Mapping::Get_Vertex_Point(1);
+        robot.SetPose(p.x, p.y, 0);
+        otos.SetPose(p.x, p.y, 0);
+        Trajectory::Reset();
+        timerMotion.Enable();
+      }
       else
         digitalWrite(PIN_EN_MCU, HIGH);
     }
@@ -444,8 +446,20 @@ void TaskMatch(void *pvParameters)
     // Match en cours
     if (Match::matchState == State::MATCH_BEGIN)
     {
+      timerMotion.WaitForDisable();
+      Mapping::Initialize_Map(IHM::team);
+      Point p = Mapping::Get_Vertex_Point(1);
+      robot.SetPose(p.x, p.y, 0);
+      otos.SetPose(p.x, p.y, 0);
+      Trajectory::Reset();
+      timerMotion.Enable();
+
+      Match::matchState = State::MATCH_RUN;
+      Match::printMatch();
       // Enable Motor & Servo Power
       digitalWrite(PIN_EN_MCU, HIGH);
+      ServoAX12::Bas();
+      ServoAX12::Prise();
     }
 
     // Démarrage du robot

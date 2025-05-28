@@ -52,13 +52,14 @@ namespace Match
         }
         else if (matchState == State::MATCH_BEGIN)
         {
-            // Match started, wait for elapsed time to reach the start threshold
-            elapsedTime = millis() - startTime;
-            if ((elapsedTime >= time_start_match && matchMode == Enable::ENABLE_TRUE) || (elapsedTime >= time_start_train && matchMode == Enable::ENABLE_FALSE))
-            {
-                matchState = State::MATCH_RUN;
-                printMatch();
-            }
+          // Match started, wait for elapsed time to reach the start threshold
+          // elapsedTime = millis() - startTime;
+          // if ((elapsedTime >= time_start_match && matchMode == Enable::ENABLE_TRUE) ||
+          // (elapsedTime >= time_start_train && matchMode == Enable::ENABLE_FALSE))
+          //{
+          // matchState = State::MATCH_RUN;
+          // printMatch();
+          //}
         }
         else if ((matchState == State::MATCH_RUN) || (matchState == State::MATCH_STOP))
         {

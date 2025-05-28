@@ -42,7 +42,7 @@ void Initialize_Map(Team team)
     circle[10] = Circle(2075, 250, 50);
     circle[11] = Circle(2375, 250, 50);
     // Vertex
-    vertex[0].point = Point(0, 0);
+    // vertex[0].point = Point(0, 0);
     vertex[1].point = Point(1225, 225);
     vertex[2].point = Point(775, 450);
     vertex[3].point = Point(775, 175);
@@ -87,7 +87,7 @@ void Initialize_Map(Team team)
     circle[10] = Circle(925, 250, 50);
     circle[11] = Circle(625, 250, 50);
     // Vertex
-    vertex[0].point = Point(0, 0);
+    // vertex[0].point = Point(0, 0);
     vertex[1].point = Point(1775, 225);
     vertex[2].point = Point(2225, 450);
     vertex[3].point = Point(2225, 175);
