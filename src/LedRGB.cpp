@@ -88,21 +88,12 @@ void LedRGB::update()
 
         // calculate obstacles orientation relative to the robot position and orientation
         uint8_t obstacle_led = polarPointToLedNumber(CartesianToPolar(obstacle.p, robot_current_position));
-        if (obstacle_led >= NUM_LEDS)
+        if (obstacle_led < 0 || obstacle_led >= NUM_LEDS)
         {
-            println("OBSTACLE LED NUMBER OUT OF BOUNDS: ", obstacle_led);
+            // println("OBSTACLE LED NUMBER OUT OF BOUNDS: ", obstacle_led);
             continue; // Skip if the led number is out of bounds
         }
-
-        // get the led number corresponding to the obstacle position
-        if (obstacle_led >= 0 && obstacle_led < NUM_LEDS)
-        {
-            leds[obstacle_led] = CRGB::White;
-        }
-        else
-        {
-            println("Obstacle LED number out of bounds: ", obstacle_led);
-        }
+        leds[obstacle_led] = CRGB::White;
     }
 
     ring_controller->showLeds(RING_BRIGHTNESS);
@@ -191,7 +182,6 @@ PolarPoint LedRGB::CartesianToPolar(Point point, PoseF robotPosition)
     {
         angle += 360; // Ensure angle is positive
     }
-    println("Cartesian to Polar angle: ", angle);
     polarPoint.angle = angle;
     // polarPoint.distance = static_cast<int16_t>(sqrt(pow(point.x - robotPosition.x, 2) + pow(point.y - robotPosition.y, 2)));
     polarPoint.distance = 0;
@@ -200,11 +190,20 @@ PolarPoint LedRGB::CartesianToPolar(Point point, PoseF robotPosition)
 
 uint8_t LedRGB::polarPointToLedNumber(PolarPoint polarPoint)
 {
-    print("PolarPoint angle: ", polarPoint.angle);
-    println(" distance: ", polarPoint.distance);
     // l'angle 0 est à droite du robot, on doit donc le convertir pour que 0 soit en haut
     // on doit aussi inverser le sens pour suivre le sens horaire et non trigonométrique
-    uint8_t led_number = static_cast<uint8_t>(-((polarPoint.angle - 90) / 360.0) * NUM_LEDS);
-    println("PolarPoint led number: ", led_number);
+    float angle = polarPoint.angle - 90;
+    if (angle < 0)
+    {
+        angle += 360; // Ensure angle is positive
+    }
+
+    uint8_t led_number = static_cast<uint8_t>(-(angle / 360.0) * NUM_LEDS);
+
+    // debug
+    // print("PolarPoint angle: ", polarPoint.angle);
+    // println(" distance: ", polarPoint.distance);
+    // println("PolarPoint led number: ", led_number);
+
     return led_number;
 }
