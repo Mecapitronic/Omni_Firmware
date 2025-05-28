@@ -5,6 +5,29 @@ TabWidth: 2
 UseTab: Never
 MaxEmptyLinesToKeep: 2
 NamespaceIndentation: All
-ColumnLimit: 99
 PenaltyBreakAssignment: 2
 PenaltyReturnTypeOnItsOwnLine: 200
+# bilberry
+AccessModifierOffset: -2
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: Never
+AlwaysBreakBeforeMultilineStrings: false
+BinPackArguments: false
+BinPackParameters: false
+BreakBeforeBinaryOperators: NonAssignment
+BreakBeforeBraces: Custom
+BraceWrapping:
+  AfterClass: true
+  AfterEnum: true
+  AfterExternBlock: true
+  AfterFunction: true
+  AfterStruct: true
+  AfterUnion: true
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
+BreakInheritanceList: AfterColon
+ColumnLimit: 90
+IndentCaseLabels: false
+DerivePointerAlignment: false
+SeparateDefinitionBlocks: Always
