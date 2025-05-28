@@ -15,6 +15,8 @@ Robot robot;
 
 OpticalTrackingOdometrySensor otos;
 
+bool global_error = false;
+
 void setup()
 {
     pinMode(PIN_EN_MCU, OUTPUT);
@@ -46,7 +48,7 @@ void setup()
     otos.Initialisation(simulation);
     if (!otos.IsConnected() && !simulation)
     {
-        // error = true;
+        global_error = true;
     }
 
     // Init motors
