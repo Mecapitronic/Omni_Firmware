@@ -12,7 +12,7 @@ void LedRGB::Initialisation(Robot *robotPosition)
     ring_controller = &FastLED.addLeds<NEOPIXEL, PIN_WS2812_LED>(leds, NUM_LEDS);
     FastLED.setBrightness(RING_BRIGHTNESS);
     // Set the initial color of the LEDs to black
-    fill_solid(leds, NUM_LEDS, CRGB::Black);
+    fill_solid(leds, NUM_LEDS, CRGB::DarkCyan);
     ring_controller->showLeds(RING_BRIGHTNESS);
 
     // Initialize the robot position pointer
@@ -171,7 +171,7 @@ uint8_t LedRGB::directionToLedNumber(float angle)
     angle -= 90;
 
     // Convert the angle to a value between 0 and NUM_LEDS
-    int led_number = static_cast<int>(round(angle / (2 * M_PI) * NUM_LEDS));
+    int led_number = static_cast<int>(angle / (2 * M_PI) * NUM_LEDS);
 
     // Adjust for clockwise direction
     led_number = (NUM_LEDS - led_number) % NUM_LEDS;
