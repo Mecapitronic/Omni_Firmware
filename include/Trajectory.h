@@ -1,13 +1,13 @@
 #ifndef TRAJECTORY_H
 #define TRAJECTORY_H
 
-#include "Structure.h"
 #include "ESP32_Helper.h"
 #include "GeoMathTools.h"
 #include "Motion.h"
-#include "Timer.h"
-#include "PathPlanning/PathFinding.h"
 #include "PathPlanning/Mapping.h"
+#include "PathPlanning/PathFinding.h"
+#include "Structure.h"
+#include "Timer.h"
 
 namespace Trajectory
 {
@@ -15,6 +15,14 @@ namespace Trajectory
     constexpr uint16_t OBSTACLE_TOO_CLOSE = 20;    // distance en dessous de laquelle on robot adversaire est considéré trop prêt de nous = risque de collision
 
     PolarPoint CartesianToPolar(Point point, PoseF robotPosition);
+
+    /**
+     * @brief Give the polar position of an object relative to the robot position
+     *
+     * @param obstacle the object we want to relative position from
+     * @return PolarPoint the relative (to the robot) position of the object
+     */
+    PolarPoint CartesianToRelativePolar(Point obstacle);
 
     bool isTheObstacleToClose(Circle obstacle);
 
@@ -97,19 +105,19 @@ namespace Trajectory
     void GoToPose(float x, float y, float h, float speed_limit, float speed_final);
     /**
      * @brief Go to given vertex id with speed limit and final speed
-     * 
-     * @param id 
-     * @param speed_limit 
-     * @param speed_final 
+     *
+     * @param id
+     * @param speed_limit
+     * @param speed_final
      */
     void GoToVertex(t_vertexID id, float speed_limit, float speed_final);
 
     /**
      * @brief Go to vertex id with speed limit and final speed using a Path planning algorithm
-     * 
-     * @param id 
-     * @param speed_limit 
-     * @param speed_final 
+     *
+     * @param id
+     * @param speed_limit
+     * @param speed_final
      */
     void Navigate_To_Vertex(t_vertexID id, float speed_limit, float speed_final);
 }

@@ -47,6 +47,19 @@ namespace Trajectory
     return polarPoint;
   }
 
+  PolarPoint CartesianToRelativePolar(Point obstacle)
+  {
+    float distance = sqrt((obstacle.x - robot->x) * (obstacle.x - robot->x) + (obstacle.y - robot->y) * (obstacle.y - robot->y));
+    float angle = atan2(obstacle.y - robot->y, obstacle.x - robot->x) * 180 / PI - robot->h;
+
+    if (angle < -180)
+      angle += 360;
+    else if (angle > 180)
+      angle -= 360;
+
+    return PolarPoint(angle, distance);
+  }
+
   bool isTheObstacleToClose(Circle obstacle)
   {
     return DistanceBetweenPoints(robot->GetPoint(), obstacle.p) < OBSTACLE_TOO_CLOSE;
@@ -58,7 +71,7 @@ namespace Trajectory
     {
       if (isTheObstacleToClose(obstacle))
       {
-        PolarPoint adversary = CartesianToPolar(obstacle.p, *robot);
+        PolarPoint adversary = CartesianToRelativePolar(obstacle.p);
         // on considère un cone de 30° devant nous
         if (current_direction - radians(15) < adversary.angle || adversary.angle < current_direction + radians(15))
         {
@@ -169,7 +182,7 @@ namespace Trajectory
 
     // Update linear speeds
     linear->speed_limit = speed_limit;
-    linear->speed_final = speed_final;  
+    linear->speed_final = speed_final;
   }
 
   void GoToVertex(t_vertexID id, float speed_limit, float speed_final)
