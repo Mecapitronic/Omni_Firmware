@@ -15,6 +15,11 @@ namespace Trajectory
         // timer d'attente lorsque l'on detecte un obstacle
         // avant de reprendre notre course
         Timeout collision_prevention_timer;
+
+        // backup de la target courrante lorsqu'on s'arrête pour
+        // éviter un robot (car on reset la target)
+        PoseF pending_target;
+
         // permet d'arrêter le robot lors de la detection d'un obstacle
         // sans flinguer le path finding
         bool pathFindingOnHold = false;
@@ -101,15 +106,25 @@ namespace Trajectory
     {
         if (isThereAnObstacleInFrontOfMe())
         {
-            // si on détecte un obstacle (surprise) devant nous lorsque l'on
-            // avance on attend 2 secondes collision_prevention_timer.Start(2000);
-            // on peut pas reset directement parce que le path finding croira qu'on est
-            // arrivé et continuera le reste de la stratégie
             putOnHold();
+            if (pending_target == PoseF())
+            {
+                // si on détecte un obstacle (surprise) devant nous lorsque l'on
+                // avance on attend 2 secondes collision_prevention_timer.Start(2000);
+                pending_target = target;
+            }
+            Reset();
         }
         else
         {
-            resumePathFinding();
+            if (pending_target != PoseF())
+            {
+                // restore target
+                target = pending_target;
+                pending_target = PoseF();
+                // collision_prevention_timer.Stop();
+                resumePathFinding();
+            }
         }
 
 
@@ -279,10 +294,10 @@ namespace Trajectory
                       > ArrivalTriggerDistance
                || (NormalizeAngle(abs(robot->h - target.h)) > ArrivalTriggerAngle))
         {
-            println("distance : ",
-                    DistanceBetweenPositions(robot->x, robot->y, target.x, target.y));
-            println("angle : ",
-                    (float)(degrees(NormalizeAngle(abs(robot->h - target.h)))));
+            // println("distance : ",
+            //         DistanceBetweenPositions(robot->x, robot->y, target.x, target.y));
+            // println("angle : ",
+            //         (float)(degrees(NormalizeAngle(abs(robot->h - target.h)))));
             delay(100);
         }
 
