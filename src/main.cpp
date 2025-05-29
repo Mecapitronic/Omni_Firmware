@@ -221,8 +221,8 @@ void TaskTeleplot(void *pvParameters)
         }
         if (ihmTimeOut.IsTimeOut())
         {
-            Match::printMatch();
-            IHM::PrintAll();
+//             Match::printMatch();
+//             IHM::PrintAll();
         }
 
         // Countdown
@@ -361,7 +361,10 @@ void TaskHandleCommand(void *pvParameters)
                 if (result)
                 {
                     println("PF Found");
-                    PathFinding::ListVertexPrint(PathFinding::solution, "solution");
+                    for (auto &v : PathFinding::solution)
+                    {
+                        println("Vertex id:", v);
+}
                 }
                 else
                 {
