@@ -17,6 +17,9 @@ OpticalTrackingOdometrySensor otos;
 
 void setup()
 {
+    // display state as soon as possible
+    led_ring.Initialisation(&robot);
+
     pinMode(PIN_EN_MCU, OUTPUT);
     digitalWrite(PIN_EN_MCU, LOW);
 
@@ -30,14 +33,10 @@ void setup()
     println("Temperature : ", temperatureRead(), " deg Celsius");
     println("Frequency CPU : ", getCpuFrequencyMhz(), " MHz");
     println();
-
     println("Robot Holonome Firmware");
 
     // Init IHM
     IHM::InitIHM();
-
-    led_ring.Initialisation(&robot);
-
     while (IHM::bauReady != 1)
     {
         IHM::UpdateBAU();

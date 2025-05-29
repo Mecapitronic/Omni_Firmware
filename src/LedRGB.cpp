@@ -12,7 +12,7 @@ void LedRGB::Initialisation(Robot *robotPosition)
     ring_controller = &FastLED.addLeds<NEOPIXEL, PIN_WS2812_LED>(leds, NUM_LEDS);
     FastLED.setBrightness(RING_BRIGHTNESS);
     // Set the initial color of the LEDs to black
-    fill_solid(leds, NUM_LEDS, CRGB::DarkCyan);
+    fill_solid(leds, NUM_LEDS, CRGB::Purple);
     ring_controller->showLeds(RING_BRIGHTNESS);
 
     // Initialize the robot position pointer
@@ -23,11 +23,20 @@ void LedRGB::Initialisation(Robot *robotPosition)
     rotationTimer.Start(50);
 }
 
+void LedRGB::robotIsStarting()
+{
+    fill_solid(leds, NUM_LEDS, CRGB::Purple);
+    ring_controller->showLeds(RING_BRIGHTNESS);
+}
+
 // pour faire un clignotement on stock 2 couleurs pour alterner
 void LedRGB::update()
 {
     // Update data
+    // select right team color
     IHM::team == Team::Jaune ? team_color = CRGB::Gold : team_color = CRGB::DodgerBlue;
+    // set time led to green if match mode, violet in test mode
+    IHM::switchMode == 1 ? clock_color = CRGB::ForestGreen : clock_color = CRGB::Purple;
 
     if (Match::matchState == State::MATCH_END)
     {

@@ -16,7 +16,7 @@ namespace IHM
     Team team = Team::None;
 
     Enable tirettePresent = Enable::ENABLE_NONE;
-    // OK = 1, TEST = 0, None = -1
+    // Match = 1, TEST = 0, None = -1
     int switchMode = -1;
     // Retiré (OK) = 1, Enclenché (NOK) = 0, None = -1
     int bauReady = -1;

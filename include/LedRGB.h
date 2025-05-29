@@ -76,6 +76,10 @@ public:
      */
     void rainbow();
 
+
+    void robotIsStarting();
+
+
     /**
      * @brief set all leds to red and glow smoothly
      * inline function
@@ -116,9 +120,10 @@ private:
     CRGB filling_color = CRGB::Black; // Couleur de fond
     CRGB leds[NUM_LEDS];              // Array to hold the colors of the LEDs
     CRGB team_color = CRGB::Black;    // Default color for the team
-    Robot *robot_position;            // Pointer to the robot position
-    Timeout changeColorTimer;         // Timer to switch colors
-    Timeout rotationTimer;            // Timer to rotate colors
+    CRGB clock_color = CRGB::ForestGreen; // Color for the clock
+    Robot *robot_position;                // Pointer to the robot position
+    Timeout changeColorTimer;             // Timer to switch colors
+    Timeout rotationTimer;                // Timer to rotate colors
     uint8_t blendAmount =
         0; // Amount of blending between two colors,that changes over time
     uint8_t current_hue = 0; // repère pour la rotation de couleur ou d'arc en ciel
