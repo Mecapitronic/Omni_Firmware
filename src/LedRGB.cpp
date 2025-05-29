@@ -19,7 +19,6 @@ void LedRGB::Initialisation(Robot *robotPosition)
     robot_position = robotPosition;
 
     // Initialize the timers
-    changeColorTimer.Start(TRANSITION_DELAY_MS / TRANSITION_STEPS);
     // we need a rotation of led every 2 seconds, so 2s/24
     rotationTimer.Start(2000 / NUM_LEDS);
 }
@@ -89,41 +88,44 @@ void LedRGB::update()
 // la led après un peu moins fort
 void LedRGB::displayTime()
 {
-    if (Match::matchState == State::MATCH_WAIT)
+
+    // display seconds counter in wait, begin and run states
+    if (Match::matchState != State::MATCH_END && Match::matchState != State::MATCH_STOP)
     {
-        if (secondsCounter >= NUM_LEDS)
-        {
-            secondsCounter = 0; // Reset hue to avoid overflow
-        }
         leds[secondsCounter] = CRGB::ForestGreen;
         if (rotationTimer.IsTimeOut())
         {
-            secondsCounter++; // Increment hue for the next cycle
+            secondsCounter++;
         }
     }
-
 
     // update led ring display according to current robot state
     if (Match::matchState == State::MATCH_BEGIN || Match::matchState == State::MATCH_RUN)
     {
-        // indicate seconds
-        if (secondsCounter >= NUM_LEDS)
+        if (!matchClockTimer.isRunning)
         {
-            secondsCounter = 0; // Reset hue to avoid overflow
-        }
-        leds[secondsCounter] = CRGB::ForestGreen;
-        if (rotationTimer.IsTimeOut())
-        {
-            secondsCounter++; // Increment hue for the next cycle
+            // match lasts 100 seconds
+            matchClockTimer.Start(100000 / NUM_LEDS);
+            match_time_led = 0;
+            secondsCounter = 0;
         }
 
         // change of led all 4 seconds
-        match_time_led = (NUM_LEDS * Match::getMatchTimeMs()) / Match::time_end_match;
+        if (matchClockTimer.IsTimeOut())
+        {
+            match_time_led++;
+        }
+
         // Ensure we don't go out of bounds
         if (match_time_led <= NUM_LEDS)
         {
             leds[match_time_led] = CRGB::ForestGreen; // Set the time in green
         }
+    }
+
+    if (secondsCounter >= NUM_LEDS)
+    {
+        secondsCounter = 0; // avoid overflow
     }
 }
 
@@ -139,7 +141,7 @@ void LedRGB::rainbow()
 
 inline void LedRGB::TwoColorsTransition(CRGB color1, CRGB color2)
 {
-    if (changeColorTimer.IsTimeOut())
+    if (rotationTimer.IsTimeOut())
     {
         // uint8_t blendAmount = map(i, 0, steps, 0, 255); // 0 → 255
         CRGB color = blend(color1, color2, blendAmount);

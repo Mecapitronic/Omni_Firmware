@@ -126,7 +126,7 @@ private:
     CRGB team_color = CRGB::Black;    // Default color for the team
     CRGB clock_color = CRGB::ForestGreen; // Color for the clock
     Robot *robot_position;                // Pointer to the robot position
-    Timeout changeColorTimer;             // Timer to switch colors
+    Timeout matchClockTimer;              // Timer to display match time
     Timeout rotationTimer;                // Timer to rotate colors
     uint8_t blendAmount = 0;              // Amount of blending between two colors,
                                           // that changes over time
