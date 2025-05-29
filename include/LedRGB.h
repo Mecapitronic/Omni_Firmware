@@ -128,11 +128,12 @@ private:
     Robot *robot_position;                // Pointer to the robot position
     Timeout changeColorTimer;             // Timer to switch colors
     Timeout rotationTimer;                // Timer to rotate colors
-    uint8_t blendAmount =
-        0; // Amount of blending between two colors,that changes over time
-    uint8_t current_hue = 0; // repère pour la rotation de couleur ou d'arc en ciel
-    uint8_t match_time_led =
-        0; // numero de la led a allumer pour indiquer le temps de match écoulé
+    uint8_t blendAmount = 0;              // Amount of blending between two colors,
+                                          // that changes over time
+    uint8_t secondsCounter = 0; // permet d'afficher les secondes (1/2 rpm) pour la
+                                // rotation de couleur ou d'arc en ciel
+    uint8_t match_time_led = 0; // numero de la led à allumer
+                                // pour indiquer le temps de match écoulé
 };
 
 #endif

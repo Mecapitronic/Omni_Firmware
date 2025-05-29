@@ -20,7 +20,7 @@ void LedRGB::Initialisation(Robot *robotPosition)
 
     // Initialize the timers
     changeColorTimer.Start(TRANSITION_DELAY_MS / TRANSITION_STEPS);
-    // we need a rotation of led per second, so 1s/24 (x2 i don't know why)
+    // we need a rotation of led every 2 seconds, so 2s/24
     rotationTimer.Start(2000 / NUM_LEDS);
 }
 
@@ -91,14 +91,14 @@ void LedRGB::displayTime()
 {
     if (Match::matchState == State::MATCH_WAIT)
     {
-        if (current_hue >= NUM_LEDS)
+        if (secondsCounter >= NUM_LEDS)
         {
-            current_hue = 0; // Reset hue to avoid overflow
+            secondsCounter = 0; // Reset hue to avoid overflow
         }
-        leds[current_hue] = CRGB::ForestGreen;
+        leds[secondsCounter] = CRGB::ForestGreen;
         if (rotationTimer.IsTimeOut())
         {
-            current_hue++; // Increment hue for the next cycle
+            secondsCounter++; // Increment hue for the next cycle
         }
     }
 
@@ -107,14 +107,14 @@ void LedRGB::displayTime()
     if (Match::matchState == State::MATCH_BEGIN || Match::matchState == State::MATCH_RUN)
     {
         // indicate seconds
-        if (current_hue >= NUM_LEDS)
+        if (secondsCounter >= NUM_LEDS)
         {
-            current_hue = 0; // Reset hue to avoid overflow
+            secondsCounter = 0; // Reset hue to avoid overflow
         }
-        leds[current_hue] = CRGB::ForestGreen;
+        leds[secondsCounter] = CRGB::ForestGreen;
         if (rotationTimer.IsTimeOut())
         {
-            current_hue++; // Increment hue for the next cycle
+            secondsCounter++; // Increment hue for the next cycle
         }
 
         // change of led all 4 seconds
@@ -131,9 +131,9 @@ void LedRGB::rainbow()
 {
     if (rotationTimer.IsTimeOut())
     {
-        fill_rainbow_circular(leds, NUM_LEDS, current_hue, false);
+        fill_rainbow_circular(leds, NUM_LEDS, secondsCounter, false);
         ring_controller->showLeds(RING_BRIGHTNESS); // Show the current color
-        current_hue += 2;                           // Increment hue for the next cycle
+        secondsCounter += 2;                        // Increment hue for the next cycle
     }
 }
 
