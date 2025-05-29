@@ -479,6 +479,10 @@ void TaskMatch(void *pvParameters)
             digitalWrite(PIN_EN_MCU, HIGH);
             ServoAX12::Bas();
             ServoAX12::Prise();
+            while (ServoAX12::AreAllServoMoving())
+            {
+                delay(1);
+            }
 
             // Prise en vertex 6
             p = Mapping::Get_Vertex_Point(6);
@@ -488,8 +492,10 @@ void TaskMatch(void *pvParameters)
 
             // Monter le bras
             ServoAX12::Mid();
-            ServoAX12::AreAllServoMoving();
-            delay(1000);
+            while (ServoAX12::AreAllServoMoving())
+            {
+                delay(1);
+            }
 
             // Aller à la dépose
             Trajectory::Navigate_To_Vertex(1, linear.speed_max, 0);
@@ -501,20 +507,27 @@ void TaskMatch(void *pvParameters)
 
             // Baisser le bras
             ServoAX12::Bas();
-            ServoAX12::AreAllServoMoving();
-            delay(1000);
+            while (ServoAX12::AreAllServoMoving())
+            {
+                delay(1);
+            }
 
             // Déposer les boites
             ServoAX12::Depose();
-            ServoAX12::AreAllServoMoving();
-            delay(2000);
+            while (ServoAX12::AreAllServoMoving())
+            {
+                delay(1);
+            }
 
             // reculer de la dépose
             p = Mapping::Get_Vertex_Point(1);
             Trajectory::TranslateToPosition(robot.x, robot.y + 180, linear.speed_max, 0);
 
             ServoAX12::Prise();
-            delay(2000);
+            while (ServoAX12::AreAllServoMoving())
+            {
+                delay(1);
+            }
 
             // Aller au vertex 2
             Trajectory::Navigate_To_Vertex(2, linear.speed_max, 0);
@@ -527,8 +540,10 @@ void TaskMatch(void *pvParameters)
 
             // Déposer les boites
             ServoAX12::Depose();
-            ServoAX12::AreAllServoMoving();
-            delay(2000);
+            while (ServoAX12::AreAllServoMoving())
+            {
+                delay(1);
+            }
 
             // reculer de la dépose
             p = Mapping::Get_Vertex_Point(2);
