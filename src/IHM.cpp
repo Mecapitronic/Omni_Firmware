@@ -46,14 +46,12 @@ namespace IHM
         if (tirettePresent == Enable::ENABLE_TRUE)
         {
             println("Tirette : Présente au démarrage");
-            Match::matchMode = Enable::ENABLE_TRUE;
             ledTimeOut.timeOut = 500;
         }
         else if (tirettePresent == Enable::ENABLE_FALSE)
         {
             println("Tirette : Absente au démarrage");
-            Match::matchMode = Enable::ENABLE_FALSE;
-            ledTimeOut.timeOut = 200;
+            ledTimeOut.timeOut = 500;
         }
         Match::printMatch();
         UpdateHMI();
@@ -86,17 +84,15 @@ namespace IHM
         Enable tiretteTmp = (Enable)!digitalRead(PIN_START);
         if (tiretteTmp != tirettePresent)
         {
-            if (tiretteTmp == Enable::ENABLE_TRUE)
-            {
-                ledTimeOut.timeOut = 500;
-            }
-            else if (tiretteTmp == Enable::ENABLE_FALSE)
-            {
-                ledTimeOut.timeOut = 1000;
-                Match::startMatch();
-            }
             tirettePresent = tiretteTmp;
             PrintStart();
+        }
+
+        if ((tirettePresent == Enable::ENABLE_FALSE && switchMode == 1)
+            || (tirettePresent == Enable::ENABLE_TRUE && switchMode != 1))
+        {
+            // If tirette is not present and switch is OK, start the match
+            Match::startMatch();
         }
 
         if (bauReadyPrev != bauReady)
@@ -153,6 +149,14 @@ namespace IHM
             }
         }
         LEDcontroller->showLeds(BUILTIN_BRIGHTNESS);
+    }
+
+    void PrintAll()
+    {
+        PrintTeam();
+        PrintSwitch();
+        PrintBAU();
+        PrintStart();
     }
 
     void PrintTeam()

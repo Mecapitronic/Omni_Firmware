@@ -71,11 +71,17 @@ void setup()
     angular.SetMargin(radians(1)); // 1 deg
 
     // Initial pose
-    // Init start zone => team color ?
-    robot.SetPose(500, 500, radians(0));
-
+    if (IHM::team == Team::Jaune)
+    {
+        robot.SetPose(1200, 170, radians(0));
+    }
+    else
+    {
+        robot.SetPose(3000 - 1200, 170, radians(0));
+    }
     // Reset odometry
     otos.SetPose(robot.x, robot.y, robot.h);
+
 
     // Init trajectory
     Trajectory::Initialisation(&linear, &angular, &robot);
@@ -176,9 +182,10 @@ void TaskTeleplot(void *pvParameters)
 {
     int lastMatchTime = 0;
     println("Start TaskTeleplot");
-    Timeout robotPosTimeOut, mapTimeOut;
+    Timeout robotPosTimeOut, mapTimeOut, ihmTimeOut;
     robotPosTimeOut.Start(100);
     mapTimeOut.Start(200);
+    ihmTimeOut.Start(5000);
     Chrono chrono("Teleplot", 1000);
 
     while (true)
@@ -189,12 +196,6 @@ void TaskTeleplot(void *pvParameters)
             teleplot("Position", robot);
             teleplot("Orient", degrees(robot.h));
 
-            // Countdown
-            if (lastMatchTime != (int)(Match::getMatchTimeSec()))
-            {
-                println("Match Time : ", (int)(Match::getMatchTimeSec()));
-                lastMatchTime = (int)(Match::getMatchTimeSec());
-            }
             // teleplot("Direction", linear.direction)
             // println(">fixeScale:0:0;0:2000;3000:2000;3000:0;|xy");
             // otos.Teleplot();
@@ -209,11 +210,22 @@ void TaskTeleplot(void *pvParameters)
             // teleplot("Servo_Up Cmd", ServoAX12::Servo_Up.command_position);
             // teleplot("Servo_Left Cmd", ServoAX12::Servo_Left.command_position);
         }
-
         if (mapTimeOut.IsTimeOut())
         {
             Obstacle::PrintObstacleList();
             ServoAX12::TeleplotPosition();
+        }
+        if (ihmTimeOut.IsTimeOut())
+        {
+            Match::printMatch();
+            IHM::PrintAll();
+        }
+
+        // Countdown
+        if (lastMatchTime != (int)(Match::getMatchTimeSec()))
+        {
+            println("Match Time : ", (int)(Match::getMatchTimeSec()));
+            lastMatchTime = (int)(Match::getMatchTimeSec());
         }
         if (chrono.Check())
         {
@@ -250,23 +262,24 @@ void TaskUpdate(void *pvParameters)
         //   //while(linear.isRunning || angular.isRunning) ;//doWhileWaiting();
 
         // Enable or disable Communication
-        if (IHM::switchMode == 0 && (Printer::IsEnable())) // || Wifi_Helper::IsEnable()))
-        {
-            println("Disable Com");
-            Printer::EnablePrinter(Enable::ENABLE_FALSE);
-            Wifi_Helper::EnableWifi(Enable::ENABLE_FALSE);
-            Printer::teleplotUDPEnable = Enable::ENABLE_FALSE;
-            Lidar::disableComLidar = true;
-        }
-        else if (IHM::switchMode == 1
-                 && (!Printer::IsEnable())) // || !Wifi_Helper::IsEnable()))
-        {
-            Printer::EnablePrinter(Enable::ENABLE_TRUE);
-            Wifi_Helper::EnableWifi(Enable::ENABLE_TRUE);
-            Printer::teleplotUDPEnable = Enable::ENABLE_TRUE;
-            println("Enable Com");
-            Lidar::enableComLidar = true;
-        }
+        // if (IHM::switchMode == 0 && (Printer::IsEnable())) // ||
+        // Wifi_Helper::IsEnable()))
+        // {
+        //     println("Disable Com");
+        //     Printer::EnablePrinter(Enable::ENABLE_FALSE);
+        //     Wifi_Helper::EnableWifi(Enable::ENABLE_FALSE);
+        //     Printer::teleplotUDPEnable = Enable::ENABLE_FALSE;
+        //     Lidar::disableComLidar = true;
+        // }
+        // else if (IHM::switchMode == 1
+        //          && (!Printer::IsEnable())) // || !Wifi_Helper::IsEnable()))
+        // {
+        //     Printer::EnablePrinter(Enable::ENABLE_TRUE);
+        //     Wifi_Helper::EnableWifi(Enable::ENABLE_TRUE);
+        //     Printer::teleplotUDPEnable = Enable::ENABLE_TRUE;
+        //     println("Enable Com");
+        //     Lidar::enableComLidar = true;
+        // }
         if (chrono.Check())
         {
             // println("Chrono " + chrono.name + " : ", chrono.elapsedTime /
@@ -436,55 +449,42 @@ void TaskMatch(void *pvParameters)
         if (Match::matchState == State::MATCH_WAIT)
         {
             IHM::UpdateHMI();
-            Mapping::Initialize_Map(IHM::team);
             // Disable Motor & Servo Power in Match mode during waiting
-            if (Match::matchMode == Enable::ENABLE_TRUE)
+            if (IHM::switchMode == 1)
             {
                 digitalWrite(PIN_EN_MCU, LOW);
-                timerMotion.WaitForDisable();
-                Mapping::Initialize_Map(IHM::team);
-                if (IHM::team == Team::Jaune)
-                {
-                    robot.SetPose(1200, 170, radians(0));
-                    otos.SetPose(1200, 170, radians(0));
-                }
-                else
-                {
-                    robot.SetPose(3000 - 1200, 170, radians(0));
-                    otos.SetPose(3000 - 1200, 170, radians(0));
-                }
-                Trajectory::Reset();
-                timerMotion.Enable();
             }
             else
+            {
                 digitalWrite(PIN_EN_MCU, HIGH);
+            }
         }
 
         // Match en cours
         if (Match::matchState == State::MATCH_BEGIN)
         {
+            // Enable Motor & Servo Power
+            digitalWrite(PIN_EN_MCU, HIGH);
             timerMotion.WaitForDisable();
             Mapping::Initialize_Map(IHM::team);
+            // Initial pose
             if (IHM::team == Team::Jaune)
             {
                 robot.SetPose(1200, 170, radians(0));
-                otos.SetPose(1200, 170, radians(0));
             }
             else
             {
                 robot.SetPose(3000 - 1200, 170, radians(0));
-                otos.SetPose(3000 - 1200, 170, radians(0));
             }
+            // Reset odometry
+            otos.SetPose(robot.x, robot.y, robot.h);
             Trajectory::Reset();
             timerMotion.Enable();
 
             Match::matchState = State::MATCH_RUN;
             Match::printMatch();
-            // Enable Motor & Servo Power
-            digitalWrite(PIN_EN_MCU, HIGH);
             ServoAX12::Bas();
             ServoAX12::Prise();
-            delay(1000);
         }
 
         // Démarrage du robot
@@ -494,7 +494,6 @@ void TaskMatch(void *pvParameters)
             digitalWrite(PIN_EN_MCU, HIGH);
             ServoAX12::Bas();
             ServoAX12::Prise();
-            delay(1000);
 
             Trajectory::Navigate_To_Vertex(6, linear.speed_max, 0);
             Point p = Mapping::Get_Vertex_Point(6);

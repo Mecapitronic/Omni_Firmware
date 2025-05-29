@@ -24,6 +24,7 @@ namespace IHM
 
     void Blink();
 
+    void PrintAll();
     void PrintTeam();
     void PrintSwitch();
     void PrintBAU();

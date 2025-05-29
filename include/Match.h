@@ -2,6 +2,7 @@
 #define MATCH_H
 
 #include "ESP32_Helper.h"
+#include "IHM.h"
 #include "Structure.h"
 
 namespace Match
@@ -15,7 +16,6 @@ namespace Match
 
 
     extern State matchState;
-    extern Enable matchMode;
 
     void startMatch();
     void stopMatch();

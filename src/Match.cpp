@@ -14,9 +14,6 @@ namespace Match
     // Get the current state of the match
     State matchState = State::MATCH_WAIT;
 
-    // Get the mode : ENABLE_TRUE is Match, ENABLE_FALSE is Train (default)
-    Enable matchMode = Enable::ENABLE_NONE;
-
     void startMatch()
     {
         startTime = millis();
@@ -51,25 +48,17 @@ namespace Match
         }
         else if (matchState == State::MATCH_BEGIN)
         {
-            // Match started, wait for elapsed time to reach the start threshold
-            // elapsedTime = millis() - startTime;
-            // if ((elapsedTime >= time_start_match && matchMode == Enable::ENABLE_TRUE)
-            // || (elapsedTime >= time_start_train && matchMode == Enable::ENABLE_FALSE))
-            //{
-            // matchState = State::MATCH_RUN;
-            // printMatch();
-            //}
+            // In TaskMatch init map and robot position then go into run mode
         }
         else if ((matchState == State::MATCH_RUN) || (matchState == State::MATCH_STOP))
         {
             // PAMI still running or waiting for end of match
             elapsedTime = millis() - startTime;
 
-            if ((elapsedTime >= time_end_match && matchMode == Enable::ENABLE_TRUE)
-                || (elapsedTime >= time_end_train && matchMode == Enable::ENABLE_FALSE))
+            if ((elapsedTime >= time_end_match && IHM::switchMode == 1)
+                || (elapsedTime >= time_end_train && IHM::switchMode != 1))
             {
                 matchState = State::MATCH_END;
-                printMatch();
             }
         }
         else if (matchState == State::MATCH_END)
@@ -93,13 +82,5 @@ namespace Match
             ENUM_PRINT(State::MATCH_STOP);
             ENUM_PRINT(State::MATCH_END);
         }
-
-        print("Match Mode : ");
-        if (matchMode == Enable::ENABLE_TRUE)
-            println("Match");
-        else if (matchMode == Enable::ENABLE_FALSE)
-            println("Training - No starting cooldown");
-        else
-            println("None");
     }
 } // namespace Match
