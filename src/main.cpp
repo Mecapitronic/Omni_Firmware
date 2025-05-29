@@ -38,6 +38,9 @@ void setup()
 
     led_ring.Initialisation(&robot);
 
+    // To show it's Starting
+    led_ring.emergencyStop();
+
     while (IHM::bauReady != 1)
     {
         IHM::UpdateBAU();
