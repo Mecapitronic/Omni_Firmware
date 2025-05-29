@@ -76,7 +76,6 @@ void LedRGB::update()
     displayTime();
 
     // display obstacles around the robot
-    PoseF robot_current_position = robot_position->GetPoseF();
     for (const auto &obstacle : Obstacle::obstacle)
     {
         if (obstacle.r == 0)
@@ -204,7 +203,8 @@ void LedRGB::emergencyStop()
 
 float LedRGB::RelativeDirection(Point point)
 {
-    return atan2(point.y - robot_position->y, point.x - robot_position->x);
+    return atan2(point.y - robot_position->y, point.x - robot_position->x)
+           - robot_position->h;
 }
 
 uint8_t LedRGB::directionToLedNumber(float angle)
