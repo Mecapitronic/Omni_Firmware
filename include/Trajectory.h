@@ -22,6 +22,8 @@ namespace Trajectory
         20; // distance en dessous de laquelle on robot adversaire est considéré trop prêt
             // de nous = risque de collision
 
+    void putOnHold();
+    void resumePathFinding();
 
     PoseF GetTarget();
 
