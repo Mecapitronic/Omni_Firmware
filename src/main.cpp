@@ -22,7 +22,9 @@ void setup()
     delay(500); // display for 1/2 second
 
     pinMode(PIN_EN_MCU, OUTPUT);
-    digitalWrite(PIN_EN_MCU, LOW);
+    // digitalWrite(PIN_EN_MCU, LOW);
+    //  We need it to init the servos
+    digitalWrite(PIN_EN_MCU, HIGH);
 
     ESP32_Helper::Initialisation();
     // delay(3000);
@@ -433,7 +435,7 @@ void TaskMatch(void *pvParameters)
             // Disable Motor & Servo Power in Match mode during waiting
             if (IHM::switchMode == 1)
             {
-                digitalWrite(PIN_EN_MCU, LOW);
+                // digitalWrite(PIN_EN_MCU, LOW);
             }
             else
             {
