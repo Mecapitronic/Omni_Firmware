@@ -66,6 +66,7 @@ void LedRGB::update()
     fill_solid(leds, NUM_LEDS, filling_color); // Clear all LEDs
 
     displayTime();
+
     // display obstacles around the robot
     PoseF robot_current_position = robot_position->GetPoseF();
     for (const auto &obstacle : Obstacle::obstacle)
@@ -88,11 +89,10 @@ void LedRGB::update()
 // la led après un peu moins fort
 void LedRGB::displayTime()
 {
-
     // display seconds counter in wait, begin and run states
     if (Match::matchState != State::MATCH_END && Match::matchState != State::MATCH_STOP)
     {
-        leds[secondsCounter] = CRGB::ForestGreen;
+        leds[secondsCounter] = clock_color;
         if (rotationTimer.IsTimeOut())
         {
             secondsCounter++;
@@ -102,6 +102,9 @@ void LedRGB::displayTime()
     // update led ring display according to current robot state
     if (Match::matchState == State::MATCH_BEGIN || Match::matchState == State::MATCH_RUN)
     {
+        // get time instead of using timer
+        // match_time_led = (NUM_LEDS * Match::getMatchTimeMs()) / Match::time_end_match;
+
         if (!matchClockTimer.isRunning)
         {
             // match lasts 100 seconds
@@ -119,7 +122,7 @@ void LedRGB::displayTime()
         // Ensure we don't go out of bounds
         if (match_time_led <= NUM_LEDS)
         {
-            leds[match_time_led] = CRGB::ForestGreen; // Set the time in green
+            leds[match_time_led] = clock_color;
         }
     }
 

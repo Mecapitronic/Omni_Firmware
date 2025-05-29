@@ -120,6 +120,7 @@ public:
     uint8_t directionToLedNumber(float angle);
 
 private:
+    CRGB::HTMLColorCode timerMatchColor;
     CLEDController *ring_controller;  // Pointer to the FastLED controller for the ring
     CRGB filling_color = CRGB::Black; // Couleur de fond
     CRGB leds[NUM_LEDS];              // Array to hold the colors of the LEDs
