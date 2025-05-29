@@ -263,25 +263,6 @@ void TaskUpdate(void *pvParameters)
         //    delay(5000);
         //   //while(linear.isRunning || angular.isRunning) ;//doWhileWaiting();
 
-        // Enable or disable Communication
-        // if (IHM::switchMode == 0 && (Printer::IsEnable())) // ||
-        // Wifi_Helper::IsEnable()))
-        // {
-        //     println("Disable Com");
-        //     Printer::EnablePrinter(Enable::ENABLE_FALSE);
-        //     Wifi_Helper::EnableWifi(Enable::ENABLE_FALSE);
-        //     Printer::teleplotUDPEnable = Enable::ENABLE_FALSE;
-        //     Lidar::disableComLidar = true;
-        // }
-        // else if (IHM::switchMode == 1
-        //          && (!Printer::IsEnable())) // || !Wifi_Helper::IsEnable()))
-        // {
-        //     Printer::EnablePrinter(Enable::ENABLE_TRUE);
-        //     Wifi_Helper::EnableWifi(Enable::ENABLE_TRUE);
-        //     Printer::teleplotUDPEnable = Enable::ENABLE_TRUE;
-        //     println("Enable Com");
-        //     Lidar::enableComLidar = true;
-        // }
         if (chrono.Check())
         {
             // println("Chrono " + chrono.name + " : ", chrono.elapsedTime /

@@ -11,9 +11,6 @@ namespace Lidar
         Robot *robot;
     } // namespace
 
-    bool enableComLidar = false;
-    bool disableComLidar = false;
-
     void Initialisation(Robot *_robot)
     {
         println("Init Lidar");
@@ -59,25 +56,6 @@ namespace Lidar
                 // Ending char : '\n'
                 SERIAL_LIDAR.write(0x0A);
                 // println("Lidar sent : ", p);
-            }
-
-            if (enableComLidar || disableComLidar)
-            {
-                // Starting char : '!'
-                SERIAL_LIDAR.write(0x21);
-
-                SERIAL_LIDAR.write('C');
-                SERIAL_LIDAR.write('o');
-                SERIAL_LIDAR.write('M');
-                if (enableComLidar)
-                    SERIAL_LIDAR.write('1');
-                else
-                    SERIAL_LIDAR.write('0');
-
-                // Ending char : '\n'
-                SERIAL_LIDAR.write(0x0A);
-                enableComLidar = false;
-                disableComLidar = false;
             }
 
             while (SERIAL_LIDAR.available())

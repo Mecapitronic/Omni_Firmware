@@ -8,9 +8,6 @@
 
 namespace Lidar
 {
-    extern bool enableComLidar;
-    extern bool disableComLidar;
-
     void Initialisation(Robot *_robot);
     void TaskLidar(void *pvParameters);
 }; // namespace Lidar
