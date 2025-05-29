@@ -361,6 +361,7 @@ void TaskHandleCommand(void *pvParameters)
                 if (result)
                 {
                     println("PF Found");
+                    PathFinding::ListVertexPrint(PathFinding::solution, "solution");
                 }
                 else
                 {
