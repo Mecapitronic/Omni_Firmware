@@ -36,6 +36,20 @@ namespace Trajectory
         return target;
     }
 
+    PolarPoint CartesianToPolar(Point point)
+    {
+        return CartesianToPolar(point.x, point.y);
+    }
+
+    PolarPoint CartesianToPolar(float x, float y)
+    {
+        float distance =
+            sqrt((x - robot->x) * (x - robot->x) + (y - robot->y) * (y - robot->y));
+        float angle = atan2(y - robot->y, x - robot->x);
+
+        return PolarPoint(angle, distance, 0);
+    }
+
     PolarPoint CartesianToRelativePolar(Point obstacle)
     {
         return CartesianToRelativePolar(obstacle.x, obstacle.y);
@@ -43,13 +57,9 @@ namespace Trajectory
 
     PolarPoint CartesianToRelativePolar(float x, float y)
     {
-        float distance =
-            sqrt((x - robot->x) * (x - robot->x) + (y - robot->y) * (y - robot->y));
-        float angle = atan2(y - robot->y, x - robot->x);
-
-        // on ne corrige pas l'angle, on conserve entre -180 et 180
-        // pour faciliter la définition du cone de tolérance
-        return PolarPoint(angle, distance, 0);
+        PolarPoint point = CartesianToPolar(x, y);
+        point.angle = NormalizeAngle(point.angle - robot->h);
+        return point;
     }
 
     bool isTheObstacleToClose(Circle obstacle)
@@ -59,20 +69,15 @@ namespace Trajectory
                      + OBSTACLE_MARGIN;
     }
 
-    bool isThereAnObstacleInFrontOfMe(float current_direction)
+    bool isThereAnObstacleInFrontOfMe()
     {
         for (auto obstacle : Obstacle::obstacle)
         {
             if (isTheObstacleToClose(obstacle))
             {
-                PolarPoint adversary = CartesianToRelativePolar(obstacle.p);
-                if (current_direction - radians(20.0) < adversary.angle
-                    && adversary.angle < current_direction + radians(20.0))
+                PolarPoint adversary = CartesianToPolar(obstacle.p);
+                if (abs(adversary.angle - linear->direction) < radians(20.0))
                 {
-                    // float dir = degrees(current_direction);
-                    // println("current direction: ", dir);
-                    // float deg = degrees(adversary.angle);
-                    // println("un adversaire est là: ", deg);
                     return true;
                 }
             }
@@ -82,13 +87,12 @@ namespace Trajectory
 
     void Update()
     {
-        if (isThereAnObstacleInFrontOfMe(linear->direction))
+        if (isThereAnObstacleInFrontOfMe())
         {
             if (pending_target == PoseF())
             {
-                // si on détecte un obstacle (surprise) devant nous lorsque l'on avance
-                // on attend 2 secondes
-                // collision_prevention_timer.Start(2000);
+                // si on détecte un obstacle (surprise) devant nous lorsque l'on
+                // avance on attend 2 secondes collision_prevention_timer.Start(2000);
                 pending_target = target;
             }
             Reset();
@@ -105,8 +109,7 @@ namespace Trajectory
         }
 
         // Direction of the linear motion vector, in local robot reference
-        linear->direction =
-            NormalizeAngle(CartesianToRelativePolar(target.x, target.y).angle - robot->h);
+        linear->direction = CartesianToRelativePolar(target.x, target.y).angle;
 
         // Magnitude of the linear motion vector => Distance error
         linear->position_error =
@@ -191,11 +194,11 @@ namespace Trajectory
         target.x = x;
         target.y = y;
         target.h = h;
-        // TODO: adapter vitesse de rotation selon distance : vitesse angular = angle *
-        // Vitesse linear / distance if (linear.position_error != 0)
+        // TODO: adapter vitesse de rotation selon distance : vitesse angular = angle
+        // * Vitesse linear / distance if (linear.position_error != 0)
         // {
-        //   angular.speed_max = fmin((fabsf(angular.position_error) * linear.speed_max) /
-        //   fabsf(linear.position_error), speed_ang_rads_max);
+        //   angular.speed_max = fmin((fabsf(angular.position_error) *
+        //   linear.speed_max) / fabsf(linear.position_error), speed_ang_rads_max);
         // }
 
         // Update linear speeds
@@ -243,8 +246,8 @@ namespace Trajectory
         Point p = Mapping::Get_Vertex_Point(id);
         // TODO: dans l'idéal on regarde uniquement les obstacles dans la moitié du
         // terrain où on est pour éviter le flicker de la trajectoire
-        // TODO: checker si on est dans un obstacle avant path planning et reculer dans la
-        // direction opposée de l'obstacle
+        // TODO: checker si on est dans un obstacle avant path planning et reculer
+        // dans la direction opposée de l'obstacle
         while (DistanceBetweenPositions(robot->x, robot->y, p.x, p.y)
                > ArrivalTriggerDistance)
         {

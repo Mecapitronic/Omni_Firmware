@@ -39,6 +39,8 @@ namespace Trajectory
      */
     PolarPoint CartesianToRelativePolar(Point obstacle);
     PolarPoint CartesianToRelativePolar(float x, float y);
+    PolarPoint CartesianToPolar(Point point);
+    PolarPoint CartesianToPolar(float x, float y);
 
     /**
      * @brief TODO
@@ -51,14 +53,13 @@ namespace Trajectory
 
     /**
      * @brief detecte si on obstacle se trouve devant la direction actuelle du robot
-     * @details défini un cone de 30° autour de la direction (cone de tolérance)
-     * ~ les calculs sont effectués en [-180;180] ~
+     * @details défini un cone de 40° autour de la direction (cone de tolérance)
+     * les calculs sont effectués en [-pi;pi]
      *
-     * @param current_direction la direction du robot (h) en radian
      * @return true si on obstacle se trouve sur le chemin (dans le cone de tolérance)
      * @return false si aucun obstacle n'est détecté devant le robot
      */
-    bool isThereAnObstacleInFrontOfMe(float current_direction);
+    bool isThereAnObstacleInFrontOfMe();
     void FallBackIfWeAreWithinObstacleLimits();
 
     /**
