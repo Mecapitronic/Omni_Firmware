@@ -256,10 +256,6 @@ namespace Trajectory
         while (DistanceBetweenPositions(robot->x, robot->y, p.x, p.y)
                > ArrivalTriggerDistance)
         {
-            while (pathFindingOnHold)
-            {
-                delay(10);
-            }
             PathFinding::PathFinding((int16_t)robot->x, (int16_t)robot->y, id);
             if (target_vertex != PathFinding::solution.front())
             {
@@ -278,8 +274,9 @@ namespace Trajectory
 
     bool WaitRobotArrived()
     {
-        while (DistanceBetweenPositions(robot->x, robot->y, target.x, target.y)
-                   > ArrivalTriggerDistance
+        while (pathFindingOnHold
+               || DistanceBetweenPositions(robot->x, robot->y, target.x, target.y)
+                      > ArrivalTriggerDistance
                || (NormalizeAngle(abs(robot->h - target.h)) > ArrivalTriggerAngle))
         {
             println("distance : ",
