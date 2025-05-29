@@ -22,11 +22,11 @@ namespace Trajectory
         20; // distance en dessous de laquelle on robot adversaire est considéré trop prêt
             // de nous = risque de collision
 
+    // obstacle avoidance while path finding
     void putOnHold();
     void resumePathFinding();
 
     PoseF GetTarget();
-
 
     /**
      * @brief Give the polar position of an object relative to the robot position and
