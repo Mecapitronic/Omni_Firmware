@@ -477,28 +477,40 @@ void TaskMatch(void *pvParameters)
             ServoAX12::Bas();
             ServoAX12::Prise();
 
+            // Prise en vertex 6
             p = Mapping::Get_Vertex_Point(6);
             Trajectory::TranslateToPosition(p.x, p.y + 180, linear.speed_max, 0);
-            // delay(4000);
             Trajectory::TranslateToPosition(p.x + 30, p.y + 180, linear.speed_max, 0);
-            // delay(1000);
             Trajectory::TranslateToPosition(p.x - 30, p.y + 180, linear.speed_max, 0);
-            // delay(1000);
+
+            // Monter le bras
             ServoAX12::Mid();
             ServoAX12::AreAllServoMoving();
             delay(1000);
+
+            // Aller à la dépose
             Trajectory::Navigate_To_Vertex(1, linear.speed_max, 0);
+
+            // Tourner vers la dépose
             Trajectory::RotateToOrientation(radians(180), angular.speed_max / 10, 0);
             delay(10000);
             Trajectory::RotateToOrientation(radians(180), angular.speed_max / 10, 0);
+
+            // Baisser le bras
             ServoAX12::Bas();
             ServoAX12::AreAllServoMoving();
             delay(1000);
+
+            // Déposer les boites
             ServoAX12::Depose();
             ServoAX12::AreAllServoMoving();
             delay(2000);
+
+            // reculer de la dépose
             p = Mapping::Get_Vertex_Point(1);
             Trajectory::TranslateToPosition(robot.x, robot.y + 180, linear.speed_max, 0);
+
+            // Aller au vertex 10
             Trajectory::Navigate_To_Vertex(10, linear.speed_max, 0);
 
             while (Match::time_end_match - Match::getMatchTimeMs() > 5000)
