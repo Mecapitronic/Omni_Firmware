@@ -19,6 +19,7 @@ void setup()
 {
     // display state as soon as possible
     led_ring.Initialisation(&robot);
+    delay(500); // display for 1/2 second
 
     pinMode(PIN_EN_MCU, OUTPUT);
     digitalWrite(PIN_EN_MCU, LOW);
