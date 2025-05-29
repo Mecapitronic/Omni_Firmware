@@ -28,7 +28,8 @@ void LedRGB::update()
 {
     // Update data
     IHM::team == Team::Jaune ? team_color = CRGB::Gold : team_color = CRGB::DodgerBlue;
-
+    IHM::switchMode == 1 ? timerMatchColor = CRGB::ForestGreen
+                         : timerMatchColor = CRGB::Purple;
     if (Match::matchState == State::MATCH_END)
     {
         rainbow();
@@ -62,7 +63,7 @@ void LedRGB::update()
         {
             current_hue = 0; // Reset hue to avoid overflow
         }
-        leds[current_hue] = CRGB::ForestGreen;
+        leds[current_hue] = timerMatchColor;
         if (rotationTimer.IsTimeOut())
         {
             current_hue++; // Increment hue for the next cycle
@@ -80,7 +81,7 @@ void LedRGB::update()
         // Ensure we don't go out of bounds
         if (match_time_led <= NUM_LEDS)
         {
-            leds[match_time_led] = CRGB::ForestGreen; // Set the time in green
+            leds[match_time_led] = timerMatchColor; // Set the time in green
         }
     }
 
