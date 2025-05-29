@@ -122,7 +122,7 @@ namespace Lidar
                 //         chrono.elapsedTime / chrono.loopNbr,
                 //         " µs/loop");
             }
-            vTaskDelay(10);
+            vTaskDelay(5);
         }
         println("End TaskLidar");
     }
