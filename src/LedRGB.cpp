@@ -21,6 +21,8 @@ void LedRGB::Initialisation(Robot *robotPosition)
     // Initialize the timers
     // we need a rotation of led every 2 seconds, so 2s/24
     rotationTimer.Start(2000 / NUM_LEDS);
+    blendTimeOut.Start(5);
+    blendCoef = 5;
 }
 
 void LedRGB::robotIsStarting()
@@ -55,12 +57,18 @@ void LedRGB::update()
             || Match::matchState == State::MATCH_BEGIN)
         {
             // Set the team color when waiting for the match to start
-            filling_color = team_color;
+            // filling_color = team_color;
+            filling_color = glowTwoColors(team_color, team_color.lerp8(CRGB::Black, 240));
+            // blendTimeOut.timeOut = 10;
+            blendCoef = 1;
         }
         else
         {
             // Blend the team color with black for a lighter shade
-            filling_color = team_color.lerp8(CRGB::Black, 200);
+            // filling_color = team_color.lerp8(CRGB::Black, 200);
+            filling_color = glowTwoColors(team_color, team_color.lerp8(CRGB::Black, 240));
+            // blendTimeOut.timeOut = 1;
+            blendCoef = 5;
         }
     }
     fill_solid(leds, NUM_LEDS, filling_color); // Clear all LEDs
@@ -142,32 +150,40 @@ void LedRGB::rainbow()
     }
 }
 
-inline void LedRGB::TwoColorsTransition(CRGB color1, CRGB color2)
+inline CRGB LedRGB::TwoColorsTransition(CRGB color1, CRGB color2)
 {
-    if (rotationTimer.IsTimeOut())
-    {
-        // uint8_t blendAmount = map(i, 0, steps, 0, 255); // 0 → 255
-        CRGB color = blend(color1, color2, blendAmount);
-        fill_solid(leds, NUM_LEDS, color);
-        ring_controller->showLeds(RING_BRIGHTNESS); // Show the current color
 
-        blendAmount++;
-        if (blendAmount > 255)
+    // uint8_t blendAmount = map(i, 0, steps, 0, 255); // 0 → 255
+    CRGB color = blend(color1, color2, blendAmount);
+    // fill_solid(leds, NUM_LEDS, color);
+    // ring_controller->showLeds(RING_BRIGHTNESS); // Show the current color
+    static int8_t direction = 1; // 1 for forward, -1 for backward
+    if (blendTimeOut.IsTimeOut())
+    {
+        blendAmount += direction;
+        if (blendAmount >= 255)
         {
-            blendAmount = 0; // Reset blend amount after full transition
+            blendAmount = 255;
+            direction = -blendCoef; // Reverse direction
+        }
+        else if (blendAmount <= 0)
+        {
+            blendAmount = 0;
+            direction = blendCoef; // Reverse direction
         }
     }
+    return color;
 }
 
-inline void LedRGB::glowTwoColors(CRGB color1, CRGB color2)
+inline CRGB LedRGB::glowTwoColors(CRGB color1, CRGB color2)
 {
-    TwoColorsTransition(color1, color2);
+    return TwoColorsTransition(color1, color2);
     // TwoColorsTransition(color2, color1);
 }
 
-inline void LedRGB::glowOneColor(CRGB color)
+inline CRGB LedRGB::glowOneColor(CRGB color)
 {
-    LedRGB::glowTwoColors(CRGB::Black, color);
+    return LedRGB::glowTwoColors(CRGB::Black, color);
 }
 
 void LedRGB::emergencyStop()

@@ -88,9 +88,9 @@ public:
      * @brief set all leds to red and glow smoothly
      * inline function
      */
-    inline void TwoColorsTransition(CRGB color1, CRGB color2);
-    inline void glowTwoColors(CRGB color1, CRGB color2);
-    inline void glowOneColor(CRGB color);
+    inline CRGB TwoColorsTransition(CRGB color1, CRGB color2);
+    inline CRGB glowTwoColors(CRGB color1, CRGB color2);
+    inline CRGB glowOneColor(CRGB color);
 
     void emergencyStop();
 
@@ -129,8 +129,10 @@ private:
     Robot *robot_position;                // Pointer to the robot position
     Timeout matchClockTimer;              // Timer to display match time
     Timeout rotationTimer;                // Timer to rotate colors
-    uint8_t blendAmount = 0;              // Amount of blending between two colors,
-                                          // that changes over time
+    Timeout blendTimeOut;
+    uint8_t blendAmount; // Amount of blending between two colors,
+                         // that changes over time
+    int8_t blendCoef;
     uint8_t secondsCounter = 0; // permet d'afficher les secondes (1/2 rpm) pour la
                                 // rotation de couleur ou d'arc en ciel
     uint8_t match_time_led = 0; // numero de la led à allumer
