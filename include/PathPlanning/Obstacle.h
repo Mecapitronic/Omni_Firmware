@@ -1,6 +1,7 @@
 #ifndef OBSTACLE_H
 #define OBSTACLE_H
 
+
 /****************************************************************************************
  * Includes
  ****************************************************************************************/
@@ -14,6 +15,8 @@
  ****************************************************************************************/
 constexpr size_t OBSTACLE_RADIUS = 150; // mm
 constexpr size_t OBSTACLE_MARGIN = 40;  // mm for false obstacle checking
+// maximum distance for an obstacle to be considered valid in mm
+constexpr size_t MAXIMUM_OBSTACLE_DISTANCE = 1000; // 1 meter
 
 constexpr size_t MAX_OBSTACLE = 10;       // normally 1 robot for other team
 constexpr size_t MAX_FALSE_OBSTACLE = 10; // potential false obstacle
