@@ -31,6 +31,11 @@ namespace Trajectory
         target.h = robot->h;
     }
 
+    PoseF GetTarget()
+    {
+        return target;
+    }
+
     PolarPoint CartesianToRelativePolar(Point obstacle)
     {
         return CartesianToRelativePolar(obstacle.x, obstacle.y);
@@ -134,6 +139,7 @@ namespace Trajectory
         // Update target position
         target.x = x;
         target.y = y;
+        target.h = robot->h;
 
         // Update linear speeds
         linear->speed_limit = speed_limit;
@@ -148,6 +154,8 @@ namespace Trajectory
     void RotateToOrientation(float h_rad, float speed_limit, float speed_final)
     {
         // Update target orientation
+        target.x = robot->x;
+        target.y = robot->y;
         target.h = h_rad;
 
         // Update linear speeds
@@ -197,6 +205,7 @@ namespace Trajectory
         Point p = Mapping::Get_Vertex_Point(id);
         target.x = p.x;
         target.y = p.y;
+        target.h = robot->h;
         linear->speed_limit = speed_limit;
         linear->speed_final = speed_final;
     }
