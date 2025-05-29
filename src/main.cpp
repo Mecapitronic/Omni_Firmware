@@ -492,26 +492,34 @@ void TaskMatch(void *pvParameters)
         // Démarrage du robot
         if (Match::matchState == State::MATCH_RUN)
         {
+            Point p;
             // Enable Motor & Servo Power
             digitalWrite(PIN_EN_MCU, HIGH);
             ServoAX12::Bas();
             ServoAX12::Prise();
 
-            Trajectory::Navigate_To_Vertex(6, linear.speed_max, 0);
-            Point p = Mapping::Get_Vertex_Point(6);
-            Trajectory::TranslateToPosition(p.x, p.y + 140, linear.speed_max, 0);
-            delay(3000);
+            p = Mapping::Get_Vertex_Point(6);
+            Trajectory::TranslateToPosition(p.x, p.y + 180, linear.speed_max, 0);
+            // delay(4000);
+            Trajectory::TranslateToPosition(p.x + 30, p.y + 180, linear.speed_max, 0);
+            // delay(1000);
+            Trajectory::TranslateToPosition(p.x - 30, p.y + 180, linear.speed_max, 0);
+            // delay(1000);
             ServoAX12::Mid();
+            ServoAX12::AreAllServoMoving();
             delay(1000);
             Trajectory::Navigate_To_Vertex(1, linear.speed_max, 0);
-            Trajectory::RotateToOrientation(radians(180), 10, 0);
-            delay(3000);
-            Trajectory::RotateToOrientation(radians(180), angular.speed_max, 0);
+            Trajectory::RotateToOrientation(radians(180), angular.speed_max / 10, 0);
+            delay(10000);
+            Trajectory::RotateToOrientation(radians(180), angular.speed_max / 10, 0);
             ServoAX12::Bas();
+            ServoAX12::AreAllServoMoving();
             delay(1000);
             ServoAX12::Depose();
             ServoAX12::AreAllServoMoving();
             delay(2000);
+            p = Mapping::Get_Vertex_Point(1);
+            Trajectory::TranslateToPosition(robot.x, robot.y + 180, linear.speed_max, 0);
             Trajectory::Navigate_To_Vertex(10, linear.speed_max, 0);
 
             while (Match::time_end_match - Match::getMatchTimeMs() > 5000)

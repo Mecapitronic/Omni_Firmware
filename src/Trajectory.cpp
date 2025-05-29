@@ -144,6 +144,7 @@ namespace Trajectory
         // Update linear speeds
         linear->speed_limit = speed_limit;
         linear->speed_final = speed_final;
+        WaitRobotArrived();
     }
 
     void TranslateToPoint(PointF point, float speed_limit, float speed_final)
@@ -161,6 +162,7 @@ namespace Trajectory
         // Update linear speeds
         angular->speed_limit = speed_limit;
         angular->speed_final = speed_final;
+        WaitRobotArrived();
     }
 
     void RotateTowardsPosition(float x, float y, float speed_limit, float speed_final)
@@ -180,6 +182,7 @@ namespace Trajectory
         target.x = x;
         target.y = y;
         target.h = h;
+        WaitRobotArrived();
     }
 
     void GoToPose(float x, float y, float h, float speed_limit, float speed_final)
@@ -198,6 +201,7 @@ namespace Trajectory
         // Update linear speeds
         linear->speed_limit = speed_limit;
         linear->speed_final = speed_final;
+        WaitRobotArrived();
     }
 
     void GoToVertex(t_vertexID id, float speed_limit, float speed_final)
@@ -208,6 +212,7 @@ namespace Trajectory
         target.h = robot->h;
         linear->speed_limit = speed_limit;
         linear->speed_final = speed_final;
+        WaitRobotArrived();
     }
 
     void FallBackIfWeAreWithinObstacleLimits()
@@ -257,5 +262,25 @@ namespace Trajectory
             vTaskDelay(5);
         }
         println("End of Path Finding");
+    }
+
+    bool WaitRobotArrived()
+    {
+        while (DistanceBetweenPositions(robot->x, robot->y, target.x, target.y)
+                   > ArrivalTriggerDistance
+               || (NormalizeAngle(abs(robot->h - target.h)) > ArrivalTriggerAngle))
+        {
+            println("distance : ",
+                    DistanceBetweenPositions(robot->x, robot->y, target.x, target.y));
+            println("angle : ",
+                    (float)(degrees(NormalizeAngle(abs(robot->h - target.h)))));
+            delay(100);
+        }
+
+        // while (linear->isRunning || angular->isRunning)
+        //{
+        //     delay(1);
+        // }
+        return true;
     }
 } // namespace Trajectory

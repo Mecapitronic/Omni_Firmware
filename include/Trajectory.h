@@ -11,9 +11,13 @@
 
 namespace Trajectory
 {
-    constexpr float ArrivalTriggerDistance =
-        20.0; // distance seuil à partir de laquelle on considère qu'on est arrivé à un
-              // point donné (tolérance)
+    // distance seuil à partir de laquelle on considère qu'on est arrivé à un point donné
+    // (tolérance)
+    constexpr float ArrivalTriggerDistance = 20.0;
+    // angle seuil à partir de laquelle on considère qu'on est arrivé à un point donné
+    // (tolérance)
+    constexpr float ArrivalTriggerAngle = radians(5.0);
+
     constexpr uint16_t OBSTACLE_TOO_CLOSE =
         20; // distance en dessous de laquelle on robot adversaire est considéré trop prêt
             // de nous = risque de collision
@@ -154,5 +158,7 @@ namespace Trajectory
      * @param speed_final
      */
     void Navigate_To_Vertex(t_vertexID id, float speed_limit, float speed_final);
+
+    bool WaitRobotArrived();
 } // namespace Trajectory
 #endif
