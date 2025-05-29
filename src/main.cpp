@@ -221,8 +221,8 @@ void TaskTeleplot(void *pvParameters)
         }
         if (ihmTimeOut.IsTimeOut())
         {
-//             Match::printMatch();
-//             IHM::PrintAll();
+            //             Match::printMatch();
+            //             IHM::PrintAll();
         }
 
         // Countdown
@@ -364,7 +364,7 @@ void TaskHandleCommand(void *pvParameters)
                     for (auto &v : PathFinding::solution)
                     {
                         println("Vertex id:", v);
-}
+                    }
                 }
                 else
                 {
@@ -501,12 +501,10 @@ void TaskMatch(void *pvParameters)
             }
 
             // Aller à la dépose
-            Trajectory::Navigate_To_Vertex(1, linear.speed_max, 0);
+            Trajectory::Navigate_To_Vertex(1, linear.speed_max / 4, 0);
 
             // Tourner vers la dépose
-            Trajectory::RotateToOrientation(radians(180), angular.speed_max / 10, 0);
-            delay(10000);
-            Trajectory::RotateToOrientation(radians(180), angular.speed_max / 10, 0);
+            Trajectory::RotateToOrientation(radians(-175), angular.speed_max / 10, 0);
 
             // Baisser le bras
             ServoAX12::Bas();
@@ -537,9 +535,9 @@ void TaskMatch(void *pvParameters)
 
             // Prendre les boites
             p = Mapping::Get_Vertex_Point(2);
-            Trajectory::TranslateToPosition(p.x, p.y - 180, linear.speed_max, 0);
-            Trajectory::TranslateToPosition(p.x + 30, p.y - 180, linear.speed_max, 0);
-            Trajectory::TranslateToPosition(p.x - 30, p.y - 180, linear.speed_max, 0);
+            Trajectory::TranslateToPosition(p.x, p.y - 200, linear.speed_max, 0);
+            Trajectory::TranslateToPosition(p.x + 30, p.y - 200, linear.speed_max, 0);
+            Trajectory::TranslateToPosition(p.x - 30, p.y - 200, linear.speed_max, 0);
 
             // Déposer les boites
             ServoAX12::Depose();
@@ -550,7 +548,7 @@ void TaskMatch(void *pvParameters)
 
             // reculer de la dépose
             p = Mapping::Get_Vertex_Point(2);
-            Trajectory::TranslateToPosition(robot.x, robot.y + 180, linear.speed_max, 0);
+            Trajectory::TranslateToPosition(robot.x, robot.y + 200, linear.speed_max, 0);
 
             // Aller au vertex 10
             Trajectory::Navigate_To_Vertex(10, linear.speed_max, 0);
