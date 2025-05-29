@@ -196,7 +196,8 @@ void TaskTeleplot(void *pvParameters)
         {
             teleplot("Position", robot);
             teleplot("Orient", degrees(robot.h));
-
+            teleplot("Target", Trajectory::GetTarget());
+            teleplot("TargetOrient", degrees(Trajectory::GetTarget().h));
             // teleplot("Direction", linear.direction)
             // println(">fixeScale:0:0;0:2000;3000:2000;3000:0;|xy");
             // otos.Teleplot();
