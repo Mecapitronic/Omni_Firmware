@@ -20,7 +20,8 @@ void LedRGB::Initialisation(Robot *robotPosition)
 
     // Initialize the timers
     changeColorTimer.Start(TRANSITION_DELAY_MS / TRANSITION_STEPS);
-    rotationTimer.Start(50);
+    // we need a rotation of led per second, so 1s/24 (x2 i don't know why)
+    rotationTimer.Start(2000 / NUM_LEDS);
 }
 
 void LedRGB::robotIsStarting()
@@ -65,34 +66,7 @@ void LedRGB::update()
     }
     fill_solid(leds, NUM_LEDS, filling_color); // Clear all LEDs
 
-    if (Match::matchState == State::MATCH_WAIT)
-    {
-        if (current_hue >= NUM_LEDS)
-        {
-            current_hue = 0; // Reset hue to avoid overflow
-        }
-        leds[current_hue] = CRGB::ForestGreen;
-        if (rotationTimer.IsTimeOut())
-        {
-            current_hue++; // Increment hue for the next cycle
-        }
-    }
-
-    // TODO add red leds for errors (like otos not connected)
-    // we could have an error counters and increment or decrement outside ledrgb
-    // and turn on the number of leds equivalent to the number of errors
-
-    // update led ring display according to current robot state
-    if (Match::matchState == State::MATCH_BEGIN || Match::matchState == State::MATCH_RUN)
-    {
-        match_time_led = (NUM_LEDS * Match::getMatchTimeMs()) / Match::time_end_match;
-        // Ensure we don't go out of bounds
-        if (match_time_led <= NUM_LEDS)
-        {
-            leds[match_time_led] = CRGB::ForestGreen; // Set the time in green
-        }
-    }
-
+    displayTime();
     // display obstacles around the robot
     PoseF robot_current_position = robot_position->GetPoseF();
     for (const auto &obstacle : Obstacle::obstacle)
@@ -107,6 +81,50 @@ void LedRGB::update()
     }
 
     ring_controller->showLeds(RING_BRIGHTNESS);
+}
+
+// comme une led représente 4 secondes, on peut faire un tour complet en 1 secondes
+// faire 4 tours avant d'incrémenter la led
+// quand on est pas en match on peut faire une petite navette en allumant la led avant et
+// la led après un peu moins fort
+void LedRGB::displayTime()
+{
+    if (Match::matchState == State::MATCH_WAIT)
+    {
+        if (current_hue >= NUM_LEDS)
+        {
+            current_hue = 0; // Reset hue to avoid overflow
+        }
+        leds[current_hue] = CRGB::ForestGreen;
+        if (rotationTimer.IsTimeOut())
+        {
+            current_hue++; // Increment hue for the next cycle
+        }
+    }
+
+
+    // update led ring display according to current robot state
+    if (Match::matchState == State::MATCH_BEGIN || Match::matchState == State::MATCH_RUN)
+    {
+        // indicate seconds
+        if (current_hue >= NUM_LEDS)
+        {
+            current_hue = 0; // Reset hue to avoid overflow
+        }
+        leds[current_hue] = CRGB::ForestGreen;
+        if (rotationTimer.IsTimeOut())
+        {
+            current_hue++; // Increment hue for the next cycle
+        }
+
+        // change of led all 4 seconds
+        match_time_led = (NUM_LEDS * Match::getMatchTimeMs()) / Match::time_end_match;
+        // Ensure we don't go out of bounds
+        if (match_time_led <= NUM_LEDS)
+        {
+            leds[match_time_led] = CRGB::ForestGreen; // Set the time in green
+        }
+    }
 }
 
 void LedRGB::rainbow()

@@ -43,6 +43,9 @@ using namespace Printer;
  * compris dans [ -pi; pi ] en partant de ce 0.
  * Il faut inverser le sens de rotations.
  *
+ * @todo TODO add red leds for errors (like otos not connected)
+ * we could have an error counters and increment or decrement outside ledrgb
+ * and turn on the number of leds equivalent to the number of errors
  */
 class LedRGB
 {
@@ -78,6 +81,7 @@ public:
 
 
     void robotIsStarting();
+    void displayTime();
 
 
     /**
