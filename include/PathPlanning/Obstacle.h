@@ -29,14 +29,10 @@ namespace Obstacle
     extern std::array<Circle, MAX_OBSTACLE> obstacle;
     extern std::array<Circle, MAX_FALSE_OBSTACLE> false_obstacle;
 
-    extern QueueThread<Circle> queueObstacle;
-
     /****************************************************************************************
      * Functions Prototypes
      ****************************************************************************************/
     void Initialize_Obstacle(void);
-    bool HasQueueObstacle();
-    Circle GetQueueObstacle();
 
     boolean Is_Valid_Obstacle(uint8_t obstacleID);
     boolean Is_False_Obstacle(Point obstacle_point);

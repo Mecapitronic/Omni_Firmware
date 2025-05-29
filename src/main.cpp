@@ -417,7 +417,6 @@ void TaskHandleCommand(void *pvParameters)
                 Point p;
                 p.x = cmd.data[1];
                 p.y = cmd.data[2];
-                // Obstacle::queueObstacle.Send(Circle(p, num));
                 Obstacle::Add_Obstacle(num, p);
                 Mapping::Update_Passability_Obstacle();
                 Obstacle::PrintObstacleList();
@@ -425,7 +424,6 @@ void TaskHandleCommand(void *pvParameters)
             else if (cmd.cmd == "RemoveObstacle" && cmd.size == 1)
             {
                 int num = cmd.data[0];
-                // Obstacle::queueObstacle.Send(Circle(0, 0, num));
                 Obstacle::Add_Obstacle(num, {0, 0});
                 Mapping::Update_Passability_Obstacle();
                 Obstacle::PrintObstacleList();

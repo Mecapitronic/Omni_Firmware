@@ -15,19 +15,11 @@ namespace Obstacle
     std::array<Circle, MAX_FALSE_OBSTACLE> false_obstacle;
     boolean false_obstacle_enable = false;
 
-    QueueThread<Circle> queueObstacle;
-
     /****************************************************************************************
      * Initialize obstacle
      ****************************************************************************************/
     void Initialize_Obstacle(void)
     {
-        Printer::println("Creating Incoming Obstacle Queue");
-        queueObstacle = QueueThread<Circle>(20);
-        if (!queueObstacle.IsInit())
-        {
-            Printer::println("Error creating the queue : queueObstacle");
-        }
         // Define false obstacle
         int i = 0;
         // false_obstacle[i++] = Circle(0, 0, 0 + OBSTACLE_MARGIN);
@@ -39,24 +31,6 @@ namespace Obstacle
 
         // enable obstacle detection
         obstacle_enable = true;
-    }
-
-    bool HasQueueObstacle()
-    {
-        return queueObstacle.MessagesWaiting() > 0;
-    }
-
-    Circle GetQueueObstacle()
-    {
-        Circle circle;
-        if (HasQueueObstacle())
-        {
-            if (queueObstacle.Receive(circle))
-            {
-                return circle;
-            }
-        }
-        return circle;
     }
 
     /****************************************************************************************

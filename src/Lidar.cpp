@@ -102,13 +102,7 @@ namespace Lidar
                             p.y = trame[5] << 8 | trame[4];
                             int footer = trame[6];
                             // I use the radius as the id number
-                            // Obstacle::queueObstacle.Send(Circle(p, num));
                             Obstacle::Add_Obstacle(num, p);
-                            if (p.x != 0 && p.y != 0)
-                            {
-                                //  print("Lidar received : ", num);
-                                //  println(" ", p);
-                            }
                             cursor = 0;
                             // break;
                         }
