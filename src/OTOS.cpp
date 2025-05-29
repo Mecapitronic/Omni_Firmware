@@ -204,7 +204,7 @@ void OpticalTrackingOdometrySensor::SetPose(float x, float y, float h)
     {
         int retrySetPose = 0;
         error = myOtos.setPosition(currentPose);
-        while (error != 0 && retrySetPose < 3)
+        while (error != 0 && retrySetPose < 5)
         {
             println("OTOS Error SetPose : ", error);
             delay(100);
