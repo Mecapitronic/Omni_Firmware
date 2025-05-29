@@ -17,7 +17,7 @@ OpticalTrackingOdometrySensor otos;
 
 void setup()
 {
-    // display state as soon as possible
+    // display state as soon as possible to show it is starting
     led_ring.Initialisation(&robot);
     delay(500); // display for 1/2 second
 
@@ -38,6 +38,7 @@ void setup()
 
     // Init IHM
     IHM::InitIHM();
+
     while (IHM::bauReady != 1)
     {
         IHM::UpdateBAU();
