@@ -50,6 +50,7 @@ namespace ServoAX12
 
             servo.position = servo.command_position =
                 dxl.getPresentPosition(servo.id, UNIT_DEGREE);
+            SetServoPosition(servo, servo.position);
         }
         else
         {
@@ -98,10 +99,10 @@ namespace ServoAX12
 
     void UpdateServo(ServoMotion &servo)
     {
+        servo.position = dxl.getPresentPosition(servo.id, UNIT_DEGREE);
         if (servo.position >= servo.command_position + 0.5
             || servo.position <= servo.command_position - 0.5)
         {
-            servo.position = dxl.getPresentPosition(servo.id, UNIT_DEGREE);
             if (!servo.ledState)
             {
                 servo.ledState = true;
