@@ -27,7 +27,7 @@ namespace Lidar
         println("Start TaskLidar");
         Chrono chrono("Lidar", 1000);
         Timeout sendDataToLidarTimer;
-        sendDataToLidarTimer.Start(10);
+        sendDataToLidarTimer.Start(20);
         while (true)
         {
             chrono.Start();
