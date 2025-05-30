@@ -613,7 +613,7 @@ void TaskMatch(void *pvParameters)
                 Trajectory::RotateToOrientation(radians(90), angular.speed_max, 0);
 
                 // Prise en vertex
-                p = Mapping::Get_Vertex_Point(12 /*TODO ADD CORRECT VERTEX */);
+                p = Mapping::Get_Vertex_Point(20);
                 Trajectory::TranslateToPosition(p.x, p.y + 180, linear.speed_max / 10, 0);
                 Trajectory::TranslateToPosition(p.x + 30, p.y + 180, linear.speed_max, 0);
                 Trajectory::TranslateToPosition(p.x - 30, p.y + 180, linear.speed_max, 0);
@@ -627,9 +627,7 @@ void TaskMatch(void *pvParameters)
 
 
                 // Aller à la dépose
-
-                // Aller au vertex 2
-                Trajectory::Navigate_To_Vertex(2, linear.speed_max, 0);
+                Trajectory::Navigate_To_Vertex(14, linear.speed_max, 0);
 
                 // Tourner vers la dépose
                 Trajectory::RotateToOrientation(radians(-175), angular.speed_max / 10, 0);
