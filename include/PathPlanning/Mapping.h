@@ -66,6 +66,9 @@ namespace Mapping
     boolean Is_Valid_Vertex(uint8_t vertexID);
     uint32_t Get_Distance_Vertex(t_vertexID id1, t_vertexID id2);
     void Update_Start_Vertex(int16_t x, int16_t y);
+    void removeCircle(int id);
+    void changeCircle(int id, int x, int y, int r = 50);
+
     void PrintVertex0();
     void PrintVertexList();
     void PrintSegmentList();

@@ -656,6 +656,26 @@ namespace Mapping
         vertex[0].point.y = y; // robot.mm.y;
     }
 
+    void removeCircle(int id)
+    {
+        if (id >= 0 && id < Max_Circle)
+        {
+            circle[id].p.x = 0;
+            circle[id].p.y = 0;
+            circle[id].r = 0;
+        }
+    }
+
+    void changeCircle(int id, int x, int y, int r)
+    {
+        if (id >= 0 && id < Max_Circle)
+        {
+            circle[id].p.x = x;
+            circle[id].p.y = y;
+            circle[id].r = r;
+        }
+    }
+
     void PrintVertex0()
     {
         String str = "VertexList:";
@@ -711,17 +731,19 @@ namespace Mapping
     void PrintCircleList()
     {
         String str = "CircleList:";
+        String str00 = String(0) + ":";
         String str01 = String(circle[0].p.x) + ":" + String(circle[0].p.y);
         String str02 = ":" + String(circle[0].r);
-        str = str + str01 + str02;
+        str = str + str00 + str01 + str02;
 
         for (size_t i = 1; i < Max_Circle; i++)
         {
             if (circle[i].p.x != 0 || circle[i].p.y != 0 || circle[i].r != 0)
             {
+                String stri0 = String(i) + ":";
                 String stri1 = String(circle[i].p.x) + ":" + String(circle[i].p.y);
                 String stri2 = ":" + String(circle[i].r);
-                str = str + ";" + stri1 + stri2;
+                str = str + ";" + stri0 + stri1 + stri2;
             }
         }
         // str = str + "|xy";
