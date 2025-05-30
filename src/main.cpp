@@ -1,737 +1,347 @@
-#include "main.h"
+#include "ESP32_Helper.h"
+#include "pins.h"
+#include <Bluepad32.h>
 
-/****************************************************************************************
- * Variables
- ****************************************************************************************/
-TimerThread timerMotion;
+ControllerPtr myControllers[BP32_MAX_GAMEPADS];
 
-LedRGB led_ring;
-Motor motor;
+// This callback gets called any time a new gamepad is connected.
+// Up to 4 gamepads can be connected at the same time.
+void onConnectedController(ControllerPtr ctl)
+{
+    bool foundEmptySlot = false;
+    for (int i = 0; i < BP32_MAX_GAMEPADS; i++)
+    {
+        if (myControllers[i] == nullptr)
+        {
+            Serial.printf("CALLBACK: Controller is connected, index=%d\n", i);
+            // Additionally, you can get certain gamepad properties like:
+            // Model, VID, PID, BTAddr, flags, etc.
+            ControllerProperties properties = ctl->getProperties();
+            Serial.printf("Controller model: %s, VID=0x%04x, PID=0x%04x\n",
+                          ctl->getModelName().c_str(),
+                          properties.vendor_id,
+                          properties.product_id);
+            myControllers[i] = ctl;
+            foundEmptySlot = true;
+            break;
+        }
+    }
+    if (!foundEmptySlot)
+    {
+        Serial.println("CALLBACK: Controller connected, but could not found empty slot");
+    }
+}
 
-Motion linear;
-Motion angular;
+void onDisconnectedController(ControllerPtr ctl)
+{
+    bool foundController = false;
 
-Robot robot;
+    for (int i = 0; i < BP32_MAX_GAMEPADS; i++)
+    {
+        if (myControllers[i] == ctl)
+        {
+            Serial.printf("CALLBACK: Controller disconnected from index=%d\n", i);
+            myControllers[i] = nullptr;
+            foundController = true;
+            break;
+        }
+    }
 
-OpticalTrackingOdometrySensor otos;
+    if (!foundController)
+    {
+        Serial.println(
+            "CALLBACK: Controller disconnected, but not found in myControllers");
+    }
+}
 
+void dumpGamepad(ControllerPtr ctl)
+{
+    Serial.printf("idx=%d, dpad: 0x%02x, buttons: 0x%04x, axis L: %4d, %4d, axis R: %4d, "
+                  "%4d, brake: %4d, throttle: %4d, "
+                  "misc: 0x%02x, gyro x:%6d y:%6d z:%6d, accel x:%6d y:%6d z:%6d\n",
+                  ctl->index(),       // Controller Index
+                  ctl->dpad(),        // D-pad
+                  ctl->buttons(),     // bitmask of pressed buttons
+                  ctl->axisX(),       // (-511 - 512) left X Axis
+                  ctl->axisY(),       // (-511 - 512) left Y axis
+                  ctl->axisRX(),      // (-511 - 512) right X axis
+                  ctl->axisRY(),      // (-511 - 512) right Y axis
+                  ctl->brake(),       // (0 - 1023): brake button
+                  ctl->throttle(),    // (0 - 1023): throttle (AKA gas) button
+                  ctl->miscButtons(), // bitmask of pressed "misc" buttons
+                  ctl->gyroX(),       // Gyro X
+                  ctl->gyroY(),       // Gyro Y
+                  ctl->gyroZ(),       // Gyro Z
+                  ctl->accelX(),      // Accelerometer X
+                  ctl->accelY(),      // Accelerometer Y
+                  ctl->accelZ()       // Accelerometer Z
+    );
+}
+
+void dumpMouse(ControllerPtr ctl)
+{
+    Serial.printf(
+        "idx=%d, buttons: 0x%04x, scrollWheel=0x%04x, delta X: %4d, delta Y: %4d\n",
+        ctl->index(),       // Controller Index
+        ctl->buttons(),     // bitmask of pressed buttons
+        ctl->scrollWheel(), // Scroll Wheel
+        ctl->deltaX(),      // (-511 - 512) left X Axis
+        ctl->deltaY()       // (-511 - 512) left Y axis
+    );
+}
+
+void dumpKeyboard(ControllerPtr ctl)
+{
+    static const char *key_names[] = {
+        // clang-format off
+        // To avoid having too much noise in this file, only a few keys are mapped to strings.
+        // Starts with "A", which is offset 4.
+        "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V",
+        "W", "X", "Y", "Z", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
+        // Special keys
+        "Enter", "Escape", "Backspace", "Tab", "Spacebar", "Underscore", "Equal", "OpenBracket", "CloseBracket",
+        "Backslash", "Tilde", "SemiColon", "Quote", "GraveAccent", "Comma", "Dot", "Slash", "CapsLock",
+        // Function keys
+        "F1", "F2", "F3", "F4", "F5", "F6", "F7", "F8", "F9", "F10", "F11", "F12",
+        // Cursors and others
+        "PrintScreen", "ScrollLock", "Pause", "Insert", "Home", "PageUp", "Delete", "End", "PageDown",
+        "RightArrow", "LeftArrow", "DownArrow", "UpArrow",
+        // clang-format on
+    };
+    static const char *modifier_names[] = {
+        // clang-format off
+        // From 0xe0 to 0xe7
+        "Left Control", "Left Shift", "Left Alt", "Left Meta",
+        "Right Control", "Right Shift", "Right Alt", "Right Meta",
+        // clang-format on
+    };
+    Serial.printf("idx=%d, Pressed keys: ", ctl->index());
+    for (int key = Keyboard_A; key <= Keyboard_UpArrow; key++)
+    {
+        if (ctl->isKeyPressed(static_cast<KeyboardKey>(key)))
+        {
+            const char *keyName = key_names[key - 4];
+            Serial.printf("%s,", keyName);
+        }
+    }
+    for (int key = Keyboard_LeftControl; key <= Keyboard_RightMeta; key++)
+    {
+        if (ctl->isKeyPressed(static_cast<KeyboardKey>(key)))
+        {
+            const char *keyName = modifier_names[key - 0xe0];
+            Serial.printf("%s,", keyName);
+        }
+    }
+    Console.printf("\n");
+}
+
+void dumpBalanceBoard(ControllerPtr ctl)
+{
+    Serial.printf(
+        "idx=%d,  TL=%u, TR=%u, BL=%u, BR=%u, temperature=%d\n",
+        ctl->index(),       // Controller Index
+        ctl->topLeft(),     // top-left scale
+        ctl->topRight(),    // top-right scale
+        ctl->bottomLeft(),  // bottom-left scale
+        ctl->bottomRight(), // bottom-right scale
+        ctl->temperature()  // temperature: used to adjust the scale value's precision
+    );
+}
+
+void processGamepad(ControllerPtr ctl)
+{
+    // There are different ways to query whether a button is pressed.
+    // By query each button individually:
+    //  a(), b(), x(), y(), l1(), etc...
+    if (ctl->a())
+    {
+        static int colorIdx = 0;
+        // Some gamepads like DS4 and DualSense support changing the color LED.
+        // It is possible to change it by calling:
+        switch (colorIdx % 3)
+        {
+        case 0:
+            // Red
+            ctl->setColorLED(255, 0, 0);
+            break;
+        case 1:
+            // Green
+            ctl->setColorLED(0, 255, 0);
+            break;
+        case 2:
+            // Blue
+            ctl->setColorLED(0, 0, 255);
+            break;
+        }
+        colorIdx++;
+    }
+
+    if (ctl->b())
+    {
+        // Turn on the 4 LED. Each bit represents one LED.
+        static int led = 0;
+        led++;
+        // Some gamepads like the DS3, DualSense, Nintendo Wii, Nintendo Switch
+        // support changing the "Player LEDs": those 4 LEDs that usually indicate
+        // the "gamepad seat".
+        // It is possible to change them by calling:
+        ctl->setPlayerLEDs(led & 0x0f);
+    }
+
+    if (ctl->x())
+    {
+        // Some gamepads like DS3, DS4, DualSense, Switch, Xbox One S, Stadia support
+        // rumble. It is possible to set it by calling: Some controllers have two motors:
+        // "strong motor", "weak motor". It is possible to control them independently.
+        ctl->playDualRumble(0 /* delayedStartMs */,
+                            250 /* durationMs */,
+                            0x80 /* weakMagnitude */,
+                            0x40 /* strongMagnitude */);
+    }
+
+    // Another way to query controller data is by getting the buttons() function.
+    // See how the different "dump*" functions dump the Controller info.
+    dumpGamepad(ctl);
+}
+
+void processMouse(ControllerPtr ctl)
+{
+    // This is just an example.
+    if (ctl->scrollWheel() > 0)
+    {
+        // Do Something
+    }
+    else if (ctl->scrollWheel() < 0)
+    {
+        // Do something else
+    }
+
+    // See "dumpMouse" for possible things to query.
+    dumpMouse(ctl);
+}
+
+void processKeyboard(ControllerPtr ctl)
+{
+    if (!ctl->isAnyKeyPressed())
+        return;
+
+    // This is just an example.
+    if (ctl->isKeyPressed(Keyboard_A))
+    {
+        // Do Something
+        Serial.println("Key 'A' pressed");
+    }
+
+    // Don't do "else" here.
+    // Multiple keys can be pressed at the same time.
+    if (ctl->isKeyPressed(Keyboard_LeftShift))
+    {
+        // Do something else
+        Serial.println("Key 'LEFT SHIFT' pressed");
+    }
+
+    // Don't do "else" here.
+    // Multiple keys can be pressed at the same time.
+    if (ctl->isKeyPressed(Keyboard_LeftArrow))
+    {
+        // Do something else
+        Serial.println("Key 'Left Arrow' pressed");
+    }
+
+    // See "dumpKeyboard" for possible things to query.
+    dumpKeyboard(ctl);
+}
+
+void processBalanceBoard(ControllerPtr ctl)
+{
+    // This is just an example.
+    if (ctl->topLeft() > 10000)
+    {
+        // Do Something
+    }
+
+    // See "dumpBalanceBoard" for possible things to query.
+    dumpBalanceBoard(ctl);
+}
+
+void processControllers()
+{
+    for (auto myController : myControllers)
+    {
+        if (myController && myController->isConnected() && myController->hasData())
+        {
+            if (myController->isGamepad())
+            {
+                processGamepad(myController);
+            }
+            else if (myController->isMouse())
+            {
+                processMouse(myController);
+            }
+            else if (myController->isKeyboard())
+            {
+                processKeyboard(myController);
+            }
+            else if (myController->isBalanceBoard())
+            {
+                processBalanceBoard(myController);
+            }
+            else
+            {
+                Serial.println("Unsupported controller");
+            }
+        }
+    }
+}
+
+// Arduino setup function. Runs in CPU 1
 void setup()
 {
-    // display state as soon as possible to show it is starting
-    led_ring.Initialisation(&robot);
-    delay(500); // display for 1/2 second
+    Serial.begin(921600);
+    Serial.printf("Firmware: %s\n", BP32.firmwareVersion());
+    const uint8_t *addr = BP32.localBdAddress();
+    Serial.printf("BD Addr: %2X:%2X:%2X:%2X:%2X:%2X\n",
+                  addr[0],
+                  addr[1],
+                  addr[2],
+                  addr[3],
+                  addr[4],
+                  addr[5]);
 
-    pinMode(PIN_EN_MCU, OUTPUT);
-    // digitalWrite(PIN_EN_MCU, LOW);
-    //  We need it to init the servos
-    digitalWrite(PIN_EN_MCU, HIGH);
+    // Setup the Bluepad32 callbacks
+    BP32.setup(&onConnectedController, &onDisconnectedController);
 
-    ESP32_Helper::Initialisation();
-    // delay(3000);
-    println("Board : ", String(ARDUINO_BOARD));
-    print("Arduino Version : ", ESP_ARDUINO_VERSION_MAJOR);
-    print(".", ESP_ARDUINO_VERSION_MINOR);
-    println(".", ESP_ARDUINO_VERSION_PATCH);
-    println("ESP IDF Version : ", String(esp_get_idf_version()));
-    println("Temperature : ", temperatureRead(), " deg Celsius");
-    println("Frequency CPU : ", getCpuFrequencyMhz(), " MHz");
-    println();
-    println("Robot Holonome Firmware");
+    // "forgetBluetoothKeys()" should be called when the user performs
+    // a "device factory reset", or similar.
+    // Calling "forgetBluetoothKeys" in setup() just as an example.
+    // Forgetting Bluetooth keys prevents "paired" gamepads to reconnect.
+    // But it might also fix some connection / re-connection issues.
+    BP32.forgetBluetoothKeys();
 
-    // Init IHM
-    IHM::InitIHM();
-
-    while (IHM::bauReady != 1)
-    {
-        IHM::UpdateBAU();
-        led_ring.emergencyStop();
-        vTaskDelay(1);
-    }
-
-    ServoAX12::Initialisation();
-
-    Lidar::Initialisation(&robot);
-
-    otos.Initialisation(simulation);
-    // Init sensors
-    while (!otos.IsConnected() && !simulation)
-    {
-        otos.Initialisation(simulation);
-        led_ring.emergencyStop();
-        vTaskDelay(1);
-    }
-
-    // Init motors
-    motor.Initialisation(Motor::OMNIDIRECTIONAL_3_MOTORS, CENTER_WHEEL_DISTANCE);
-
-    // Init Motion
-    // Linear max speed 1500 mm/s and acceleration 1000 mm/s²
-    linear.Initialisation(1000, 500);
-    // Angular max speed 500 °/s and acceleration 1000 °/s²
-    angular.Initialisation(radians(200), radians(500));
-    // Init end position tolerance
-    linear.SetMargin(1);           // 1 mm
-    angular.SetMargin(radians(1)); // 1 deg
-
-    // Initial pose
-    if (IHM::team == Team::Jaune)
-    {
-        robot.SetPose(1200, 170, radians(0));
-    }
-    else
-    {
-        robot.SetPose(3000 - 1200, 170, radians(0));
-    }
-    // Reset odometry
-    otos.SetPose(robot.x, robot.y, robot.h);
-
-
-    // Init trajectory
-    Trajectory::Initialisation(&linear, &angular, &robot);
-
-    // Init Path Planning
-    Mapping::Initialize_Map(IHM::team);
-    Obstacle::Initialize_Obstacle();
-    Mapping::Initialize_Passability_Graph();
-    Mapping::Update_Start_Vertex((int16_t)robot.x, (int16_t)robot.y);
-    Mapping::Update_Passability_Graph();
-
-    // Create a timer => for motion
-    timerMotion = TimerThread(timerMotionCallback,
-                              "Timer Motion",
-                              (1000 * Motion::dt_motion) / portTICK_PERIOD_MS);
-    timerMotion.Start();
-
-    // Put at least the 1 Tick delay, this is needed so the watchdog doesn't trigger
-    TaskThread(TaskTeleplot, "TaskTeleplot", 10000, 10, 0);
-    TaskThread(TaskUpdate, "TaskUpdate", 10000, 15, 1);
-    TaskThread(TaskHandleCommand, "TaskHandleCommand", 20000, 5, 1);
-    TaskThread(TaskMatch, "TaskMatch", 20000, 10, 1);
-
-    // Send to PC all the mapping data
-    ESP32_Helper::HandleCommand(Command("UpdateMapping"));
+    // Enables mouse / touchpad support for gamepads that support them.
+    // When enabled, controllers like DualSense and DualShock4 generate two connected
+    // devices:
+    // - First one: the gamepad
+    // - Second one, which is a "virtual device", is a mouse.
+    // By default, it is disabled.
+    BP32.enableVirtualDevice(false);
 }
 
+// Arduino loop function. Runs in CPU 1.
 void loop()
 {
-    // HACK Vérifier qu'on n'utilise pas les serialEvent !!!
-    // C:\Users\xxx\.platformio\packages\framework-arduinoespressif32\cores\esp32\main.cpp
-    // https://github.com/espressif/arduino-esp32/blob/master/cores/esp32/main.cpp
-    vTaskDelete(NULL); // Supprime immédiatement le task Arduino "loop"
-}
-
-// TIMER 5ms => MOTION
-// do NON BLOCKING stuff
-void timerMotionCallback(TimerHandle_t xTimer)
-{
-    if (timerMotion.IsEnable())
-    {
-        timerMotion.Running(true);
-        // Odometry Update
-        if (!simulation)
-        {
-            otos.Update();
-        }
-        else
-        {
-            float motor1_speed = motor.GetMotorSpeed(1);
-            float motor2_speed = motor.GetMotorSpeed(2);
-            float motor3_speed = motor.GetMotorSpeed(3);
-
-            // Simulation Calcul Vitesse OK
-            // Calcul des composantes x, y et angular à partir des vitesses des
-            // moteurs
-            float v_x = (motor1_speed + motor2_speed - 2 * motor3_speed) / 3;
-            float v_y = (motor2_speed - motor1_speed) * INV_SQRT3;
-            float v_ang = (-(motor1_speed + motor2_speed + motor3_speed)
-                           / (3 * CENTER_WHEEL_DISTANCE));
-
-            otos.acceleration.x = v_x - otos.velocity.x;
-            otos.acceleration.y = v_y - otos.velocity.y;
-            otos.acceleration.h = v_ang - otos.velocity.h;
-
-            otos.velocity.x = v_x;
-            otos.velocity.y = v_y;
-            otos.velocity.h = v_ang;
-
-            // Mise à jour des positions en fonction des vitesses
-            otos.position.x += v_x * timerMotion.Period() / 1000;
-            otos.position.y += v_y * timerMotion.Period() / 1000;
-            otos.position.h += v_ang * timerMotion.Period() / 1000;
-        }
-
-        // Actual position update
-        robot.SetPose(otos.position.x, otos.position.y, otos.position.h);
-
-        // Actual velocity update, in global field reference
-        linear.velocity_actual = Norm2D(otos.velocity.x, otos.velocity.y);
-        angular.velocity_actual = otos.velocity.h;
-
-        // Trajectory update => error update
-        Trajectory::Update();
-
-        // Motion update
-        linear.Update();
-        angular.Update();
-
-        // Motor update => in local robot reference
-        motor.Update(linear.velocity_command, linear.direction, angular.velocity_command);
-    }
-
-    timerMotion.Running(false);
-}
-
-void TaskTeleplot(void *pvParameters)
-{
-    int lastMatchTime = 0;
-    println("Start TaskTeleplot");
-    Timeout robotPosTimeOut, mapTimeOut, ihmTimeOut;
-    robotPosTimeOut.Start(100);
-    mapTimeOut.Start(200);
-    ihmTimeOut.Start(5000);
-    Chrono chrono("Teleplot", 1000);
-
-    while (true)
-    {
-        chrono.Start();
-        try
-        {
-            if (robotPosTimeOut.IsTimeOut())
-            {
-                teleplot("Position", robot);
-                teleplot("Orient", degrees(robot.h));
-                teleplot("Target", Trajectory::GetTarget());
-                teleplot("TargetOrient", degrees(Trajectory::GetTarget().h));
-                // teleplot("Direction", linear.direction)
-                // println(">fixeScale:0:0;0:2000;3000:2000;3000:0;|xy");
-                // otos.Teleplot();
-                // linear.Teleplot("linear");
-                // angular.Teleplot("angular");
-
-                // teleplot("v1", motor.GetMotorSpeed(1));
-                // teleplot("v2", motor.GetMotorSpeed(2));
-                // teleplot("v3", motor.GetMotorSpeed(3));
-                // teleplot("Servo_Up Pos", ServoAX12::Servo_Up.position);
-                // teleplot("Servo_Left Pos", ServoAX12::Servo_Left.position);
-                // teleplot("Servo_Up Cmd", ServoAX12::Servo_Up.command_position);
-                // teleplot("Servo_Left Cmd", ServoAX12::Servo_Left.command_position);
-            }
-            if (mapTimeOut.IsTimeOut())
-            {
-                Obstacle::PrintObstacleList();
-                ServoAX12::TeleplotPosition();
-            }
-            if (ihmTimeOut.IsTimeOut())
-            {
-                //             Match::printMatch();
-                //             IHM::PrintAll();
-            }
-
-            // Countdown
-            if (lastMatchTime != (int)(Match::getMatchTimeSec()))
-            {
-                println("Match Time : ", (int)(Match::getMatchTimeSec()));
-                lastMatchTime = (int)(Match::getMatchTimeSec());
-            }
-        }
-        catch (const std::exception &e)
-        {
-            printError(e.what());
-        }
-        if (chrono.Check())
-        {
-            // printChrono(chrono);
-        }
-        vTaskDelay(10);
-    }
-}
-
-void TaskUpdate(void *pvParameters)
-{
-    println("Start TaskUpdate");
-    Chrono chrono("Update", 1000);
-    while (true)
-    {
-        chrono.Start();
-        try
-        {
-            Match::updateMatch();
-            IHM::UpdateBAU();
-            IHM::Blink();
-            led_ring.update();
-
-            // take some time to update the servo, maybe move it elsewhere
-            ServoAX12::Update();
-            // functionChrono(1);
-            //  functionChrono(1000);
-            //   delay(3000);
-            //   // Test trajectoires
-            //    goTo.x = 500;
-            //    goTo.y = 1000; // avance 500
-            //    goTo.h = 0;
-            //    SetRobotPosition(goTo.x, goTo.y, goTo.h);
-            //    delay(5000);
-            //   //while(linear.isRunning || angular.isRunning) ;//doWhileWaiting();
-        }
-        catch (const std::exception &e)
-        {
-            printError(e.what());
-        }
-        if (chrono.Check())
-        {
-            // printChrono(chrono);
-        }
-        vTaskDelay(10);
-    }
-}
-
-void TaskHandleCommand(void *pvParameters)
-{
-    println("Start TaskHandleCommand");
-    Chrono chrono("HandleCommand", 1000);
-    while (true)
-    {
-        chrono.Start();
-        try
-        {
-            if (ESP32_Helper::HasWaitingCommand())
-            {
-                Command cmd = ESP32_Helper::GetCommand();
-
-                otos.HandleCommand(cmd);
-                motor.HandleCommand(cmd);
-                if (cmd.cmd.startsWith("AX12"))
-                {
-                    ServoAX12::HandleCommand(cmd);
-                }
-
-                if (cmd.cmd == "Help")
-                {
-                    otos.PrintCommandHelp();
-                    motor.PrintCommandHelp();
-                }
-                else if (cmd.cmd == "GoToPose" && cmd.size == 3)
-                {
-                    // GoToPose:500;500;90
-                    // GoToPose:500;500;0
-                    // GoToPose:50;50;0
-                    // GoToPose:0;0;45
-                    // GoToPose:0;0;0
-                    Pose goTo = Pose(cmd.data[0], cmd.data[1], radians(cmd.data[2]));
-                    print("Robot go to x=", goTo.x);
-                    print(" y=", goTo.y);
-                    print(" h=", goTo.h);
-                    println();
-                    Trajectory::GoToPose(goTo.x, goTo.y, goTo.h, linear.speed_max, 0);
-                }
-                else if (cmd.cmd == "SetPose" && cmd.size == 3)
-                {
-                    // SetPose:2000:200:9000
-                    // SetPose:500;500;0
-                    // SetPose:1500;1000;0
-                    timerMotion.WaitForDisable();
-                    Pose goTo = Pose(cmd.data[0], cmd.data[1], radians(cmd.data[2]));
-                    print("Robot set to x=", goTo.x);
-                    print(" y=", goTo.y);
-                    print(" h=", goTo.h);
-                    println();
-                    robot.SetPose(goTo.x, goTo.y, goTo.h);
-                    otos.SetPose(robot.x, robot.y, robot.h);
-                    Trajectory::Reset();
-                    timerMotion.Enable();
-                }
-                else if (cmd.cmd == "TrajReset")
-                {
-                    Trajectory::Reset();
-                }
-                else if (cmd.cmd == "UpdateMapping")
-                {
-                    Mapping::Update_Start_Vertex((int16_t)robot.x, (int16_t)robot.y);
-                    Mapping::Update_Passability_Graph();
-                    Mapping::PrintVertexList();
-                    Mapping::PrintSegmentList();
-                    Mapping::PrintCircleList();
-                    Obstacle::PrintObstacleList();
-                    println("RobotRadius:", ROBOT_RADIUS);
-                    println("RobotMargin:", ROBOT_MARGIN);
-                }
-                else if (cmd.cmd == "PF")
-                {
-                    bool result = false;
-                    // PathFinding
-                    // PF:5
-                    // PF:500:1000:5
-                    if (cmd.size == 1)
-                    {
-                        result = PathFinding::PathFinding(
-                            (int16_t)robot.x, (int16_t)robot.y, cmd.data[0]);
-                    }
-                    else if (cmd.size == 3)
-                    {
-                        result = PathFinding::PathFinding(
-                            cmd.data[0], cmd.data[1], cmd.data[2]);
-                    }
-                    if (result)
-                    {
-                        println("PF Found");
-                        for (auto &v : PathFinding::solution)
-                        {
-                            println("Vertex id:", v);
-                        }
-                    }
-                    else
-                    {
-                        print("PF Not Found");
-                    }
-                }
-                else if (cmd.cmd == "Nav" && cmd.size == 1)
-                {
-                    Trajectory::Navigate_To_Vertex(cmd.data[0], linear.speed_max, 0);
-                }
-                else if (cmd.cmd == "VertexList")
-                {
-                    Mapping::PrintVertexList();
-                }
-                else if (cmd.cmd == "SegmentList")
-                {
-                    Mapping::PrintSegmentList();
-                }
-                else if (cmd.cmd == "CircleList")
-                {
-                    Mapping::PrintCircleList();
-                }
-                else if (cmd.cmd == "MappingList")
-                {
-                    Mapping::PrintVertexList();
-                    Mapping::PrintSegmentList();
-                    Mapping::PrintCircleList();
-                }
-                else if (cmd.cmd == "ObstacleList")
-                {
-                    Obstacle::PrintObstacleList();
-                }
-                else if (cmd.cmd == "AddObs" && cmd.size == 3)
-                {
-                    // AddObs:0:500:1000
-                    int num = cmd.data[0];
-                    Point p;
-                    p.x = cmd.data[1];
-                    p.y = cmd.data[2];
-                    Obstacle::Add_Obstacle(num, p);
-                    Mapping::Update_Passability_Obstacle();
-                    Obstacle::PrintObstacleList();
-                }
-                else if (cmd.cmd == "RemoveObstacle" && cmd.size == 1)
-                {
-                    int num = cmd.data[0];
-                    Obstacle::Add_Obstacle(num, {0, 0});
-                    Mapping::Update_Passability_Obstacle();
-                    Obstacle::PrintObstacleList();
-                }
-            }
-        }
-        catch (const std::exception &e)
-        {
-            printError(e.what());
-        }
-        if (chrono.Check())
-        {
-            // printChrono(chrono);
-        }
-        vTaskDelay(10); // Allow other tasks to run
-    }
-}
-
-void TaskMatch(void *pvParameters)
-{
-    println("Start TaskMatch");
-    Chrono chrono("Match", 1000);
-    while (true)
-    {
-        chrono.Start();
-        try
-        {
-            // Attente du démarrage du match par la tirette
-            if (Match::matchState == State::MATCH_WAIT)
-            {
-                IHM::UpdateHMI();
-                // Disable Motor & Servo Power in Match mode during waiting
-                if (IHM::switchMode == 1)
-                {
-                    // digitalWrite(PIN_EN_MCU, LOW);
-                }
-                else
-                {
-                    digitalWrite(PIN_EN_MCU, HIGH);
-                }
-            }
-
-            // Match en cours
-            if (Match::matchState == State::MATCH_BEGIN)
-            {
-                // Enable Motor & Servo Power
-                digitalWrite(PIN_EN_MCU, HIGH);
-                timerMotion.WaitForDisable();
-                Mapping::Initialize_Map(IHM::team);
-                // Initial pose
-                if (IHM::team == Team::Jaune)
-                {
-                    robot.SetPose(1200, 170, radians(0));
-                }
-                else
-                {
-                    robot.SetPose(3000 - 1200, 170, radians(0));
-                }
-                // Reset odometry
-                otos.SetPose(robot.x, robot.y, robot.h);
-                Trajectory::Reset();
-                timerMotion.Enable();
-
-                Match::matchState = State::MATCH_RUN;
-                Match::printMatch();
-                ServoAX12::Bas();
-                ServoAX12::Prise();
-            }
-
-            // Démarrage du robot
-            if (Match::matchState == State::MATCH_RUN)
-            {
-                Point p;
-                // Enable Motor & Servo Power
-                digitalWrite(PIN_EN_MCU, HIGH);
-                ServoAX12::Bas();
-                ServoAX12::Prise();
-                while (ServoAX12::AreAllServoMoving())
-                {
-                    delay(1);
-                }
-
-                // Prise en vertex 6
-                p = Mapping::Get_Vertex_Point(6);
-                Trajectory::TranslateToPosition(p.x, p.y + 180, linear.speed_max, 0);
-                Trajectory::TranslateToPosition(p.x + 30, p.y + 180, linear.speed_max, 0);
-                Trajectory::TranslateToPosition(p.x - 30, p.y + 180, linear.speed_max, 0);
-
-                Mapping::removeCircle(0);
-                Mapping::removeCircle(1);
-                Mapping::removeCircle(2);
-                Mapping::removeCircle(3);
-                Mapping::Update_Passability_Graph();
-
-                Mapping::PrintCircleList();
-
-                // Monter le bras
-                ServoAX12::Mid();
-                while (ServoAX12::AreAllServoMoving())
-                {
-                    delay(1);
-                }
-
-                // Aller à la dépose
-                Trajectory::Navigate_To_Vertex(1, linear.speed_max / 4, 0);
-
-                // Tourner vers la dépose
-                Trajectory::RotateToOrientation(radians(-175), angular.speed_max / 10, 0);
-
-                // Baisser le bras
-                ServoAX12::Bas();
-                while (ServoAX12::AreAllServoMoving())
-                {
-                    delay(1);
-                }
-
-                // Déposer les boites
-                ServoAX12::Depose();
-                while (ServoAX12::AreAllServoMoving())
-                {
-                    delay(1);
-                }
-
-                // reculer de la dépose
-                p = Mapping::Get_Vertex_Point(1);
-                Trajectory::TranslateToPosition(
-                    robot.x, robot.y + 180, linear.speed_max, 0);
-
-
-                p = Mapping::Get_Vertex_Point(1);
-                Mapping::changeCircle(0, p.x, p.y, 50);
-                Mapping::Update_Passability_Graph();
-
-                Mapping::PrintCircleList();
-
-                ServoAX12::Prise();
-                while (ServoAX12::AreAllServoMoving())
-                {
-                    delay(1);
-                }
-
-                // Aller au vertex 2
-                Trajectory::Navigate_To_Vertex(2, linear.speed_max, 0);
-
-                // Tourner vers la prise
-                Trajectory::RotateToOrientation(radians(-175), angular.speed_max, 0);
-
-                // Prendre les boites
-                p = Mapping::Get_Vertex_Point(2);
-                Trajectory::TranslateToPosition(p.x, p.y - 200, linear.speed_max, 0);
-                Trajectory::TranslateToPosition(p.x + 30, p.y - 200, linear.speed_max, 0);
-                Trajectory::TranslateToPosition(p.x - 30, p.y - 200, linear.speed_max, 0);
-
-                // Déposer les boites
-                ServoAX12::Depose();
-                while (ServoAX12::AreAllServoMoving())
-                {
-                    delay(1);
-                }
-
-                // println("Remove Circle");
-                Mapping::removeCircle(8);
-                Mapping::removeCircle(9);
-                Mapping::Update_Passability_Graph();
-
-                Mapping::PrintCircleList();
-
-                // reculer de la dépose
-                p = Mapping::Get_Vertex_Point(2);
-                Trajectory::TranslateToPosition(
-                    robot.x, robot.y + 200, linear.speed_max, 0);
-
-
-                // p = Mapping::Get_Vertex_Point(3);
-                // Mapping::changeCircle(8, p.x, p.y);
-                // Mapping::Update_Passability_Graph();
-
-                // Mapping::PrintCircleList();
-
-                /////////////////////
-                // aller chercher les autres gradins pour les empiler
-                // d'abord on récupère ceux en face de l'autre coté du terrain
-                // comme ça on fait une translation et une rotation
-                /////////////////////
-
-                // Tourner vers la prise
-                Trajectory::RotateToOrientation(radians(90), angular.speed_max, 0);
-
-                // Prise en vertex
-                p = Mapping::Get_Vertex_Point(20);
-                Trajectory::TranslateToPosition(p.x, p.y + 180, linear.speed_max / 10, 0);
-                Trajectory::TranslateToPosition(p.x + 30, p.y + 180, linear.speed_max, 0);
-                Trajectory::TranslateToPosition(p.x - 30, p.y + 180, linear.speed_max, 0);
-
-                Mapping::removeCircle(4);
-                Mapping::removeCircle(5);
-                Mapping::removeCircle(6);
-                Mapping::removeCircle(7);
-                Mapping::Update_Passability_Graph();
-                Mapping::PrintCircleList();
-
-
-                // Aller à la dépose
-                Trajectory::Navigate_To_Vertex(14, linear.speed_max, 0);
-
-                // Tourner vers la dépose
-                Trajectory::RotateToOrientation(radians(-175), angular.speed_max / 10, 0);
-
-                // Monter le bras
-                ServoAX12::Haut();
-                while (ServoAX12::AreAllServoMoving())
-                {
-                    delay(1);
-                }
-
-                // Avancer pour déposer sur les gradins précédents
-                Trajectory::TranslateToPosition(p.x, p.y - 180, linear.speed_max / 10, 0);
-
-                // Baisser le bras au milieu pour empiler
-                ServoAX12::Mid();
-                while (ServoAX12::AreAllServoMoving())
-                {
-                    delay(1);
-                }
-
-                // Déposer les boites
-                ServoAX12::Depose();
-                while (ServoAX12::AreAllServoMoving())
-                {
-                    delay(1);
-                }
-
-                // reculer de la dépose
-                p = Mapping::Get_Vertex_Point(1);
-                Trajectory::TranslateToPosition(
-                    robot.x, robot.y + 180, linear.speed_max, 0);
-
-
-                ///////////////////
-                // Allons chercher les dernières boites pour les empiler dans la zone de
-                // départ
-                ///////////////////////
-
-
-                //////////////////////////
-                // attente de la fin de match
-                ///////////////////////
-
-                // Aller au vertex 10 pour attendre d'entrer dans la zone de fin de match
-                // pour laisser les PAMI sortir
-                Trajectory::Navigate_To_Vertex(10, linear.speed_max, 0);
-
-                while (Match::time_end_match - Match::getMatchTimeMs() > 5000)
-                {
-                    // Wait for 5 sec before end of match
-                    vTaskDelay(100);
-                }
-                Trajectory::Navigate_To_Vertex(11, linear.speed_max, 0);
-
-                Match::stopMatch();
-            }
-
-            // Arrêt du robot
-            if (Match::matchState == State::MATCH_STOP)
-            {
-                // Wait for end of match
-            }
-
-            // Fin du match
-            if (Match::matchState == State::MATCH_END)
-            {
-                // Disable Motor & Servo Power
-                digitalWrite(PIN_EN_MCU, LOW);
-                IHM::useBlink = false;
-                // Disable Motion timer
-                timerMotion.WaitForDisable();
-                motor.Update(0, 0, 0);
-                ServoAX12::StopAllServo();
-            }
-        }
-        catch (const std::exception &e)
-        {
-            printError(e.what());
-        }
-        if (chrono.Check())
-        {
-            // printChrono(chrono);
-        }
-        vTaskDelay(10);
-    }
-}
-
-//**************************************************************************************************************************/
-void functionChrono(int nbrLoop)
-{
-    unsigned long startChrono = micros();
-    for (int i = 0; i < nbrLoop; i++)
-    {
-        // function or code to loop
-    }
-    unsigned long endChrono = micros();
-    unsigned long deltaChrono = endChrono - startChrono;
-
-    unsigned long chrono = deltaChrono / nbrLoop;
-    print("Chrono from ", nbrLoop, " loop");
-    print(" is : ", deltaChrono, " µs total");
-    print(" = ", deltaChrono / 1000, " ms total.");
-    print(" or ", chrono, " µs/func ");
-    print(" = ", chrono / 1000, " ms/func.");
-    println();
+    // This call fetches all the controllers' data.
+    // Call this function in your main loop.
+    bool dataUpdated = BP32.update();
+    if (dataUpdated)
+        processControllers();
+
+    // The main loop must have some kind of "yield to lower priority task" event.
+    // Otherwise, the watchdog will get triggered.
+    // If your main loop doesn't have one, just add a simple `vTaskDelay(1)`.
+    // Detailed info here:
+    // https://stackoverflow.com/questions/66278271/task-watchdog-got-triggered-the-tasks-did-not-reset-the-watchdog-in-time
+
+    //     vTaskDelay(1);
+    delay(150);
 }
