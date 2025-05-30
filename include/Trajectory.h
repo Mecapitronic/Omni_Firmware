@@ -55,7 +55,7 @@ namespace Trajectory
 
     /**
      * @brief detecte si on obstacle se trouve devant la direction actuelle du robot
-     * @details défini un cone de 40° autour de la direction (cone de tolérance)
+     * @details défini un cone de 60° autour de la direction (cone de tolérance)
      * les calculs sont effectués en [-pi;pi]
      *
      * @return true si on obstacle se trouve sur le chemin (dans le cone de tolérance)

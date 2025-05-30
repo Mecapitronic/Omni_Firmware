@@ -83,7 +83,7 @@ namespace Trajectory
             if (isTheObstacleToClose(obstacle))
             {
                 PolarPoint adversary = CartesianToPolar(obstacle.p);
-                if (abs(adversary.angle - linear->direction) < radians(20.0))
+                if (abs(adversary.angle - linear->direction) < radians(60.0))
                 {
                     return true;
                 }
