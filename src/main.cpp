@@ -603,7 +603,79 @@ void TaskMatch(void *pvParameters)
 
                 // Mapping::PrintCircleList();
 
-                // Aller au vertex 10
+                /////////////////////
+                // aller chercher les autres gradins pour les empiler
+                // d'abord on récupère ceux en face de l'autre coté du terrain
+                // comme ça on fait une translation et une rotation
+                /////////////////////
+
+                // Tourner vers la prise
+                Trajectory::RotateToOrientation(radians(90), angular.speed_max, 0);
+
+                // Prise en vertex
+                p = Mapping::Get_Vertex_Point(12 /*TODO ADD CORRECT VERTEX */);
+                Trajectory::TranslateToPosition(p.x, p.y + 180, linear.speed_max / 10, 0);
+                Trajectory::TranslateToPosition(p.x + 30, p.y + 180, linear.speed_max, 0);
+                Trajectory::TranslateToPosition(p.x - 30, p.y + 180, linear.speed_max, 0);
+
+                Mapping::removeCircle(4);
+                Mapping::removeCircle(5);
+                Mapping::removeCircle(6);
+                Mapping::removeCircle(7);
+                Mapping::Update_Passability_Graph();
+                Mapping::PrintCircleList();
+
+
+                // Aller à la dépose
+
+                // Aller au vertex 2
+                Trajectory::Navigate_To_Vertex(2, linear.speed_max, 0);
+
+                // Tourner vers la dépose
+                Trajectory::RotateToOrientation(radians(-175), angular.speed_max / 10, 0);
+
+                // Monter le bras
+                ServoAX12::Haut();
+                while (ServoAX12::AreAllServoMoving())
+                {
+                    delay(1);
+                }
+
+                // Avancer pour déposer sur les gradins précédents
+                Trajectory::TranslateToPosition(p.x, p.y - 180, linear.speed_max / 10, 0);
+
+                // Baisser le bras au milieu pour empiler
+                ServoAX12::Mid();
+                while (ServoAX12::AreAllServoMoving())
+                {
+                    delay(1);
+                }
+
+                // Déposer les boites
+                ServoAX12::Depose();
+                while (ServoAX12::AreAllServoMoving())
+                {
+                    delay(1);
+                }
+
+                // reculer de la dépose
+                p = Mapping::Get_Vertex_Point(1);
+                Trajectory::TranslateToPosition(
+                    robot.x, robot.y + 180, linear.speed_max, 0);
+
+
+                ///////////////////
+                // Allons chercher les dernières boites pour les empiler dans la zone de
+                // départ
+                ///////////////////////
+
+
+                //////////////////////////
+                // attente de la fin de match
+                ///////////////////////
+
+                // Aller au vertex 10 pour attendre d'entrer dans la zone de fin de match
+                // pour laisser les PAMI sortir
                 Trajectory::Navigate_To_Vertex(10, linear.speed_max, 0);
 
                 while (Match::time_end_match - Match::getMatchTimeMs() > 5000)
@@ -614,7 +686,6 @@ void TaskMatch(void *pvParameters)
                 Trajectory::Navigate_To_Vertex(11, linear.speed_max, 0);
 
                 Match::stopMatch();
-                // TODO 5 sec avant la fin du match aller dans la zone de back stage
             }
 
             // Arrêt du robot
