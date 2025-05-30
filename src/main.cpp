@@ -194,47 +194,53 @@ void TaskTeleplot(void *pvParameters)
     while (true)
     {
         chrono.Start();
-        if (robotPosTimeOut.IsTimeOut())
+        try
         {
-            teleplot("Position", robot);
-            teleplot("Orient", degrees(robot.h));
-            teleplot("Target", Trajectory::GetTarget());
-            teleplot("TargetOrient", degrees(Trajectory::GetTarget().h));
-            // teleplot("Direction", linear.direction)
-            // println(">fixeScale:0:0;0:2000;3000:2000;3000:0;|xy");
-            // otos.Teleplot();
-            // linear.Teleplot("linear");
-            // angular.Teleplot("angular");
+            if (robotPosTimeOut.IsTimeOut())
+            {
+                teleplot("Position", robot);
+                teleplot("Orient", degrees(robot.h));
+                teleplot("Target", Trajectory::GetTarget());
+                teleplot("TargetOrient", degrees(Trajectory::GetTarget().h));
+                // teleplot("Direction", linear.direction)
+                // println(">fixeScale:0:0;0:2000;3000:2000;3000:0;|xy");
+                // otos.Teleplot();
+                // linear.Teleplot("linear");
+                // angular.Teleplot("angular");
 
-            // teleplot("v1", motor.GetMotorSpeed(1));
-            // teleplot("v2", motor.GetMotorSpeed(2));
-            // teleplot("v3", motor.GetMotorSpeed(3));
-            // teleplot("Servo_Up Pos", ServoAX12::Servo_Up.position);
-            // teleplot("Servo_Left Pos", ServoAX12::Servo_Left.position);
-            // teleplot("Servo_Up Cmd", ServoAX12::Servo_Up.command_position);
-            // teleplot("Servo_Left Cmd", ServoAX12::Servo_Left.command_position);
-        }
-        if (mapTimeOut.IsTimeOut())
-        {
-            Obstacle::PrintObstacleList();
-            ServoAX12::TeleplotPosition();
-        }
-        if (ihmTimeOut.IsTimeOut())
-        {
-            //             Match::printMatch();
-            //             IHM::PrintAll();
-        }
+                // teleplot("v1", motor.GetMotorSpeed(1));
+                // teleplot("v2", motor.GetMotorSpeed(2));
+                // teleplot("v3", motor.GetMotorSpeed(3));
+                // teleplot("Servo_Up Pos", ServoAX12::Servo_Up.position);
+                // teleplot("Servo_Left Pos", ServoAX12::Servo_Left.position);
+                // teleplot("Servo_Up Cmd", ServoAX12::Servo_Up.command_position);
+                // teleplot("Servo_Left Cmd", ServoAX12::Servo_Left.command_position);
+            }
+            if (mapTimeOut.IsTimeOut())
+            {
+                Obstacle::PrintObstacleList();
+                ServoAX12::TeleplotPosition();
+            }
+            if (ihmTimeOut.IsTimeOut())
+            {
+                //             Match::printMatch();
+                //             IHM::PrintAll();
+            }
 
-        // Countdown
-        if (lastMatchTime != (int)(Match::getMatchTimeSec()))
+            // Countdown
+            if (lastMatchTime != (int)(Match::getMatchTimeSec()))
+            {
+                println("Match Time : ", (int)(Match::getMatchTimeSec()));
+                lastMatchTime = (int)(Match::getMatchTimeSec());
+            }
+        }
+        catch (const std::exception &e)
         {
-            println("Match Time : ", (int)(Match::getMatchTimeSec()));
-            lastMatchTime = (int)(Match::getMatchTimeSec());
+            printError(e.what());
         }
         if (chrono.Check())
         {
-            // println("Chrono " + chrono.name + " : ", chrono.elapsedTime /
-            // chrono.loopNbr, " µs/loop");
+            // printChrono(chrono);
         }
         vTaskDelay(10);
     }
@@ -247,28 +253,33 @@ void TaskUpdate(void *pvParameters)
     while (true)
     {
         chrono.Start();
-        Match::updateMatch();
-        IHM::UpdateBAU();
-        IHM::Blink();
-        led_ring.update();
+        try
+        {
+            Match::updateMatch();
+            IHM::UpdateBAU();
+            IHM::Blink();
+            led_ring.update();
 
-        // take some time to update the servo, maybe move it elsewhere
-        ServoAX12::Update();
-        // functionChrono(1);
-        //  functionChrono(1000);
-        //   delay(3000);
-        //   // Test trajectoires
-        //    goTo.x = 500;
-        //    goTo.y = 1000; // avance 500
-        //    goTo.h = 0;
-        //    SetRobotPosition(goTo.x, goTo.y, goTo.h);
-        //    delay(5000);
-        //   //while(linear.isRunning || angular.isRunning) ;//doWhileWaiting();
-
+            // take some time to update the servo, maybe move it elsewhere
+            ServoAX12::Update();
+            // functionChrono(1);
+            //  functionChrono(1000);
+            //   delay(3000);
+            //   // Test trajectoires
+            //    goTo.x = 500;
+            //    goTo.y = 1000; // avance 500
+            //    goTo.h = 0;
+            //    SetRobotPosition(goTo.x, goTo.y, goTo.h);
+            //    delay(5000);
+            //   //while(linear.isRunning || angular.isRunning) ;//doWhileWaiting();
+        }
+        catch (const std::exception &e)
+        {
+            printError(e.what());
+        }
         if (chrono.Check())
         {
-            // println("Chrono " + chrono.name + " : ", chrono.elapsedTime /
-            // chrono.loopNbr, " µs/loop");
+            // printChrono(chrono);
         }
         vTaskDelay(10);
     }
@@ -281,145 +292,151 @@ void TaskHandleCommand(void *pvParameters)
     while (true)
     {
         chrono.Start();
-        if (ESP32_Helper::HasWaitingCommand())
+        try
         {
-            Command cmd = ESP32_Helper::GetCommand();
+            if (ESP32_Helper::HasWaitingCommand())
+            {
+                Command cmd = ESP32_Helper::GetCommand();
 
-            otos.HandleCommand(cmd);
-            motor.HandleCommand(cmd);
-            if (cmd.cmd.startsWith("AX12"))
-            {
-                ServoAX12::HandleCommand(cmd);
-            }
+                otos.HandleCommand(cmd);
+                motor.HandleCommand(cmd);
+                if (cmd.cmd.startsWith("AX12"))
+                {
+                    ServoAX12::HandleCommand(cmd);
+                }
 
-            if (cmd.cmd == "Help")
-            {
-                otos.PrintCommandHelp();
-                motor.PrintCommandHelp();
-            }
-            else if (cmd.cmd == "GoToPose" && cmd.size == 3)
-            {
-                // GoToPose:500;500;90
-                // GoToPose:500;500;0
-                // GoToPose:50;50;0
-                // GoToPose:0;0;45
-                // GoToPose:0;0;0
-                Pose goTo = Pose(cmd.data[0], cmd.data[1], radians(cmd.data[2]));
-                print("Robot go to x=", goTo.x);
-                print(" y=", goTo.y);
-                print(" h=", goTo.h);
-                println();
-                Trajectory::GoToPose(goTo.x, goTo.y, goTo.h, linear.speed_max, 0);
-            }
-            else if (cmd.cmd == "SetPose" && cmd.size == 3)
-            {
-                // SetPose:2000:200:9000
-                // SetPose:500;500;0
-                // SetPose:1500;1000;0
-                timerMotion.WaitForDisable();
-                Pose goTo = Pose(cmd.data[0], cmd.data[1], radians(cmd.data[2]));
-                print("Robot set to x=", goTo.x);
-                print(" y=", goTo.y);
-                print(" h=", goTo.h);
-                println();
-                robot.SetPose(goTo.x, goTo.y, goTo.h);
-                otos.SetPose(robot.x, robot.y, robot.h);
-                Trajectory::Reset();
-                timerMotion.Enable();
-            }
-            else if (cmd.cmd == "TrajReset")
-            {
-                Trajectory::Reset();
-            }
-            else if (cmd.cmd == "UpdateMapping")
-            {
-                Mapping::Update_Start_Vertex((int16_t)robot.x, (int16_t)robot.y);
-                Mapping::Update_Passability_Graph();
-                Mapping::PrintVertexList();
-                Mapping::PrintSegmentList();
-                Mapping::PrintCircleList();
-                Obstacle::PrintObstacleList();
-                println("RobotRadius:", ROBOT_RADIUS);
-                println("RobotMargin:", ROBOT_MARGIN);
-            }
-            else if (cmd.cmd == "PF")
-            {
-                bool result = false;
-                // PathFinding
-                // PF:5
-                // PF:500:1000:5
-                if (cmd.size == 1)
+                if (cmd.cmd == "Help")
                 {
-                    result = PathFinding::PathFinding(
-                        (int16_t)robot.x, (int16_t)robot.y, cmd.data[0]);
+                    otos.PrintCommandHelp();
+                    motor.PrintCommandHelp();
                 }
-                else if (cmd.size == 3)
+                else if (cmd.cmd == "GoToPose" && cmd.size == 3)
                 {
-                    result =
-                        PathFinding::PathFinding(cmd.data[0], cmd.data[1], cmd.data[2]);
+                    // GoToPose:500;500;90
+                    // GoToPose:500;500;0
+                    // GoToPose:50;50;0
+                    // GoToPose:0;0;45
+                    // GoToPose:0;0;0
+                    Pose goTo = Pose(cmd.data[0], cmd.data[1], radians(cmd.data[2]));
+                    print("Robot go to x=", goTo.x);
+                    print(" y=", goTo.y);
+                    print(" h=", goTo.h);
+                    println();
+                    Trajectory::GoToPose(goTo.x, goTo.y, goTo.h, linear.speed_max, 0);
                 }
-                if (result)
+                else if (cmd.cmd == "SetPose" && cmd.size == 3)
                 {
-                    println("PF Found");
-                    for (auto &v : PathFinding::solution)
+                    // SetPose:2000:200:9000
+                    // SetPose:500;500;0
+                    // SetPose:1500;1000;0
+                    timerMotion.WaitForDisable();
+                    Pose goTo = Pose(cmd.data[0], cmd.data[1], radians(cmd.data[2]));
+                    print("Robot set to x=", goTo.x);
+                    print(" y=", goTo.y);
+                    print(" h=", goTo.h);
+                    println();
+                    robot.SetPose(goTo.x, goTo.y, goTo.h);
+                    otos.SetPose(robot.x, robot.y, robot.h);
+                    Trajectory::Reset();
+                    timerMotion.Enable();
+                }
+                else if (cmd.cmd == "TrajReset")
+                {
+                    Trajectory::Reset();
+                }
+                else if (cmd.cmd == "UpdateMapping")
+                {
+                    Mapping::Update_Start_Vertex((int16_t)robot.x, (int16_t)robot.y);
+                    Mapping::Update_Passability_Graph();
+                    Mapping::PrintVertexList();
+                    Mapping::PrintSegmentList();
+                    Mapping::PrintCircleList();
+                    Obstacle::PrintObstacleList();
+                    println("RobotRadius:", ROBOT_RADIUS);
+                    println("RobotMargin:", ROBOT_MARGIN);
+                }
+                else if (cmd.cmd == "PF")
+                {
+                    bool result = false;
+                    // PathFinding
+                    // PF:5
+                    // PF:500:1000:5
+                    if (cmd.size == 1)
                     {
-                        println("Vertex id:", v);
+                        result = PathFinding::PathFinding(
+                            (int16_t)robot.x, (int16_t)robot.y, cmd.data[0]);
+                    }
+                    else if (cmd.size == 3)
+                    {
+                        result = PathFinding::PathFinding(
+                            cmd.data[0], cmd.data[1], cmd.data[2]);
+                    }
+                    if (result)
+                    {
+                        println("PF Found");
+                        for (auto &v : PathFinding::solution)
+                        {
+                            println("Vertex id:", v);
+                        }
+                    }
+                    else
+                    {
+                        print("PF Not Found");
                     }
                 }
-                else
+                else if (cmd.cmd == "Nav" && cmd.size == 1)
                 {
-                    print("PF Not Found");
+                    Trajectory::Navigate_To_Vertex(cmd.data[0], linear.speed_max, 0);
+                }
+                else if (cmd.cmd == "VertexList")
+                {
+                    Mapping::PrintVertexList();
+                }
+                else if (cmd.cmd == "SegmentList")
+                {
+                    Mapping::PrintSegmentList();
+                }
+                else if (cmd.cmd == "CircleList")
+                {
+                    Mapping::PrintCircleList();
+                }
+                else if (cmd.cmd == "MappingList")
+                {
+                    Mapping::PrintVertexList();
+                    Mapping::PrintSegmentList();
+                    Mapping::PrintCircleList();
+                }
+                else if (cmd.cmd == "ObstacleList")
+                {
+                    Obstacle::PrintObstacleList();
+                }
+                else if (cmd.cmd == "AddObs" && cmd.size == 3)
+                {
+                    // AddObs:0:500:1000
+                    int num = cmd.data[0];
+                    Point p;
+                    p.x = cmd.data[1];
+                    p.y = cmd.data[2];
+                    Obstacle::Add_Obstacle(num, p);
+                    Mapping::Update_Passability_Obstacle();
+                    Obstacle::PrintObstacleList();
+                }
+                else if (cmd.cmd == "RemoveObstacle" && cmd.size == 1)
+                {
+                    int num = cmd.data[0];
+                    Obstacle::Add_Obstacle(num, {0, 0});
+                    Mapping::Update_Passability_Obstacle();
+                    Obstacle::PrintObstacleList();
                 }
             }
-            else if (cmd.cmd == "Nav" && cmd.size == 1)
-            {
-                Trajectory::Navigate_To_Vertex(cmd.data[0], linear.speed_max, 0);
-            }
-            else if (cmd.cmd == "VertexList")
-            {
-                Mapping::PrintVertexList();
-            }
-            else if (cmd.cmd == "SegmentList")
-            {
-                Mapping::PrintSegmentList();
-            }
-            else if (cmd.cmd == "CircleList")
-            {
-                Mapping::PrintCircleList();
-            }
-            else if (cmd.cmd == "MappingList")
-            {
-                Mapping::PrintVertexList();
-                Mapping::PrintSegmentList();
-                Mapping::PrintCircleList();
-            }
-            else if (cmd.cmd == "ObstacleList")
-            {
-                Obstacle::PrintObstacleList();
-            }
-            else if (cmd.cmd == "AddObs" && cmd.size == 3)
-            {
-                // AddObs:0:500:1000
-                int num = cmd.data[0];
-                Point p;
-                p.x = cmd.data[1];
-                p.y = cmd.data[2];
-                Obstacle::Add_Obstacle(num, p);
-                Mapping::Update_Passability_Obstacle();
-                Obstacle::PrintObstacleList();
-            }
-            else if (cmd.cmd == "RemoveObstacle" && cmd.size == 1)
-            {
-                int num = cmd.data[0];
-                Obstacle::Add_Obstacle(num, {0, 0});
-                Mapping::Update_Passability_Obstacle();
-                Obstacle::PrintObstacleList();
-            }
+        }
+        catch (const std::exception &e)
+        {
+            printError(e.what());
         }
         if (chrono.Check())
         {
-            // println("Chrono " + chrono.name + " : ", chrono.elapsedTime /
-            // chrono.loopNbr, " µs/loop");
+            // printChrono(chrono);
         }
         vTaskDelay(10); // Allow other tasks to run
     }
@@ -432,159 +449,167 @@ void TaskMatch(void *pvParameters)
     while (true)
     {
         chrono.Start();
-        // Attente du démarrage du match par la tirette
-        if (Match::matchState == State::MATCH_WAIT)
+        try
         {
-            IHM::UpdateHMI();
-            // Disable Motor & Servo Power in Match mode during waiting
-            if (IHM::switchMode == 1)
+            // Attente du démarrage du match par la tirette
+            if (Match::matchState == State::MATCH_WAIT)
             {
-                // digitalWrite(PIN_EN_MCU, LOW);
+                IHM::UpdateHMI();
+                // Disable Motor & Servo Power in Match mode during waiting
+                if (IHM::switchMode == 1)
+                {
+                    // digitalWrite(PIN_EN_MCU, LOW);
+                }
+                else
+                {
+                    digitalWrite(PIN_EN_MCU, HIGH);
+                }
             }
-            else
+
+            // Match en cours
+            if (Match::matchState == State::MATCH_BEGIN)
             {
+                // Enable Motor & Servo Power
                 digitalWrite(PIN_EN_MCU, HIGH);
+                timerMotion.WaitForDisable();
+                Mapping::Initialize_Map(IHM::team);
+                // Initial pose
+                if (IHM::team == Team::Jaune)
+                {
+                    robot.SetPose(1200, 170, radians(0));
+                }
+                else
+                {
+                    robot.SetPose(3000 - 1200, 170, radians(0));
+                }
+                // Reset odometry
+                otos.SetPose(robot.x, robot.y, robot.h);
+                Trajectory::Reset();
+                timerMotion.Enable();
+
+                Match::matchState = State::MATCH_RUN;
+                Match::printMatch();
+                ServoAX12::Bas();
+                ServoAX12::Prise();
+            }
+
+            // Démarrage du robot
+            if (Match::matchState == State::MATCH_RUN)
+            {
+                Point p;
+                // Enable Motor & Servo Power
+                digitalWrite(PIN_EN_MCU, HIGH);
+                ServoAX12::Bas();
+                ServoAX12::Prise();
+                while (ServoAX12::AreAllServoMoving())
+                {
+                    delay(1);
+                }
+
+                // Prise en vertex 6
+                p = Mapping::Get_Vertex_Point(6);
+                Trajectory::TranslateToPosition(p.x, p.y + 180, linear.speed_max, 0);
+                Trajectory::TranslateToPosition(p.x + 30, p.y + 180, linear.speed_max, 0);
+                Trajectory::TranslateToPosition(p.x - 30, p.y + 180, linear.speed_max, 0);
+
+                // Monter le bras
+                ServoAX12::Mid();
+                while (ServoAX12::AreAllServoMoving())
+                {
+                    delay(1);
+                }
+
+                // Aller à la dépose
+                Trajectory::Navigate_To_Vertex(1, linear.speed_max / 4, 0);
+
+                // Tourner vers la dépose
+                Trajectory::RotateToOrientation(radians(-175), angular.speed_max / 10, 0);
+
+                // Baisser le bras
+                ServoAX12::Bas();
+                while (ServoAX12::AreAllServoMoving())
+                {
+                    delay(1);
+                }
+
+                // Déposer les boites
+                ServoAX12::Depose();
+                while (ServoAX12::AreAllServoMoving())
+                {
+                    delay(1);
+                }
+
+                // reculer de la dépose
+                p = Mapping::Get_Vertex_Point(1);
+                Trajectory::TranslateToPosition(
+                    robot.x, robot.y + 180, linear.speed_max, 0);
+
+                ServoAX12::Prise();
+                while (ServoAX12::AreAllServoMoving())
+                {
+                    delay(1);
+                }
+
+                // Aller au vertex 2
+                Trajectory::Navigate_To_Vertex(2, linear.speed_max, 0);
+
+                // Prendre les boites
+                p = Mapping::Get_Vertex_Point(2);
+                Trajectory::TranslateToPosition(p.x, p.y - 200, linear.speed_max, 0);
+                Trajectory::TranslateToPosition(p.x + 30, p.y - 200, linear.speed_max, 0);
+                Trajectory::TranslateToPosition(p.x - 30, p.y - 200, linear.speed_max, 0);
+
+                // Déposer les boites
+                ServoAX12::Depose();
+                while (ServoAX12::AreAllServoMoving())
+                {
+                    delay(1);
+                }
+
+                // reculer de la dépose
+                p = Mapping::Get_Vertex_Point(2);
+                Trajectory::TranslateToPosition(
+                    robot.x, robot.y + 200, linear.speed_max, 0);
+
+                // Aller au vertex 10
+                Trajectory::Navigate_To_Vertex(10, linear.speed_max, 0);
+
+                while (Match::time_end_match - Match::getMatchTimeMs() > 5000)
+                {
+                    // Wait for 5 sec before end of match
+                    vTaskDelay(100);
+                }
+                Trajectory::Navigate_To_Vertex(11, linear.speed_max, 0);
+
+                Match::stopMatch();
+                // TODO 5 sec avant la fin du match aller dans la zone de back stage
+            }
+
+            // Arrêt du robot
+            if (Match::matchState == State::MATCH_STOP)
+            {
+                // Wait for end of match
+            }
+
+            // Fin du match
+            if (Match::matchState == State::MATCH_END)
+            {
+                // Disable Motor & Servo Power
+                digitalWrite(PIN_EN_MCU, LOW);
+                IHM::useBlink = false;
+                // Disable Motion timer
+                timerMotion.WaitForDisable();
+                motor.Update(0, 0, 0);
+                ServoAX12::StopAllServo();
             }
         }
-
-        // Match en cours
-        if (Match::matchState == State::MATCH_BEGIN)
+        catch (const std::exception &e)
         {
-            // Enable Motor & Servo Power
-            digitalWrite(PIN_EN_MCU, HIGH);
-            timerMotion.WaitForDisable();
-            Mapping::Initialize_Map(IHM::team);
-            // Initial pose
-            if (IHM::team == Team::Jaune)
-            {
-                robot.SetPose(1200, 170, radians(0));
-            }
-            else
-            {
-                robot.SetPose(3000 - 1200, 170, radians(0));
-            }
-            // Reset odometry
-            otos.SetPose(robot.x, robot.y, robot.h);
-            Trajectory::Reset();
-            timerMotion.Enable();
-
-            Match::matchState = State::MATCH_RUN;
-            Match::printMatch();
-            ServoAX12::Bas();
-            ServoAX12::Prise();
-        }
-
-        // Démarrage du robot
-        if (Match::matchState == State::MATCH_RUN)
-        {
-            Point p;
-            // Enable Motor & Servo Power
-            digitalWrite(PIN_EN_MCU, HIGH);
-            ServoAX12::Bas();
-            ServoAX12::Prise();
-            while (ServoAX12::AreAllServoMoving())
-            {
-                delay(1);
-            }
-
-            // Prise en vertex 6
-            p = Mapping::Get_Vertex_Point(6);
-            Trajectory::TranslateToPosition(p.x, p.y + 180, linear.speed_max, 0);
-            Trajectory::TranslateToPosition(p.x + 30, p.y + 180, linear.speed_max, 0);
-            Trajectory::TranslateToPosition(p.x - 30, p.y + 180, linear.speed_max, 0);
-
-            // Monter le bras
-            ServoAX12::Mid();
-            while (ServoAX12::AreAllServoMoving())
-            {
-                delay(1);
-            }
-
-            // Aller à la dépose
-            Trajectory::Navigate_To_Vertex(1, linear.speed_max / 4, 0);
-
-            // Tourner vers la dépose
-            Trajectory::RotateToOrientation(radians(-175), angular.speed_max / 10, 0);
-
-            // Baisser le bras
-            ServoAX12::Bas();
-            while (ServoAX12::AreAllServoMoving())
-            {
-                delay(1);
-            }
-
-            // Déposer les boites
-            ServoAX12::Depose();
-            while (ServoAX12::AreAllServoMoving())
-            {
-                delay(1);
-            }
-
-            // reculer de la dépose
-            p = Mapping::Get_Vertex_Point(1);
-            Trajectory::TranslateToPosition(robot.x, robot.y + 180, linear.speed_max, 0);
-
-            ServoAX12::Prise();
-            while (ServoAX12::AreAllServoMoving())
-            {
-                delay(1);
-            }
-
-            // Aller au vertex 2
-            Trajectory::Navigate_To_Vertex(2, linear.speed_max, 0);
-
-            // Prendre les boites
-            p = Mapping::Get_Vertex_Point(2);
-            Trajectory::TranslateToPosition(p.x, p.y - 200, linear.speed_max, 0);
-            Trajectory::TranslateToPosition(p.x + 30, p.y - 200, linear.speed_max, 0);
-            Trajectory::TranslateToPosition(p.x - 30, p.y - 200, linear.speed_max, 0);
-
-            // Déposer les boites
-            ServoAX12::Depose();
-            while (ServoAX12::AreAllServoMoving())
-            {
-                delay(1);
-            }
-
-            // reculer de la dépose
-            p = Mapping::Get_Vertex_Point(2);
-            Trajectory::TranslateToPosition(robot.x, robot.y + 200, linear.speed_max, 0);
-
-            // Aller au vertex 10
-            Trajectory::Navigate_To_Vertex(10, linear.speed_max, 0);
-
-            while (Match::time_end_match - Match::getMatchTimeMs() > 5000)
-            {
-                // Wait for 5 sec before end of match
-                vTaskDelay(100);
-            }
-            Trajectory::Navigate_To_Vertex(11, linear.speed_max, 0);
-
-            Match::stopMatch();
-            // TODO 5 sec avant la fin du match aller dans la zone de back stage
-        }
-
-        // Arrêt du robot
-        if (Match::matchState == State::MATCH_STOP)
-        {
-            // Wait for end of match
-        }
-
-        // Fin du match
-        if (Match::matchState == State::MATCH_END)
-        {
-            // Disable Motor & Servo Power
-            digitalWrite(PIN_EN_MCU, LOW);
-            IHM::useBlink = false;
-            // Disable Motion timer
-            timerMotion.WaitForDisable();
-            motor.Update(0, 0, 0);
-            ServoAX12::StopAllServo();
+            printError(e.what());
         }
         if (chrono.Check())
         {
-            // println("Chrono " + chrono.name + " : ", chrono.elapsedTime /
-            // chrono.loopNbr, " µs/loop");
+            // printChrono(chrono);
         }
         vTaskDelay(10);
     }
