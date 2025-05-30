@@ -727,15 +727,11 @@ void TaskMatch(void *pvParameters)
                 {
                     Trajectory::RotateToOrientation(
                         radians(90), angular.speed_max / 5, 0);
-                    // Trajectory::TranslateToPosition(p.x + 100, p.y, linear.speed_max,
-                    // 0);
                 }
                 else
                 {
                     Trajectory::RotateToOrientation(
                         radians(-90), angular.speed_max / 5, 0);
-                    // Trajectory::TranslateToPosition(p.x - 100, p.y, linear.speed_max,
-                    // 0);
                 }
 
                 // Prendre les boites
@@ -762,11 +758,17 @@ void TaskMatch(void *pvParameters)
                 Trajectory::GoToVertex(8, linear.speed_max / 5, 0);
 
                 // s'orienter vers le point de dépose
-                p = Mapping::Get_Vertex_Point(2);
-                PointF p2;
-                p2.x = p.x;
-                p2.y = p.y;
-                Trajectory::RotateTowardsPoint(p2, angular.speed_max / 10, 0);
+                // p = Mapping::Get_Vertex_Point(2);
+                // PointF p2;
+                // p2.x = p.x;
+                // p2.y = p.y;
+                // Trajectory::RotateTowardsPoint(p2, angular.speed_max / 10, 0);
+
+                if (IHM::team == Team::Jaune)
+                    Trajectory::RotateToOrientation(radians(-178), angular.speed_max, 0);
+                else
+                    Trajectory::RotateToOrientation(radians(178), angular.speed_max, 0);
+
                 Trajectory::Navigate_To_Vertex(2, linear.speed_max / 2, 0);
 
                 // Monter le bras
