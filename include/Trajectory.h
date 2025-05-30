@@ -92,6 +92,10 @@ namespace Trajectory
      * @param speed_final
      */
     void TranslateToPosition(float x, float y, float speed_limit, float speed_final);
+    void TranslateToPositionWithoutWaiting(float x,
+                                           float y,
+                                           float speed_limit,
+                                           float speed_final);
 
     /**
      * @brief Pure translation to point, with limit and final speed

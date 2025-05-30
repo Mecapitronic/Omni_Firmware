@@ -27,7 +27,7 @@ void setup()
     digitalWrite(PIN_EN_MCU, HIGH);
 
     ESP32_Helper::Initialisation();
-    // delay(3000);
+    delay(3000);
     println("Board : ", String(ARDUINO_BOARD));
     print("Arduino Version : ", ESP_ARDUINO_VERSION_MAJOR);
     print(".", ESP_ARDUINO_VERSION_MINOR);
@@ -456,14 +456,15 @@ void TaskMatch(void *pvParameters)
             {
                 IHM::UpdateHMI();
                 // Disable Motor & Servo Power in Match mode during waiting
-                if (IHM::switchMode == 1)
-                {
-                    // digitalWrite(PIN_EN_MCU, LOW);
-                }
-                else
-                {
-                    digitalWrite(PIN_EN_MCU, HIGH);
-                }
+                // if (IHM::switchMode == 1)
+                // {
+                //     // digitalWrite(PIN_EN_MCU, LOW);
+                // }
+                // else
+                // {
+                //     // digitalWrite(PIN_EN_MCU, HIGH);
+                // }
+                digitalWrite(PIN_EN_MCU, HIGH);
             }
 
             // Match en cours
@@ -531,7 +532,12 @@ void TaskMatch(void *pvParameters)
                 Trajectory::Navigate_To_Vertex(1, linear.speed_max / 4, 0);
 
                 // Tourner vers la dépose
-                Trajectory::RotateToOrientation(radians(-178), angular.speed_max / 10, 0);
+                if (IHM::team == Team::Jaune)
+                    Trajectory::RotateToOrientation(
+                        radians(-178), angular.speed_max / 10, 0);
+                else
+                    Trajectory::RotateToOrientation(
+                        radians(178), angular.speed_max / 10, 0);
 
                 // Baisser le bras
                 ServoAX12::Bas();
@@ -569,7 +575,10 @@ void TaskMatch(void *pvParameters)
                 Trajectory::Navigate_To_Vertex(2, linear.speed_max, 0);
 
                 // Tourner vers la prise
-                Trajectory::RotateToOrientation(radians(-178), angular.speed_max, 0);
+                if (IHM::team == Team::Jaune)
+                    Trajectory::RotateToOrientation(radians(-178), angular.speed_max, 0);
+                else
+                    Trajectory::RotateToOrientation(radians(178), angular.speed_max, 0);
 
                 // Prendre les boites
                 p = Mapping::Get_Vertex_Point(2);
@@ -624,14 +633,21 @@ void TaskMatch(void *pvParameters)
                 p = Mapping::Get_Vertex_Point(4);
                 if (IHM::team == Team::Jaune)
                 {
-                    Trajectory::TranslateToPosition(p.x - 120, p.y, linear.speed_max, 0);
+                    Trajectory::TranslateToPositionWithoutWaiting(
+                        p.x - 130, p.y, linear.speed_max / 5, 0);
                 }
                 else
                 {
-                    Trajectory::TranslateToPosition(p.x + 120, p.y, linear.speed_max, 0);
+                    Trajectory::TranslateToPositionWithoutWaiting(
+                        p.x + 130, p.y, linear.speed_max / 5, 0);
                 }
-                Trajectory::TranslateToPosition(robot.x, p.y - 30, linear.speed_max, 0);
-                Trajectory::TranslateToPosition(robot.x, p.y + 30, linear.speed_max, 0);
+                delay(3000);
+                Trajectory::TranslateToPositionWithoutWaiting(
+                    robot.x, p.y - 30, linear.speed_max / 5, 0);
+                delay(1000);
+                Trajectory::TranslateToPositionWithoutWaiting(
+                    robot.x, p.y + 30, linear.speed_max / 5, 0);
+                delay(1000);
 
                 // Reculer
                 Trajectory::GoToVertex(4, linear.speed_max / 2, 0);
@@ -639,9 +655,14 @@ void TaskMatch(void *pvParameters)
 
                 // Aller à la dépose
                 p = Mapping::Get_Vertex_Point(1);
-                Trajectory::RotateToOrientation(radians(178), angular.speed_max / 10, 0);
                 Trajectory::TranslateToPosition(p.x, p.y + 300, linear.speed_max / 2, 0);
-                Trajectory::RotateToOrientation(radians(178), angular.speed_max / 10, 0);
+
+                if (IHM::team == Team::Jaune)
+                    Trajectory::RotateToOrientation(
+                        radians(178), angular.speed_max / 10, 0);
+                else
+                    Trajectory::RotateToOrientation(
+                        radians(-178), angular.speed_max / 10, 0);
 
                 // Monter le bras
                 ServoAX12::Haut();
@@ -650,7 +671,13 @@ void TaskMatch(void *pvParameters)
                     delay(1);
                 }
 
-                Trajectory::RotateToOrientation(radians(178), angular.speed_max / 10, 0);
+                if (IHM::team == Team::Jaune)
+                    Trajectory::RotateToOrientation(
+                        radians(178), angular.speed_max / 10, 0);
+                else
+                    Trajectory::RotateToOrientation(
+                        radians(-178), angular.speed_max / 10, 0);
+
                 Trajectory::GoToVertex(1, linear.speed_max / 2, 0);
 
                 // Poser le bras
@@ -698,13 +725,15 @@ void TaskMatch(void *pvParameters)
 
                 if (IHM::team == Team::Jaune)
                 {
-                    Trajectory::RotateToOrientation(radians(90), angular.speed_max, 0);
+                    Trajectory::RotateToOrientation(
+                        radians(90), angular.speed_max / 5, 0);
                     // Trajectory::TranslateToPosition(p.x + 100, p.y, linear.speed_max,
                     // 0);
                 }
                 else
                 {
-                    Trajectory::RotateToOrientation(radians(-90), angular.speed_max, 0);
+                    Trajectory::RotateToOrientation(
+                        radians(-90), angular.speed_max / 5, 0);
                     // Trajectory::TranslateToPosition(p.x - 100, p.y, linear.speed_max,
                     // 0);
                 }
@@ -713,17 +742,31 @@ void TaskMatch(void *pvParameters)
                 p = Mapping::Get_Vertex_Point(8);
                 if (IHM::team == Team::Jaune)
                 {
-                    Trajectory::TranslateToPosition(p.x - 120, p.y, linear.speed_max, 0);
+                    Trajectory::TranslateToPositionWithoutWaiting(
+                        p.x - 130, p.y, linear.speed_max / 20, 0);
                 }
                 else
                 {
-                    Trajectory::TranslateToPosition(p.x + 120, p.y, linear.speed_max, 0);
+                    Trajectory::TranslateToPositionWithoutWaiting(
+                        p.x + 130, p.y, linear.speed_max / 20, 0);
                 }
-                Trajectory::TranslateToPosition(robot.x, p.y - 30, linear.speed_max, 0);
-                Trajectory::TranslateToPosition(robot.x, p.y + 30, linear.speed_max, 0);
+                delay(3000);
+                Trajectory::TranslateToPositionWithoutWaiting(
+                    robot.x, p.y - 50, linear.speed_max / 20, 0);
+                delay(1000);
+                Trajectory::TranslateToPositionWithoutWaiting(
+                    robot.x, p.y + 50, linear.speed_max / 20, 0);
+                delay(1000);
 
                 // Reculer
-                Trajectory::GoToVertex(8, linear.speed_max / 2, 0);
+                Trajectory::GoToVertex(8, linear.speed_max / 5, 0);
+
+                // s'orienter vers le point de dépose
+                p = Mapping::Get_Vertex_Point(2);
+                PointF p2;
+                p2.x = p.x;
+                p2.y = p.y;
+                Trajectory::RotateTowardsPoint(p2, angular.speed_max / 10, 0);
                 Trajectory::Navigate_To_Vertex(2, linear.speed_max / 2, 0);
 
                 // Monter le bras
@@ -733,12 +776,17 @@ void TaskMatch(void *pvParameters)
                     delay(1);
                 }
 
-                Trajectory::RotateToOrientation(radians(178), angular.speed_max / 10, 0);
+                if (IHM::team == Team::Jaune)
+                    Trajectory::RotateToOrientation(
+                        radians(178), angular.speed_max / 10, 0);
+                else
+                    Trajectory::RotateToOrientation(
+                        radians(-178), angular.speed_max / 10, 0);
 
                 p = Mapping::Get_Vertex_Point(2);
 
-                Trajectory::TranslateToPosition(p.x, p.y - 250, linear.speed_max, 0);
-
+                Trajectory::TranslateToPosition(p.x, p.y - 300, linear.speed_max / 20, 0);
+                delay(1000);
                 // Poser le bras
                 ServoAX12::Mid();
                 while (ServoAX12::AreAllServoMoving())

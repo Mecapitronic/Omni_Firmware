@@ -55,15 +55,20 @@ namespace Match
             // PAMI still running or waiting for end of match
             elapsedTime = millis() - startTime;
 
-            if ((elapsedTime >= time_end_match && IHM::switchMode == 1)
-                || (elapsedTime >= time_end_train && IHM::switchMode != 1))
+            // if ((elapsedTime >= time_end_match && IHM::switchMode == 1)
+            //     || (elapsedTime >= time_end_train && IHM::switchMode != 1))
+            if (elapsedTime >= time_end_match)
             {
                 matchState = State::MATCH_END;
             }
         }
         else if (matchState == State::MATCH_END)
         {
-            // End of match
+
+            // Fin du match
+            // Disable Motor & Servo Power
+            digitalWrite(PIN_EN_MCU, LOW);
+            IHM::useBlink = false;
         }
         else
         {

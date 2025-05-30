@@ -170,6 +170,21 @@ namespace Trajectory
         WaitRobotArrived();
     }
 
+    void TranslateToPositionWithoutWaiting(float x,
+                                           float y,
+                                           float speed_limit,
+                                           float speed_final)
+    {
+        // Update target position
+        target.x = x;
+        target.y = y;
+        target.h = robot->h;
+
+        // Update linear speeds
+        linear->speed_limit = speed_limit;
+        linear->speed_final = speed_final;
+    }
+
     void TranslateToPoint(PointF point, float speed_limit, float speed_final)
     {
         TranslateToPosition(point.x, point.y, speed_limit, speed_final);

@@ -17,8 +17,10 @@ namespace IHM
 
     Enable tirettePresent = Enable::ENABLE_NONE;
     // Match = 1, TEST = 0, None = -1
-    int switchMode = -1;
-    // Retiré (OK) = 1, Enclenché (NOK) = 0, None = -1
+    // BUG
+    int switchMode = 1;
+    // int switchMode = -1;
+    //  Retiré (OK) = 1, Enclenché (NOK) = 0, None = -1
     int bauReady = -1;
 
     CLEDController *LEDcontroller;
@@ -73,27 +75,37 @@ namespace IHM
         }
 
         // Lecture du bouton Switch TEST / OK
-        int switchTmp = digitalRead(PIN_SWITCH);
-        if (switchTmp != switchMode)
-        {
-            switchMode = switchTmp;
-            PrintSwitch();
-        }
+        // int switchTmp = digitalRead(PIN_SWITCH);
+        // if (switchTmp != switchMode)
+        //{
+        //    switchMode = switchTmp;
+        //    PrintSwitch();
+        //}
 
-        // Lecture de la tirette de démarrage
+        // Lecture de la tirette
         Enable tiretteTmp = (Enable)!digitalRead(PIN_START);
         if (tiretteTmp != tirettePresent)
         {
+            if (tiretteTmp == Enable::ENABLE_TRUE)
+            {
+                println("Tirette : insérée");
+                // ledTimeOut.timeOut = 500;
+            }
+            else if (tiretteTmp == Enable::ENABLE_FALSE)
+            {
+                // ledTimeOut.timeOut = 1000;
+                Match::startMatch();
+            }
             tirettePresent = tiretteTmp;
             PrintStart();
         }
 
-        if ((tirettePresent == Enable::ENABLE_FALSE && switchMode == 1)
-            || (tirettePresent == Enable::ENABLE_TRUE && switchMode != 1))
-        {
-            // If tirette is not present and switch is OK, start the match
-            Match::startMatch();
-        }
+        // if ((tirettePresent == Enable::ENABLE_FALSE && switchMode == 1)
+        //     || (tirettePresent == Enable::ENABLE_TRUE && switchMode != 1))
+        // {
+        //     // If tirette is not present and switch is OK, start the match
+        //     Match::startMatch();
+        // }
 
         if (bauReadyPrev != bauReady)
         {
