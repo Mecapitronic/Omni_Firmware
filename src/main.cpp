@@ -512,6 +512,14 @@ void TaskMatch(void *pvParameters)
                 Trajectory::TranslateToPosition(p.x + 30, p.y + 180, linear.speed_max, 0);
                 Trajectory::TranslateToPosition(p.x - 30, p.y + 180, linear.speed_max, 0);
 
+                Mapping::removeCircle(0);
+                Mapping::removeCircle(1);
+                Mapping::removeCircle(2);
+                Mapping::removeCircle(3);
+                Mapping::Update_Passability_Graph();
+
+                Mapping::PrintCircleList();
+
                 // Monter le bras
                 ServoAX12::Mid();
                 while (ServoAX12::AreAllServoMoving())
@@ -544,6 +552,13 @@ void TaskMatch(void *pvParameters)
                 Trajectory::TranslateToPosition(
                     robot.x, robot.y + 180, linear.speed_max, 0);
 
+
+                p = Mapping::Get_Vertex_Point(1);
+                Mapping::changeCircle(0, p.x, p.y, 50);
+                Mapping::Update_Passability_Graph();
+
+                Mapping::PrintCircleList();
+
                 ServoAX12::Prise();
                 while (ServoAX12::AreAllServoMoving())
                 {
@@ -552,6 +567,9 @@ void TaskMatch(void *pvParameters)
 
                 // Aller au vertex 2
                 Trajectory::Navigate_To_Vertex(2, linear.speed_max, 0);
+
+                // Tourner vers la prise
+                Trajectory::RotateToOrientation(radians(-175), angular.speed_max, 0);
 
                 // Prendre les boites
                 p = Mapping::Get_Vertex_Point(2);
@@ -566,10 +584,24 @@ void TaskMatch(void *pvParameters)
                     delay(1);
                 }
 
+                // println("Remove Circle");
+                Mapping::removeCircle(8);
+                Mapping::removeCircle(9);
+                Mapping::Update_Passability_Graph();
+
+                Mapping::PrintCircleList();
+
                 // reculer de la dépose
                 p = Mapping::Get_Vertex_Point(2);
                 Trajectory::TranslateToPosition(
                     robot.x, robot.y + 200, linear.speed_max, 0);
+
+
+                // p = Mapping::Get_Vertex_Point(3);
+                // Mapping::changeCircle(8, p.x, p.y);
+                // Mapping::Update_Passability_Graph();
+
+                // Mapping::PrintCircleList();
 
                 // Aller au vertex 10
                 Trajectory::Navigate_To_Vertex(10, linear.speed_max, 0);
