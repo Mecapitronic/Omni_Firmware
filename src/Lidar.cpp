@@ -24,11 +24,18 @@ namespace Lidar
 
     void sendMatchStartTime(int startTime)
     {
-        SERIAL_LIDAR.write('?');
-        SERIAL_LIDAR.write((int)startTime % 256);
-        SERIAL_LIDAR.write((int)startTime >> 8);
-        // Ending char : '\n'
-        SERIAL_LIDAR.write(0x0A);
+        try
+        {
+            SERIAL_LIDAR.write('?');
+            SERIAL_LIDAR.write((int)startTime % 256);
+            SERIAL_LIDAR.write((int)startTime >> 8);
+            // Ending char : '\n'
+            SERIAL_LIDAR.write(0x0A);
+        }
+        catch (const std::exception &e)
+        {
+            printError(e.what());
+        }
     }
 
     void TaskLidar(void *pvParameters)
