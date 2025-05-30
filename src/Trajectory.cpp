@@ -271,8 +271,10 @@ namespace Trajectory
         while (DistanceBetweenPositions(robot->x, robot->y, p.x, p.y)
                > ArrivalTriggerDistance)
         {
-            PathFinding::PathFinding((int16_t)robot->x, (int16_t)robot->y, id);
-            if (target_vertex != PathFinding::solution.front())
+
+            if (PathFinding::PathFinding((int16_t)robot->x, (int16_t)robot->y, id)
+                && PathFinding::solution.size() > 0
+                && target_vertex != PathFinding::solution.front())
             {
                 print("Path to vertex ", id);
                 println(" found with ", PathFinding::solution.size(), " points.");
