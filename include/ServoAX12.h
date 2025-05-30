@@ -35,7 +35,7 @@ namespace ServoAX12
         UpCanMax = 295,
         UpCanHaut = 5,
         UpCanBas = 290,
-        UpCanMid = 80,
+        UpCanMid = 40,
 
         LeftMax = 197,
         LeftDepose = 185,
