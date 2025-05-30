@@ -14,13 +14,15 @@ namespace Match
     static constexpr int time_end_train = time_start_train + 999000;
     static constexpr int time_end_match = time_start_match + 100000;
 
-
     extern State matchState;
 
     void startMatch();
     void stopMatch();
     long getMatchTimeSec();
     long getMatchTimeMs();
+    long getStartTime();
+    void setStartTime(long start_time);
+
     void updateMatch();
     void printMatch();
 } // namespace Match

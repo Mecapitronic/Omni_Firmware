@@ -2,6 +2,7 @@
 #define LIDAR_H
 
 #include "ESP32_Helper.h"
+#include "Match.h"
 #include "PathPlanning/Obstacle.h"
 #include "Structure.h"
 #include "pins.h"

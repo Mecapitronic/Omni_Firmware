@@ -40,6 +40,16 @@ namespace Match
             return 0; // Match not started yet
     }
 
+    long getStartTime()
+    {
+        return startTime;
+    }
+
+    void setStartTime(long start_time)
+    {
+        startTime = start_time;
+    }
+
     void updateMatch()
     {
         if (matchState == State::MATCH_WAIT)

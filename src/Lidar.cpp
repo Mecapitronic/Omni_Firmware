@@ -22,6 +22,15 @@ namespace Lidar
         TaskThread Task = TaskThread(TaskLidar, "TaskLidar", 20000, 10, 1);
     }
 
+    void sendMatchStartTime(int startTime)
+    {
+        SERIAL_LIDAR.write('?');
+        SERIAL_LIDAR.write((int)startTime % 256);
+        SERIAL_LIDAR.write((int)startTime >> 8);
+        // Ending char : '\n'
+        SERIAL_LIDAR.write(0x0A);
+    }
+
     void TaskLidar(void *pvParameters)
     {
         println("Start TaskLidar");
@@ -30,6 +39,13 @@ namespace Lidar
         sendDataToLidarTimer.Start(20);
         while (true)
         {
+            if (Match::matchState == State::MATCH_BEGIN)
+            {
+                // peut être qu'on va l'envoyer plusieurs fois,
+                // on devrait checker si on l'a déjà envoyé avec un bool dédié
+                sendMatchStartTime((int)Match::getStartTime());
+            }
+
             chrono.Start();
             try
             {
@@ -64,11 +80,59 @@ namespace Lidar
                 {
                     char data = SERIAL_LIDAR.read();
 
-                    if (data == 0x21 && cursor == 0)
+                    // safety feature: check match start time recorded in lidar esp
+                    // in case of reset
+                    if (data == '?' && cursor == 0)
                     {
                         trame[cursor++] = data;
                     }
-                    else if (cursor > 0)
+
+                    // classic lidar data
+                    else if (data == 0x21 && cursor == 0) // start char ! for lidar data
+                    {
+                        trame[cursor++] = data;
+                    }
+
+                    // match start time received
+                    else if (cursor > 0 && trame[0] == '?')
+                    {
+                        trame[cursor++] = data;
+                        if (cursor >= 3)
+                        {
+                            // full packet receveid
+                            if (data == 0x0A)
+                            {
+                                // we need to check the match start time received against
+                                // ours
+                                int received_match_start_time =
+                                    trame[1] | (trame[2] << 8);
+                                // 300 ms if difference is enough to detect a reset, 300
+                                // is to take communication time into account
+                                if (Match::getStartTime() - received_match_start_time
+                                    > 300)
+                                {
+
+                                    // reset start time and go into match mode
+                                    Match::startMatch();
+                                    Match::setStartTime(received_match_start_time);
+
+                                    print("Lidar match start time mismatch: ");
+                                    print(received_match_start_time);
+                                    print(" ours is: ");
+                                    print(" and lidars is : ");
+                                    println(Match::getStartTime());
+                                }
+                                else
+                                {
+                                    println("Lidar match start time ok: ",
+                                            received_match_start_time);
+                                }
+                                cursor = 0;
+                            }
+                        }
+                    }
+                    // classic lidar data
+                    else if (cursor > 0 && trame[0] == '!')
                     {
                         trame[cursor++] = data;
                         if (cursor >= 7)
@@ -101,6 +165,8 @@ namespace Lidar
             }
             vTaskDelay(5);
         }
+
         println("End TaskLidar");
     }
+
 }; // namespace Lidar
