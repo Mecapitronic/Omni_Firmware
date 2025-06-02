@@ -29,6 +29,7 @@ namespace Obstacle
     extern std::array<Circle, MAX_OBSTACLE> obstacle;
     extern std::array<Circle, MAX_FALSE_OBSTACLE> false_obstacle;
 
+    extern std::array<PolarPoint, MAX_OBSTACLE> adversary;
     /****************************************************************************************
      * Functions Prototypes
      ****************************************************************************************/
@@ -39,5 +40,6 @@ namespace Obstacle
     boolean Is_In_Map(Point p);
     void Add_Obstacle(uint8_t id, Point p);
     void PrintObstacleList();
+    void PrintAdversaryList();
 } // namespace Obstacle
 #endif

@@ -24,7 +24,8 @@ namespace Trajectory
 
     // obstacle avoidance while path finding
     void putOnHold();
-    void resumePathFinding();
+    void resumeTraj();
+    bool IsOnHold();
 
     PoseF GetTarget();
 
@@ -61,6 +62,7 @@ namespace Trajectory
      * @return true si on obstacle se trouve sur le chemin (dans le cone de tolérance)
      * @return false si aucun obstacle n'est détecté devant le robot
      */
+    void UpdateAdversary();
     bool isThereAnObstacleInFrontOfMe();
     void FallBackIfWeAreWithinObstacleLimits();
 
@@ -78,7 +80,7 @@ namespace Trajectory
      * control loop => motion timer
      *
      */
-    void Update();
+    void UpdateTrajectory();
     void Reset();
 
     /**

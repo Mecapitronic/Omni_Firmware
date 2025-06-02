@@ -15,6 +15,8 @@ namespace Obstacle
     std::array<Circle, MAX_FALSE_OBSTACLE> false_obstacle;
     boolean false_obstacle_enable = false;
 
+    std::array<PolarPoint, MAX_OBSTACLE> adversary;
+
     /****************************************************************************************
      * Initialize obstacle
      ****************************************************************************************/
@@ -96,10 +98,14 @@ namespace Obstacle
                 obstacle[id].p.x = p.x;
                 obstacle[id].p.y = p.y;
                 obstacle[id].r = OBSTACLE_RADIUS;
+
+                // adversary[id].x = p.x;
+                // adversary[id].y = p.y;
             }
             else
             {
                 obstacle[id] = Circle(0, 0, 0);
+                // adversary[id] = PolarPoint();
             }
         }
     }
@@ -108,17 +114,37 @@ namespace Obstacle
     {
         String str = ">ObsRob:";
         String str01 = String(obstacle[0].p.x) + ":" + String(obstacle[0].p.y);
-        // String str02 = ":" + String(obstacle[0].r);
-        str = str + str01; // + str02;
+        String str02 = ":" + String(obstacle[0].r);
+        str = str + str01 + str02;
 
         for (size_t i = 1; i < MAX_OBSTACLE; i++)
         {
-            if (obstacle[i].p.x != 0 || obstacle[i].p.y != 0 || obstacle[i].r != 0)
-            {
-                String stri1 = String(obstacle[i].p.x) + ":" + String(obstacle[i].p.y);
-                String stri2 = ":" + String(obstacle[i].r);
-                str = str + ";" + stri1 + stri2;
-            }
+            // if (obstacle[i].p.x != 0 || obstacle[i].p.y != 0 || obstacle[i].r != 0)
+            //{
+            String stri1 = String(obstacle[i].p.x) + ":" + String(obstacle[i].p.y);
+            String stri2 = ":" + String(obstacle[i].r);
+            str = str + ";" + stri1 + stri2;
+            //}
+        }
+        str = str + "|xy";
+        Printer::println(str);
+    }
+
+    void PrintAdversaryList()
+    {
+        String str = "AdvRob:";
+        String str01 =
+            String(degrees(adversary[0].angle)) + ":" + String(adversary[0].distance);
+        str = str + str01;
+
+        for (size_t i = 1; i < MAX_OBSTACLE; i++)
+        {
+            // if (adversary[i].angle != 0 || adversary[i].distance != 0)
+            //{
+            String stri1 =
+                String(degrees(adversary[i].angle)) + ":" + String(adversary[i].distance);
+            str = str + ";" + stri1;
+            // }
         }
         str = str + "|xy";
         Printer::println(str);

@@ -168,7 +168,7 @@ void timerMotionCallback(TimerHandle_t xTimer)
         angular.velocity_actual = otos.velocity.h;
 
         // Trajectory update => error update
-        Trajectory::Update();
+        Trajectory::UpdateTrajectory();
 
         // Motion update
         linear.Update();
@@ -186,8 +186,8 @@ void TaskTeleplot(void *pvParameters)
     int lastMatchTime = 0;
     println("Start TaskTeleplot");
     Timeout robotPosTimeOut, mapTimeOut, ihmTimeOut;
-    robotPosTimeOut.Start(100);
-    mapTimeOut.Start(200);
+    robotPosTimeOut.Start(500);
+    mapTimeOut.Start(500);
     ihmTimeOut.Start(5000);
     Chrono chrono("Teleplot", 1000);
 
@@ -200,26 +200,24 @@ void TaskTeleplot(void *pvParameters)
             {
                 teleplot("Position", robot);
                 teleplot("Orient", degrees(robot.h));
-                teleplot("Target", Trajectory::GetTarget());
-                teleplot("TargetOrient", degrees(Trajectory::GetTarget().h));
-                // teleplot("Direction", linear.direction)
-                // println(">fixeScale:0:0;0:2000;3000:2000;3000:0;|xy");
-                // otos.Teleplot();
-                // linear.Teleplot("linear");
-                // angular.Teleplot("angular");
+                // teleplot("Target", Trajectory::GetTarget());
+                // teleplot("TargetOrient", degrees(Trajectory::GetTarget().h));
+                teleplot("Direction",
+                         degrees(Trajectory::CartesianToPolar(Trajectory::GetTarget().x,
+                                                              Trajectory::GetTarget().y)
+                                     .angle));
 
-                // teleplot("v1", motor.GetMotorSpeed(1));
-                // teleplot("v2", motor.GetMotorSpeed(2));
-                // teleplot("v3", motor.GetMotorSpeed(3));
-                // teleplot("Servo_Up Pos", ServoAX12::Servo_Up.position);
-                // teleplot("Servo_Left Pos", ServoAX12::Servo_Left.position);
-                // teleplot("Servo_Up Cmd", ServoAX12::Servo_Up.command_position);
-                // teleplot("Servo_Left Cmd", ServoAX12::Servo_Left.command_position);
+                println("OnHold : ", Trajectory::IsOnHold());
+                //  println(">fixeScale:0:0;0:2000;3000:2000;3000:0;|xy");
+                //  otos.Teleplot();
+                //  linear.Teleplot("linear");
+                //  angular.Teleplot("angular");
             }
             if (mapTimeOut.IsTimeOut())
             {
                 Obstacle::PrintObstacleList();
-                ServoAX12::TeleplotPosition();
+                // ServoAX12::TeleplotPosition();
+                Obstacle::PrintAdversaryList();
             }
             if (ihmTimeOut.IsTimeOut())
             {

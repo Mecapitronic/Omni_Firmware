@@ -21,8 +21,8 @@ namespace Trajectory
         PoseF pending_target;
 
         // permet d'arrêter le robot lors de la detection d'un obstacle
-        // sans flinguer le path finding
-        bool pathFindingOnHold = false;
+        // sans flinguer la traj
+        bool trajOnHold = false;
 
     } // namespace
 
@@ -76,14 +76,40 @@ namespace Trajectory
                      + OBSTACLE_MARGIN;
     }
 
+    void UpdateAdversary()
+    {
+        // first update the adversary list
+        for (size_t i = 0; i < MAX_OBSTACLE; i++)
+        {
+            if (Mapping::Is_NotNull_Circle(&Obstacle::obstacle[i]))
+                Obstacle::adversary[i] = CartesianToPolar(Obstacle::obstacle[i].p);
+            else
+                Obstacle::adversary[i] = PolarPoint();
+        }
+    }
+
     bool isThereAnObstacleInFrontOfMe()
     {
-        for (auto obstacle : Obstacle::obstacle)
+        PoseF target_to_consider;
+        if (trajOnHold)
         {
-            if (isTheObstacleToClose(obstacle))
+            target_to_consider = pending_target;
+        }
+        else
+        {
+            target_to_consider = Trajectory::GetTarget();
+        }
+
+        // check list
+        for (size_t i = 0; i < MAX_OBSTACLE; i++)
+        {
+            if (Obstacle::adversary[i].distance != 0
+                && isTheObstacleToClose(Obstacle::obstacle[i]))
             {
-                PolarPoint adversary = CartesianToPolar(obstacle.p);
-                if (abs(adversary.angle - linear->direction) < radians(60.0))
+                float targetDirection = Trajectory::CartesianToPolar(target_to_consider.x,
+                                                                     target_to_consider.y)
+                                            .angle;
+                if (abs(Obstacle::adversary[i].angle - targetDirection) < radians(60.0))
                 {
                     return true;
                 }
@@ -94,16 +120,22 @@ namespace Trajectory
 
     void putOnHold()
     {
-        pathFindingOnHold = true;
+        trajOnHold = true;
     }
 
-    void resumePathFinding()
+    void resumeTraj()
     {
-        pathFindingOnHold = false;
+        trajOnHold = false;
     }
 
-    void Update()
+    bool IsOnHold()
     {
+        return trajOnHold;
+    }
+
+    void UpdateTrajectory()
+    {
+        UpdateAdversary();
         if (isThereAnObstacleInFrontOfMe())
         {
             putOnHold();
@@ -123,7 +155,7 @@ namespace Trajectory
                 target = pending_target;
                 pending_target = PoseF();
                 // collision_prevention_timer.Stop();
-                resumePathFinding();
+                resumeTraj();
             }
         }
 
@@ -264,8 +296,8 @@ namespace Trajectory
                 // on recule de 10cm dans la direction opposée de l'obstacle
                 PoseF linear_target = robot->GetPoseF();
                 PolarPoint adversary = CartesianToRelativePolar(obstacle.p);
-                linear_target.x -= 100 * cos(radians(adversary.angle + 180));
-                linear_target.y -= 100 * sin(radians(adversary.angle + 180));
+                linear_target.x -= 100 * cos(adversary.angle + M_PI);
+                linear_target.y -= 100 * sin(adversary.angle + M_PI);
 
                 // TODO: checker si il n'y a pas d'obstacle dans la direction opposée
                 GoToPose(linear_target.x, linear_target.y, robot->h);
@@ -306,7 +338,7 @@ namespace Trajectory
 
     bool WaitRobotArrived()
     {
-        while (pathFindingOnHold
+        while (trajOnHold
                || DistanceBetweenPositions(robot->x, robot->y, target.x, target.y)
                       > ArrivalTriggerDistance
                || (NormalizeAngle(abs(robot->h - target.h)) > ArrivalTriggerAngle))
