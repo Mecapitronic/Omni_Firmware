@@ -127,7 +127,7 @@ void LedRGB::displayTime()
         }
 
         // Ensure we don't go out of bounds
-        if (match_time_led <= NUM_LEDS)
+        if (match_time_led < NUM_LEDS)
         {
             leds[match_time_led] = clock_color;
         }
