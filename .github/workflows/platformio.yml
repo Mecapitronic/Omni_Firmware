@@ -15,7 +15,7 @@ jobs:
 
     strategy:
       matrix:
-        pio-env: [ "Esp32_OTA", "Esp32_NO_WIFI", "Esp32_WITH_WIFI"]
+        pio-env: ["Esp32_NO_WIFI", "Esp32_WOKWI", "Esp32_WITH_WIFI"]
 
     steps:
       - uses: actions/checkout@v4
