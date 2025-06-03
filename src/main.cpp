@@ -1,4 +1,6 @@
 #include "main.h"
+#include "FS.h"
+#include "SPIFFS.h"
 
 /****************************************************************************************
  * Variables
@@ -37,6 +39,27 @@ void setup()
     println("Frequency CPU : ", getCpuFrequencyMhz(), " MHz");
     println();
     println("Robot Holonome Firmware");
+
+
+    if (!SPIFFS.begin(true))
+    {
+        Serial.println("An Error has occurred while mounting SPIFFS");
+        return;
+    }
+
+    File file = SPIFFS.open("/map.json");
+    if (!file)
+    {
+        Serial.println("Failed to open file for reading");
+        return;
+    }
+
+    Serial.println("File Content:");
+    while (file.available())
+    {
+        Serial.write(file.read());
+    }
+    file.close();
 
     // Init IHM
     IHM::InitIHM();

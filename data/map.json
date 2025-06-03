@@ -1,0 +1,4 @@
+
+            // Segment
+            segment[0] = Segment(Point(650, 1800), Point(1050, 1800));
+            segment[1] = Segment(Point(1050, 1800), Point(1050, 1550));
