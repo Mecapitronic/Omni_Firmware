@@ -99,7 +99,7 @@ void OpticalTrackingOdometrySensor::Initialisation(bool simulation)
         sfe_otos_pose2d_t currentPose = {0, 0, 0};
         myOtos.setPosition(currentPose);
 
-        sfTkError_t error;
+        sfeTkError_t error;
         sfe_otos_signal_process_config_t config;
         error = myOtos.getSignalProcessConfig(config);
         if (error != 0)
@@ -124,7 +124,7 @@ void OpticalTrackingOdometrySensor::Update()
 {
     if (connected)
     {
-        sfTkError_t error;
+        sfeTkError_t error;
         sfe_otos_pose2d_t myPosition;
         sfe_otos_pose2d_t myVelocity;
         sfe_otos_pose2d_t myAcceleration;
@@ -189,7 +189,7 @@ const void OpticalTrackingOdometrySensor::PrintCommandHelp()
 
 void OpticalTrackingOdometrySensor::SetPose(float x, float y, float h)
 {
-    sfTkError_t error;
+    sfeTkError_t error;
     // Reset the tracking algorithm - this resets the position to the origin,
     // but can also be used to recover from some rare tracking errors
     myOtos.resetTracking();
