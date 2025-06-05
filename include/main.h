@@ -1,12 +1,9 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-using namespace std;
-
 #include "ESP32_Helper.h"
 #include "pins.h"
 #include <math.h>
-using namespace Printer;
 #include "GeoMathTools.h"
 #include "IHM.h"
 #include "LedRGB.h"
