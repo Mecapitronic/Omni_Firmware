@@ -6,7 +6,9 @@
 #include <math.h>
 #include "GeoMathTools.h"
 #include "IHM.h"
+#ifndef _VISUAL_STUDIO
 #include "LedRGB.h"
+#endif
 #include "Lidar.h"
 #include "Match.h"
 #include "Motion.h"

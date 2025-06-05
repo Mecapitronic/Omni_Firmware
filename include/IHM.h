@@ -5,7 +5,9 @@
 #include "Match.h"
 #include "Structure.h"
 #include "pins.h"
+#ifndef _VISUAL_STUDIO
 #include <FastLED.h>
+#endif
 
 #define BUILTIN_BRIGHTNESS 50 // Brightness of the built-in LED
 

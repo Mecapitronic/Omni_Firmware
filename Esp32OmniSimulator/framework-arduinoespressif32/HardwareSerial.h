@@ -1,5 +1,5 @@
-#ifndef SERIAL_H
-#define SERIAL_H
+#ifndef HARDWARE_SERIAL_H
+#define HARDWARE_SERIAL_H
 
 #include "Arduino.h"
 #include "WString.h"
@@ -40,16 +40,17 @@ void __cdecl myprintf(const char* format, ...)
 #define myprintf cout<<
 #endif
 
-class MySerial
+class HardwareSerial
 {
 public:
 	int bytes = 0;
 	string incoming = "";
 
-	MySerial();
-	~MySerial();
+	HardwareSerial();
+    ~HardwareSerial();
 
 	void end();
+    bool setPins(int8_t rxPin, int8_t txPin, int8_t ctsPin = -1, int8_t rtsPin = -1);
 	void setRxBufferSize(int size);
 	void setTxBufferSize(int size);
 	void begin(int baud_speed);
@@ -64,8 +65,12 @@ public:
 	int available();
 	char read();
 	void write(const char* str, int length);
+    void write(const char c);
 };
 
-extern MySerial Serial;
+extern HardwareSerial Serial;
+extern HardwareSerial Serial0;
+extern HardwareSerial Serial1;
+extern HardwareSerial Serial2;
 
 #endif

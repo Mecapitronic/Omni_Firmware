@@ -8,7 +8,9 @@ using namespace Printer;
  ****************************************************************************************/
 TimerThread timerMotion;
 
+#ifndef _VISUAL_STUDIO
 LedRGB led_ring;
+#endif
 Motor motor;
 
 Motion linear;
@@ -20,8 +22,10 @@ OpticalTrackingOdometrySensor otos;
 
 void setup()
 {
+#ifndef _VISUAL_STUDIO
     // display state as soon as possible to show it is starting
     led_ring.Initialisation(&robot);
+#endif
     delay(500); // display for 1/2 second
 
     pinMode(PIN_EN_MCU, OUTPUT);
@@ -47,7 +51,9 @@ void setup()
     while (IHM::bauReady != 1)
     {
         IHM::UpdateBAU();
+#ifndef _VISUAL_STUDIO
         led_ring.emergencyStop();
+#endif
         vTaskDelay(1);
     }
 
@@ -60,7 +66,9 @@ void setup()
     while (!otos.IsConnected() && !simulation)
     {
         otos.Initialisation(simulation);
+#ifndef _VISUAL_STUDIO
         led_ring.emergencyStop();
+#endif
         vTaskDelay(1);
     }
 
@@ -120,7 +128,8 @@ void loop()
     // HACK Vérifier qu'on n'utilise pas les serialEvent !!!
     // C:\Users\xxx\.platformio\packages\framework-arduinoespressif32\cores\esp32\main.cpp
     // https://github.com/espressif/arduino-esp32/blob/master/cores/esp32/main.cpp
-    vTaskDelete(NULL); // Supprime immédiatement le task Arduino "loop"
+    // Supprime immédiatement la task Arduino "loop"
+    TaskThread::DeleteTask(NULL);
 }
 
 // TIMER 5ms => MOTION
@@ -259,7 +268,9 @@ void TaskUpdate(void *pvParameters)
             Match::updateMatch();
             IHM::UpdateBAU();
             IHM::Blink();
+#ifndef _VISUAL_STUDIO
             led_ring.update();
+#endif
 
             // take some time to update the servo, maybe move it elsewhere
             ServoAX12::Update();

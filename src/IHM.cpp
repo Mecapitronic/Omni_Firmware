@@ -22,8 +22,9 @@ namespace IHM
     // int switchMode = -1;
     //  Retiré (OK) = 1, Enclenché (NOK) = 0, None = -1
     int bauReady = -1;
-
+#ifndef _VISUAL_STUDIO
     CLEDController *LEDcontroller;
+#endif
     CRGB builtin_led;
 
     bool useBlink = true;
@@ -59,9 +60,11 @@ namespace IHM
         UpdateHMI();
         UpdateBAU();
 
+#ifndef _VISUAL_STUDIO
         LEDcontroller = &FastLED.addLeds<WS2812, PIN_RGB_LED, RGB>(&builtin_led, 1);
         builtin_led = CRGB::Black;
         LEDcontroller->showLeds(BUILTIN_BRIGHTNESS);
+#endif
     }
 
     void UpdateHMI()
@@ -126,6 +129,7 @@ namespace IHM
 
     void Blink()
     {
+#ifndef _VISUAL_STUDIO
         CRGB teamColor;
         if (team == Team::Jaune)
         {
@@ -161,6 +165,7 @@ namespace IHM
             }
         }
         LEDcontroller->showLeds(BUILTIN_BRIGHTNESS);
+#endif
     }
 
     void PrintAll()

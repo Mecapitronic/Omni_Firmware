@@ -243,7 +243,7 @@ class ESP32_FAST_PWM
     long remap(long x, long in_min, long in_max, long out_min, long out_max) {
         const long run = in_max - in_min;
         if(run == 0){
-            log_e("remap(): Invalid input range, min == max");
+            //log_e("remap(): Invalid input range, min == max");
             return -1; // AVR returns -1, SAM returns 0
         }
         const long rise = out_max - out_min;

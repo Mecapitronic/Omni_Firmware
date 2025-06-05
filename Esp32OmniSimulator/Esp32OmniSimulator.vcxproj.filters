@@ -33,6 +33,9 @@
     <Filter Include="include\PathPlanning">
       <UniqueIdentifier>{b79fc372-6e73-4776-938b-cc4fcf0f6a52}</UniqueIdentifier>
     </Filter>
+    <Filter Include="framework-arduinoespressif32\Dynamixel">
+      <UniqueIdentifier>{3c2a36ca-f858-41f5-ac66-f09c58a3990a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Esp32OmniSimulator.cpp" />
@@ -69,13 +72,10 @@
     <ClCompile Include="framework-arduinoespressif32\Arduino.cpp">
       <Filter>framework-arduinoespressif32</Filter>
     </ClCompile>
-    <ClCompile Include="framework-arduinoespressif32\Serial.cpp">
+    <ClCompile Include="framework-arduinoespressif32\HardwareSerial.cpp">
       <Filter>framework-arduinoespressif32</Filter>
     </ClCompile>
     <ClCompile Include="..\src\GeoMathTools.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\LedRGB.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\src\Motion.cpp">
@@ -93,12 +93,6 @@
     <ClCompile Include="..\src\PathPlanning\Mapping.cpp">
       <Filter>src\PathPlanning</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\PathPlanning\Node.cpp">
-      <Filter>src\PathPlanning</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\PathPlanning\NodeList.cpp">
-      <Filter>src\PathPlanning</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\PathPlanning\Obstacle.cpp">
       <Filter>src\PathPlanning</Filter>
     </ClCompile>
@@ -107,6 +101,24 @@
     </ClCompile>
     <ClCompile Include="framework-arduinoespressif32\Wire.cpp">
       <Filter>framework-arduinoespressif32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\IHM.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\PathPlanning\NodeItem.cpp">
+      <Filter>src\PathPlanning</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Lidar.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\Match.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\ServoAX12.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="framework-arduinoespressif32\Dynamixel2Arduino.cpp">
+      <Filter>framework-arduinoespressif32\Dynamixel</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -174,7 +186,7 @@
     <ClInclude Include="framework-arduinoespressif32\Arduino.h">
       <Filter>framework-arduinoespressif32</Filter>
     </ClInclude>
-    <ClInclude Include="framework-arduinoespressif32\Serial.h">
+    <ClInclude Include="framework-arduinoespressif32\HardwareSerial.h">
       <Filter>framework-arduinoespressif32</Filter>
     </ClInclude>
     <ClInclude Include="framework-arduinoespressif32\esp_arduino_version.h">
@@ -237,13 +249,7 @@
     <ClInclude Include="framework-arduinoespressif32\driver\esp32-hal-ledc.h">
       <Filter>framework-arduinoespressif32\driver</Filter>
     </ClInclude>
-    <ClInclude Include="framework-arduinoespressif32\Adafruit_NeoPixel.h">
-      <Filter>framework-arduinoespressif32</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\GeoMathTools.h">
-      <Filter>include</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\LedRGB.h">
       <Filter>include</Filter>
     </ClInclude>
     <ClInclude Include="..\include\Motion.h">
@@ -267,17 +273,38 @@
     <ClInclude Include="..\include\PathPlanning\Mapping.h">
       <Filter>include\PathPlanning</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\PathPlanning\Node.h">
-      <Filter>include\PathPlanning</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\PathPlanning\NodeList.h">
-      <Filter>include\PathPlanning</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\PathPlanning\Obstacle.h">
       <Filter>include\PathPlanning</Filter>
     </ClInclude>
     <ClInclude Include="..\include\PathPlanning\PathFinding.h">
       <Filter>include\PathPlanning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\PathPlanning\NodeItem.h">
+      <Filter>include\PathPlanning</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\IHM.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Lidar.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Match.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\ServoAX12.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\Timer.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="framework-arduinoespressif32\actuator.h">
+      <Filter>framework-arduinoespressif32</Filter>
+    </ClInclude>
+    <ClInclude Include="framework-arduinoespressif32\config.h">
+      <Filter>framework-arduinoespressif32\Dynamixel</Filter>
+    </ClInclude>
+    <ClInclude Include="framework-arduinoespressif32\Dynamixel2Arduino.h">
+      <Filter>framework-arduinoespressif32\Dynamixel</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
