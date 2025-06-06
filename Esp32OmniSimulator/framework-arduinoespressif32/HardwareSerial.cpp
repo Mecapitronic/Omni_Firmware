@@ -1,7 +1,7 @@
 /********** INCLUDE *********/
 #include "HardwareSerial.h"
 
-HardwareSerial::HardwareSerial() {};
+HardwareSerial::HardwareSerial(uint8_t uart_nr) : _uart_nr(uart_nr) {};
 HardwareSerial::~HardwareSerial() {};
 
 void HardwareSerial::end() {};
@@ -17,46 +17,102 @@ bool HardwareSerial::setPins(int8_t rxPin, int8_t txPin, int8_t ctsPin, int8_t r
     return true;
 }
 
-void HardwareSerial::setRxBufferSize(int size) {};
-void HardwareSerial::setTxBufferSize(int size) {};
-void HardwareSerial::begin(int baud_speed) {};
-void HardwareSerial::print() {};
-void HardwareSerial::print(const char* str) { if(str != NULL) myprintf(str); };
-void HardwareSerial::print(String str) {
-	if (str != "")
-	{
-		string s = str.c_str();
-		myprintf(s);
-	}
+void HardwareSerial::setRxBufferSize(int size)
+{
+    _rxBufferSize = size;
 };
-void HardwareSerial::print(int i) { if (i != NULL) myprintf(i); };
-void HardwareSerial::println() { myprintf('\n'); };
-void HardwareSerial::println(const char* str) { print(str); println(); };
-void HardwareSerial::println(String str) { print(str); println(); };
-void HardwareSerial::println(int i) { print(i); println(); };
-int HardwareSerial::available() { return bytes; };
+
+void HardwareSerial::setTxBufferSize(int size)
+{
+    _txBufferSize = size;
+};
+
+void HardwareSerial::begin(int baud_speed)
+{
+    _baudrate = baud_speed;
+};
+
+int HardwareSerial::available()
+{
+    return bytes;
+};
 
 char HardwareSerial::read()
 {
-	char c = incoming[0];
-	incoming.erase(0,1);
-	bytes = incoming.length();
-	return c;
-};
-void HardwareSerial::write(const char* str, int length)
-{
-	for (int i = 0; i < length; i++)
-	{
-		char c = str[i];
-		myprintf(c);
-	} 
-};
-void HardwareSerial::write(const char c)
-{
-     myprintf(c);
+    char c = incoming[0];
+    incoming.erase(0, 1);
+    bytes = incoming.length();
+    return c;
 };
 
-HardwareSerial Serial = HardwareSerial();
-HardwareSerial Serial0 = HardwareSerial();
-HardwareSerial Serial1 = HardwareSerial();
-HardwareSerial Serial2 = HardwareSerial();
+size_t HardwareSerial::write(const char c)
+{
+    if (_uart_nr == s_uart_debug_nr)
+    {
+        myprintf(c);
+    }
+    return 1;
+};
+
+size_t HardwareSerial::write(const char *str, int length)
+{
+    int n = 0;
+    for (int i = 0; i < length; i++)
+    {
+        char c = str[i];
+        n += write(c);
+    }
+    return n;
+};
+//
+//size_t HardwareSerial::print(const char *str)
+//{
+//    if (str != NULL)
+//        myprintf(str);
+//};
+
+size_t HardwareSerial::print(String str)
+{
+    int n = 0;
+    for (int i = 0; i < str.length(); i++)
+    {
+        char c = str[i];
+        n += write(c);
+    }
+    return n;
+};
+
+size_t HardwareSerial::print(int i)
+{
+    if (i != NULL)
+        return print(String(i));
+    return 0;
+};
+
+size_t HardwareSerial::println()
+{
+    return write('\n');
+};
+
+//size_t HardwareSerial::println(const char *str)
+//{
+//    print(str);
+//    println();
+//};
+
+size_t HardwareSerial::println(String str)
+{
+    return print(str) + println();
+};
+
+size_t HardwareSerial::println(int i)
+{
+    return print(i) + println();
+};
+
+
+
+HardwareSerial Serial = HardwareSerial(0);
+HardwareSerial Serial0 = HardwareSerial(1);
+HardwareSerial Serial1 = HardwareSerial(2);
+HardwareSerial Serial2 = HardwareSerial(3);

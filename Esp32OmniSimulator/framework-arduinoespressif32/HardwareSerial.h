@@ -40,13 +40,22 @@ void __cdecl myprintf(const char* format, ...)
 #define myprintf cout<<
 #endif
 
+static uint8_t s_uart_debug_nr = 0; // UART number for debug output
+
 class HardwareSerial
 {
+
+protected:
+    uint8_t _uart_nr;
+    size_t _rxBufferSize;
+    size_t _txBufferSize;
+    uint32_t _baudrate;
+
 public:
 	int bytes = 0;
 	string incoming = "";
 
-	HardwareSerial();
+	HardwareSerial(uint8_t uart_nr);
     ~HardwareSerial();
 
 	void end();
@@ -54,18 +63,19 @@ public:
 	void setRxBufferSize(int size);
 	void setTxBufferSize(int size);
 	void begin(int baud_speed);
-	void print();
-	void print(const char* str);
-	void print(String str);
-	void print(int i);
-	void println();
-	void println(const char* str);
-	void println(String str);
-	void println(int i);
 	int available();
 	char read();
-	void write(const char* str, int length);
-    void write(const char c);
+
+    size_t write(const char c);
+	size_t write(const char* str, int length);
+
+	//size_t print(const char* str);
+	size_t print(String str);
+	size_t print(int i);
+	size_t println();
+	//size_t println(const char* str);
+	size_t println(String str);
+	size_t println(int i);
 };
 
 extern HardwareSerial Serial;
