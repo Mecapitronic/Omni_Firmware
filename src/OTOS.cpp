@@ -6,6 +6,12 @@ void OpticalTrackingOdometrySensor::Initialisation(bool simulation)
 {
     println("Init QwiicOTOS");
 
+    if (simulation)
+    {
+        println("OTOS is in simulation mode !");
+        connected = false;
+        return;
+    }
     // Normal speed is 100 000
     // With higher speed, instructions on I2C take less time
     Wire.begin(SDA, SCL, 400000UL);
@@ -18,7 +24,7 @@ void OpticalTrackingOdometrySensor::Initialisation(bool simulation)
     int retryConnect = 0;
     // Attempt to begin the sensor
     connected = myOtos.begin();
-    while (!connected && retryConnect < 5 && !simulation)
+    while (!connected && retryConnect < 5)
     {
         println("OTOS not connected, check your wiring and I2C address!");
         delay(100);

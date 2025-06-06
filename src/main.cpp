@@ -53,12 +53,14 @@ void setup()
     // Init IHM
     IHM::InitIHM();
 
-    while (IHM::bauReady != 1)
+    while (IHM::bauReady != 1 && !simulation)
     {
         IHM::UpdateBAU();
 #ifndef _VISUAL_STUDIO
         led_ring.emergencyStop();
-#endif
+#endif  
+
+        println("Remove BAU to continue SETUP !");
         vTaskDelay(1);
     }
 
