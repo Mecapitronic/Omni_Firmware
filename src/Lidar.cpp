@@ -2,16 +2,17 @@
 
 using namespace Printer;
 
-namespace Lidar
-{
+//namespace Lidar
+//{
     namespace
     {
         unsigned char trame[7];
         uint16_t cursor = 0;
         Robot *robot;
-    } // namespace
+        //TaskThread taskLidar;
+    }
 
-    void Initialisation(Robot *_robot)
+    void InitialisationLidar(Robot *_robot)
     {
         println("Init Lidar");
         robot = _robot;
@@ -19,7 +20,7 @@ namespace Lidar
         SERIAL_LIDAR.setRxBufferSize(1024);
         SERIAL_LIDAR.setTxBufferSize(1024);
         SERIAL_LIDAR.begin(230400);
-        TaskThread Task = TaskThread(TaskLidar, "TaskLidar", 20000, 10, 1);
+        //taskLidar = TaskThread(TaskLidar, "TaskLidar", 20000, 10, 1);
     }
 
     void TaskLidar(void *pvParameters)
@@ -103,4 +104,4 @@ namespace Lidar
         }
         println("End TaskLidar");
     }
-}; // namespace Lidar
+//};

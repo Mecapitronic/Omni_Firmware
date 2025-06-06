@@ -7,6 +7,11 @@ using namespace Printer;
  * Variables
  ****************************************************************************************/
 TimerThread timerMotion;
+TaskThread *taskTeleplot;
+TaskThread *taskUpdate;
+TaskThread *taskHandleCommand;
+TaskThread *taskMatch;
+TaskThread *taskLidar;
 
 #ifndef _VISUAL_STUDIO
 LedRGB led_ring;
@@ -59,7 +64,7 @@ void setup()
 
     ServoAX12::Initialisation();
 
-    Lidar::Initialisation(&robot);
+    InitialisationLidar(&robot);
 
     otos.Initialisation(simulation);
     // Init sensors
@@ -114,10 +119,11 @@ void setup()
     timerMotion.Start();
 
     // Put at least the 1 Tick delay, this is needed so the watchdog doesn't trigger
-    TaskThread(TaskTeleplot, "TaskTeleplot", 10000, 10, 0);
-    TaskThread(TaskUpdate, "TaskUpdate", 10000, 15, 1);
-    TaskThread(TaskHandleCommand, "TaskHandleCommand", 20000, 5, 1);
-    TaskThread(TaskMatch, "TaskMatch", 20000, 10, 1);
+    taskLidar = new TaskThread(TaskLidar, "TaskLidar", 20000, 10, 1);
+    taskTeleplot = new TaskThread(TaskTeleplot, "TaskTeleplot", 10000, 10, 0);
+    taskUpdate = new TaskThread(TaskUpdate, "TaskUpdate", 10000, 15, 1);
+    taskHandleCommand = new TaskThread(TaskHandleCommand, "TaskHandleCommand", 20000, 5, 1);
+    taskMatch = new TaskThread(TaskMatch, "TaskMatch", 20000, 10, 1);
 
     // Send to PC all the mapping data
     ESP32_Helper::HandleCommand(Command("UpdateMapping"));

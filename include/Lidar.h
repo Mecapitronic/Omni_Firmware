@@ -6,9 +6,9 @@
 #include "Structure.h"
 #include "pins.h"
 
-namespace Lidar
-{
-    void Initialisation(Robot *_robot);
+//namespace Lidar
+//{
+    void InitialisationLidar(Robot *_robot);
     void TaskLidar(void *pvParameters);
-}; // namespace Lidar
+//}; // namespace Lidar
 #endif
