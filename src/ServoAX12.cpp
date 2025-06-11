@@ -8,8 +8,11 @@ namespace ServoAX12
 
     std::unordered_map<ServoID, ServoMotion, std::hash<ServoID>> Servos;
 
-    void Initialisation()
+    bool _simulation = false;
+
+    void Initialisation(bool simulation)
     {
+        _simulation = simulation;
         SERIAL_SERVO.setPins(RX_SERVO, TX_SERVO);
         // Set Port baudrate. This has to match with DYNAMIXEL baudrate.
         dxl.begin((unsigned long)BaudRate::BAUD_RATE_1000000);
@@ -34,6 +37,11 @@ namespace ServoAX12
 
     void InitServo(ServoMotion &servo)
     {
+        if (_simulation)
+        {
+            servo.position = servo.command_position = (float)servo.positionMin;
+            return;
+        }
         if (dxl.ping((uint8_t)servo.id))
         {
             print("Init Servo ID : ", servo.id);
@@ -99,6 +107,12 @@ namespace ServoAX12
 
     void UpdateServo(ServoMotion &servo)
     {
+        if (_simulation)
+        {
+            servo.position = servo.command_position;
+            servo.IsMoving = false;
+            return;
+        }
         servo.position = dxl.getPresentPosition(servo.id, UNIT_DEGREE);
         if (servo.position >= servo.command_position + 5
             || servo.position <= servo.command_position - 5)
@@ -192,7 +206,7 @@ namespace ServoAX12
         {
             Scan();
             // Put back to inital state
-            Initialisation();
+            Initialisation(_simulation);
         }
         else if (cmd.cmd == "AX12PrintInfo")
         {

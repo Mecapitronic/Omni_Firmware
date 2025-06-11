@@ -126,7 +126,7 @@ namespace ServoAX12
         }
     };
 
-    void Initialisation();
+    void Initialisation(bool simulation);
     void InitServo(ServoMotion &servo);
 
     void StopAllServo();

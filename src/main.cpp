@@ -48,7 +48,7 @@ void setup()
         vTaskDelay(1);
     }
 
-    ServoAX12::Initialisation();
+    ServoAX12::Initialisation(simulation);
 
     Lidar::Initialisation(&robot);
 
