@@ -27,6 +27,12 @@ namespace Match
         printMatch();
     }
 
+    void resetMatch()
+    {
+        matchState = State::MATCH_WAIT;
+        printMatch();
+    }
+
     long getMatchTimeSec()
     {
         return (getMatchTimeMs()) / 1000;

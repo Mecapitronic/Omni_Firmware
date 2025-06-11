@@ -827,7 +827,8 @@ void TaskMatch(void *pvParameters)
                     vTaskDelay(100);
                 }
                 Trajectory::Navigate_To_Vertex(11, linear.speed_max, 0);
-
+                // Restart in waiting State
+                //Match::resetMatch();
                 Match::stopMatch();
                 // TODO 5 sec avant la fin du match aller dans la zone de back stage
             }

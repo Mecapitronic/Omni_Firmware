@@ -19,6 +19,7 @@ namespace Match
 
     void startMatch();
     void stopMatch();
+    void resetMatch();
     long getMatchTimeSec();
     long getMatchTimeMs();
     void updateMatch();
