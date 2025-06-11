@@ -350,6 +350,7 @@ namespace Trajectory
             delay(100);
         }
 
+        Debugger::WaitForAvailableSteps();
         // while (linear->isRunning || angular->isRunning)
         //{
         //     delay(1);

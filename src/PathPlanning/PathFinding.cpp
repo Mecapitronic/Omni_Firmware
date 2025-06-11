@@ -45,7 +45,6 @@ namespace PathFinding
 
         while (open.size() > 0)
         {
-            Debugger::WaitForAvailableSteps();
             // on récupére le premier noeud de la liste cad le meilleur
             best = open.front();
             pop_front(open);
