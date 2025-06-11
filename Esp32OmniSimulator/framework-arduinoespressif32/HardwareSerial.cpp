@@ -34,14 +34,13 @@ void HardwareSerial::begin(int baud_speed)
 
 int HardwareSerial::available()
 {
-    return bytes;
+    return incoming.length();
 };
 
 char HardwareSerial::read()
 {
     char c = incoming[0];
     incoming.erase(0, 1);
-    bytes = incoming.length();
     return c;
 };
 
@@ -49,6 +48,24 @@ size_t HardwareSerial::write(const char c)
 {
     if (_uart_nr == s_uart_debug_nr)
     {
+        outgoing += c;
+
+        if (c == '\n')
+        {
+            if (connected)
+            {
+                int iResult = send(*socketClient, outgoing.c_str(), (int)strlen(outgoing.c_str()), 0);
+                if (iResult == SOCKET_ERROR)
+                {
+                    printf("send failed with error: %d\n", WSAGetLastError());
+                }
+                else
+                {
+                    outgoing = "";
+                }
+            }
+        }
+
         myprintf(c);
     }
     return 1;
@@ -109,8 +126,6 @@ size_t HardwareSerial::println(int i)
 {
     return print(i) + println();
 };
-
-
 
 HardwareSerial Serial = HardwareSerial(0);
 HardwareSerial Serial0 = HardwareSerial(1);

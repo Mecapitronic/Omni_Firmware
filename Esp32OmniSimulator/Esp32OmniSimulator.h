@@ -4,6 +4,22 @@
 #ifdef _VISUAL_STUDIO
 #else
 #endif
+#define WIN32_LEAN_AND_MEAN
+
+#include <windows.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+#define boolean bool
+
+// include for client TCP
+#define _WINSOCK_DEPRECATED_NO_WARNINGS
+#include <winsock2.h>
+#include <ws2tcpip.h>
+// Need to link with Ws2_32.lib, Mswsock.lib, and Advapi32.lib
+#pragma comment(lib, "Ws2_32.lib")
+#pragma comment(lib, "Mswsock.lib")
+#pragma comment(lib, "AdvApi32.lib")
 
 #define HAVE_STRUCT_TIMESPEC
 #include <time.h>
@@ -36,8 +52,10 @@ using namespace std;
 
 #include "main.h"
 
-extern "C"
-{
+SOCKET socketClient;
+
+//extern "C"
+//{
 
 #ifdef _WINDLL
 	#define dll __declspec(dllexport)
@@ -48,6 +66,6 @@ extern "C"
 #endif
 
 	dll void AbortSimulator(void);
-}
+//}
 
 #endif

@@ -52,8 +52,10 @@ protected:
     uint32_t _baudrate;
 
 public:
-	int bytes = 0;
+    SOCKET *socketClient;
+    bool connected = false;
 	string incoming = "";
+    string outgoing = "";
 
 	HardwareSerial(uint8_t uart_nr);
     ~HardwareSerial();
