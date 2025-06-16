@@ -73,19 +73,6 @@ void setup()
     linear.SetMargin(1);           // 1 mm
     angular.SetMargin(radians(1)); // 1 deg
 
-    // Initial pose
-    if (IHM::team == Team::Jaune)
-    {
-        robot.SetPose(1200, 170, radians(0));
-    }
-    else
-    {
-        robot.SetPose(3000 - 1200, 170, radians(0));
-    }
-    // Reset odometry
-    otos.SetPose(robot.x, robot.y, robot.h);
-
-
     // Init trajectory
     Trajectory::Initialisation(&linear, &angular, &robot);
 
@@ -93,6 +80,22 @@ void setup()
     Mapping::Initialize_Map(IHM::team);
     Obstacle::Initialize_Obstacle();
     Mapping::Initialize_Passability_Graph();
+    
+    // Initial pose
+    PoseF start;
+    if (IHM::team == Team::Jaune)
+    {
+        start = PoseF(1200, 170, radians(0));
+    }
+    else
+    {
+        start = PoseF(3000 - 1200, 170, radians(0));
+    }
+    // Initial pose
+    otos.SetPose(start.x, start.y, start.h);
+    robot.SetPose(start.x, start.y, start.h);
+    Trajectory::Reset();
+    
     Mapping::Update_Start_Vertex((int16_t)robot.x, (int16_t)robot.y);
     Mapping::Update_Passability_Graph();
 
