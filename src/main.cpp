@@ -343,7 +343,7 @@ void TaskHandleCommand(void *pvParameters)
                     // GoToPose:50;50;0
                     // GoToPose:0;0;45
                     // GoToPose:0;0;0
-                    Pose goTo = Pose(cmd.data[0], cmd.data[1], radians(cmd.data[2]));
+                    PoseF goTo = PoseF(cmd.data[0], cmd.data[1], radians(cmd.data[2]));
                     print("Robot go to x=", goTo.x);
                     print(" y=", goTo.y);
                     print(" h=", goTo.h);
@@ -356,7 +356,7 @@ void TaskHandleCommand(void *pvParameters)
                     // SetPose:500;500;0
                     // SetPose:1500;1000;0
                     timerMotion.WaitForDisable();
-                    Pose goTo = Pose(cmd.data[0], cmd.data[1], radians(cmd.data[2]));
+                    PoseF goTo = PoseF(cmd.data[0], cmd.data[1], radians(cmd.data[2]));
                     print("Robot set to x=", goTo.x);
                     print(" y=", goTo.y);
                     print(" h=", goTo.h);
@@ -365,10 +365,6 @@ void TaskHandleCommand(void *pvParameters)
                     otos.SetPose(robot.x, robot.y, robot.h);
                     Trajectory::Reset();
                     timerMotion.Enable();
-                }
-                else if (cmd.cmd == "TrajReset")
-                {
-                    Trajectory::Reset();
                 }
                 else if (cmd.cmd == "UpdateMapping")
                 {
