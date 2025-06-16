@@ -25,92 +25,70 @@ namespace Mapping
         if (team == Team::Jaune)
         {
             // Segment
-            segment[0] = Segment(Point(650, 1800), Point(1050, 1800));
-            segment[1] = Segment(Point(1050, 1800), Point(1050, 1550));
-            segment[2] = Segment(Point(1950, 1550), Point(1950, 1800));
-            segment[3] = Segment(Point(1950, 1800), Point(2350, 1800));
+            segment[0] = Segment(Point(0, 1500), Point(1500, 1500));
+            segment[1] = Segment(Point(1500, 1500), Point(1500, 0));
             // Circle
-            circle[0] = Circle(950, 950, 50);
-            circle[1] = Circle(1050, 950, 50);
-            circle[2] = Circle(1150, 950, 50);
-            circle[3] = Circle(1250, 950, 50);
-            circle[4] = Circle(1750, 950, 50);
-            circle[5] = Circle(1850, 950, 50);
-            circle[6] = Circle(1950, 950, 50);
-            circle[7] = Circle(2050, 950, 50);
-            circle[8] = Circle(625, 250, 50);
-            circle[9] = Circle(925, 250, 50);
-            circle[10] = Circle(2075, 250, 50);
-            circle[11] = Circle(2375, 250, 50);
             // Vertex
-            // vertex[0].point = Point(0, 0);
-            vertex[1].point = Point(1225, 225);
-            vertex[2].point = Point(775, 450);
-            vertex[3].point = Point(775, 175);
-            vertex[4].point = Point(250, 400);
-            vertex[5].point = Point(600, 875);
-            vertex[6].point = Point(1100, 700);
-            vertex[7].point = Point(1100, 1150);
-            vertex[8].point = Point(250, 1325);
-            vertex[9].point = Point(825, 1600);
-            vertex[10].point = Point(375, 1400);
-            vertex[11].point = Point(375, 1750);
-            vertex[12].point = Point(1500, 550);
-            vertex[13].point = Point(1500, 1350);
-            vertex[14].point = Point(1775, 400);
-            vertex[15].point = Point(2225, 450);
-            vertex[16].point = Point(2225, 175);
-            vertex[17].point = Point(2750, 400);
-            vertex[18].point = Point(2400, 875);
-            vertex[19].point = Point(1900, 700);
-            vertex[20].point = Point(1900, 1150);
-            vertex[21].point = Point(2750, 1325);
-            vertex[22].point = Point(2775, 875);
+            vertex[0].point = Point(0, 0);
+            vertex[1].point = Point(250, 250);
+            vertex[2].point = Point(500, 250);
+            vertex[3].point = Point(750, 250);
+            vertex[4].point = Point(1000, 250);
+            vertex[5].point = Point(1250, 250);
+            vertex[6].point = Point(250, 500);
+            vertex[7].point = Point(500, 500);
+            vertex[8].point = Point(750, 500);
+            vertex[9].point = Point(1000, 500);
+            vertex[10].point = Point(1250, 500);
+            vertex[11].point = Point(250, 750);
+            vertex[12].point = Point(500, 750);
+            vertex[13].point = Point(750, 750);
+            vertex[14].point = Point(1000, 750);
+            vertex[15].point = Point(1250, 750);
+            vertex[16].point = Point(250, 1000);
+            vertex[17].point = Point(500, 1000);
+            vertex[18].point = Point(750, 1000);
+            vertex[19].point = Point(1000, 1000);
+            vertex[20].point = Point(1250, 1000);
+            vertex[21].point = Point(250, 1250);
+            vertex[22].point = Point(500, 1250);
+            vertex[23].point = Point(750, 1250);
+            vertex[24].point = Point(1000, 1250);
+            vertex[25].point = Point(1250, 1250);
         }
         else if (team == Team::Bleu)
         {
             // Segment
-            segment[0] = Segment(Point(2350, 1800), Point(1950, 1800));
-            segment[1] = Segment(Point(1950, 1800), Point(1950, 1550));
-            segment[2] = Segment(Point(1050, 1550), Point(1050, 1800));
-            segment[3] = Segment(Point(1050, 1800), Point(650, 1800));
+            segment[0] = Segment(Point(3000, 1500), Point(1500, 1500));
+            segment[1] = Segment(Point(1500, 1500), Point(1500, 0));
             // Circle
-            circle[0] = Circle(2050, 950, 50);
-            circle[1] = Circle(1950, 950, 50);
-            circle[2] = Circle(1850, 950, 50);
-            circle[3] = Circle(1750, 950, 50);
-            circle[4] = Circle(1250, 950, 50);
-            circle[5] = Circle(1150, 950, 50);
-            circle[6] = Circle(1050, 950, 50);
-            circle[7] = Circle(950, 950, 50);
-            circle[8] = Circle(2375, 250, 50);
-            circle[9] = Circle(2075, 250, 50);
-            circle[10] = Circle(925, 250, 50);
-            circle[11] = Circle(625, 250, 50);
             // Vertex
-            // vertex[0].point = Point(0, 0);
-            vertex[1].point = Point(1775, 225);
-            vertex[2].point = Point(2225, 450);
-            vertex[3].point = Point(2225, 175);
-            vertex[4].point = Point(2750, 400);
-            vertex[5].point = Point(2400, 875);
-            vertex[6].point = Point(1900, 700);
-            vertex[7].point = Point(1900, 1150);
-            vertex[8].point = Point(2750, 1325);
-            vertex[9].point = Point(2175, 1600);
-            vertex[10].point = Point(2625, 1400);
-            vertex[11].point = Point(2625, 1750);
-            vertex[12].point = Point(1500, 550);
-            vertex[13].point = Point(1500, 1350);
-            vertex[14].point = Point(1225, 400);
-            vertex[15].point = Point(775, 450);
-            vertex[16].point = Point(775, 175);
-            vertex[17].point = Point(250, 400);
-            vertex[18].point = Point(600, 875);
-            vertex[19].point = Point(1100, 700);
-            vertex[20].point = Point(1100, 1150);
-            vertex[21].point = Point(250, 1325);
-            vertex[22].point = Point(225, 875);
+            vertex[0].point = Point(0, 0);
+            vertex[1].point = Point(2750, 250);
+            vertex[2].point = Point(2500, 250);
+            vertex[3].point = Point(2250, 250);
+            vertex[4].point = Point(2000, 250);
+            vertex[5].point = Point(1750, 250);
+            vertex[6].point = Point(2750, 500);
+            vertex[7].point = Point(2500, 500);
+            vertex[8].point = Point(2250, 500);
+            vertex[9].point = Point(2000, 500);
+            vertex[10].point = Point(1750, 500);
+            vertex[11].point = Point(2750, 750);
+            vertex[12].point = Point(2500, 750);
+            vertex[13].point = Point(2250, 750);
+            vertex[14].point = Point(2000, 750);
+            vertex[15].point = Point(1750, 750);
+            vertex[16].point = Point(2750, 1000);
+            vertex[17].point = Point(2500, 1000);
+            vertex[18].point = Point(2250, 1000);
+            vertex[19].point = Point(2000, 1000);
+            vertex[20].point = Point(1750, 1000);
+            vertex[21].point = Point(2750, 1250);
+            vertex[22].point = Point(2500, 1250);
+            vertex[23].point = Point(2250, 1250);
+            vertex[24].point = Point(2000, 1250);
+            vertex[25].point = Point(1750, 1250);
         }
     }
 

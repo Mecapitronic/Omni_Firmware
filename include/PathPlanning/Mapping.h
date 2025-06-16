@@ -19,8 +19,8 @@ namespace Mapping
     constexpr size_t MAP_Y_MAX = 2000; // Updated to constexpr
 
     constexpr uint8_t Max_Segment = 5;
-    constexpr uint8_t Max_Circle = 12;
-    constexpr uint8_t Max_Vertex = 23;
+    constexpr uint8_t Max_Circle = 2;
+    constexpr uint8_t Max_Vertex = 26;
 
     /****************************************************************************************
      * Global Variables
