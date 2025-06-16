@@ -38,7 +38,7 @@ public:
      * Prototypes fonctions
      ****************************************************************************************/
     void Initialisation(float speedMax, float accelMax);
-    void Update();
+    void UpdateMotion();
     void Stop();
     void TrapezoidalProfile();
     void AntiOverspeed();

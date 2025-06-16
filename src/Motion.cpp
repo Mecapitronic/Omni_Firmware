@@ -23,18 +23,19 @@ void Motion::Initialisation(float speedMax, float accelMax)
 /****************************************************************************************
  * Motion Update : Must be called on every speed control loop => motion timer
  ****************************************************************************************/
-void Motion::Update()
+void Motion::UpdateMotion()
 {
-    isRunning = true;
 
     // Check end of motion
     if (fabsf(position_error) >= position_margin)
     {
+        isRunning = true;
         TrapezoidalProfile();
         AntiOverspeed();
     }
     else
     {
+        isRunning = false;
         Stop();
     }
 }
@@ -96,7 +97,6 @@ void Motion::AntiOverspeed()
  ****************************************************************************************/
 void Motion::Stop()
 {
-    isRunning = false;
     velocity_command = 0;
 }
 

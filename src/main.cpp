@@ -171,8 +171,8 @@ void timerMotionCallback(TimerHandle_t xTimer)
         Trajectory::UpdateTrajectory();
 
         // Motion update
-        linear.Update();
-        angular.Update();
+        linear.UpdateMotion();
+        angular.UpdateMotion();
 
         // Motor update => in local robot reference
         motor.Update(linear.velocity_command, linear.direction, angular.velocity_command);
