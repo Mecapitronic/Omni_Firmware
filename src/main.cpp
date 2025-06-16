@@ -138,25 +138,29 @@ void timerMotionCallback(TimerHandle_t xTimer)
             float motor2_speed = motor.GetMotorSpeed(2);
             float motor3_speed = motor.GetMotorSpeed(3);
 
-            // Simulation Calcul Vitesse OK
+            // Simulation Calcul Vitesse
             // Calcul des composantes x, y et angular à partir des vitesses des
             // moteurs
-            float v_x = (motor1_speed + motor2_speed - 2 * motor3_speed) / 3;
-            float v_y = (motor2_speed - motor1_speed) * INV_SQRT3;
+            float v_x_relatif = (motor1_speed + motor2_speed - 2 * motor3_speed) / 3;
+            float v_y_relatif = (motor2_speed - motor1_speed) * INV_SQRT3;
             float v_ang = (-(motor1_speed + motor2_speed + motor3_speed)
                            / (3 * CENTER_WHEEL_DISTANCE));
 
-            otos.acceleration.x = v_x - otos.velocity.x;
-            otos.acceleration.y = v_y - otos.velocity.y;
+            float theta = otos.position.h; // orientation actuelle du robot
+            float v_x_global = v_x_relatif * cos(theta) - v_y_relatif * sin(theta);
+            float v_y_global = v_x_relatif * sin(theta) + v_y_relatif * cos(theta);
+
+            otos.acceleration.x = v_x_global - otos.velocity.x;
+            otos.acceleration.y = v_y_global - otos.velocity.y;
             otos.acceleration.h = v_ang - otos.velocity.h;
 
-            otos.velocity.x = v_x;
-            otos.velocity.y = v_y;
+            otos.velocity.x = v_x_global;
+            otos.velocity.y = v_y_global;
             otos.velocity.h = v_ang;
 
             // Mise à jour des positions en fonction des vitesses
-            otos.position.x += v_x * timerMotion.Period() / 1000;
-            otos.position.y += v_y * timerMotion.Period() / 1000;
+            otos.position.x += v_x_global * timerMotion.Period() / 1000;
+            otos.position.y += v_y_global * timerMotion.Period() / 1000;
             otos.position.h += v_ang * timerMotion.Period() / 1000;
         }
 
@@ -169,6 +173,26 @@ void timerMotionCallback(TimerHandle_t xTimer)
 
         // Trajectory update => error update
         Trajectory::UpdateTrajectory();
+
+        // TODO: adapter vitesse de rotation selon distance : vitesse angular = angle
+        // * Vitesse linear / distance if (linear.position_error != 0)
+        // {
+        //   angular.speed_max = fmin((fabsf(angular.position_error) *
+        //   linear.speed_max) / fabsf(linear.position_error), speed_ang_rads_max);
+        // }
+
+        // Temps pour chaque mouvement
+        // éviter div/0
+        // float t_lin = linear.position_error / fmax(linear.speed_max, 1e-3f);
+        // float t_ang = angular.position_error / fmax(angular.speed_max, 1e-3f);
+
+        // // Synchronisation : on limite la vitesse du plus rapide
+        // if (t_lin > t_ang && t_lin > 0)
+        //     angular.speed_limit =
+        //         fmax(angular.position_error / t_lin, radians(5)); // min 5°/s
+        // else if (t_ang > t_lin && t_ang > 0)
+        //     linear.speed_limit =
+        //         fmax(linear.position_error / t_ang, 10.0f); // min 10 mm/s
 
         // Motion update
         linear.UpdateMotion();
