@@ -189,17 +189,22 @@ namespace Trajectory
         angular->Stop();
     }
 
-    void TranslateToPosition(float x, float y, float speed_limit, float speed_final)
+    void GoToPose(float x, float y, float h)
     {
         // Update target position
         target.x = x;
         target.y = y;
-        target.h = robot->h;
+        target.h = h;
+        WaitRobotArrived();
+    }
 
+    void TranslateToPosition(float x, float y, float speed_limit, float speed_final)
+    {
         // Update linear speeds
         linear->speed_limit = speed_limit;
         linear->speed_final = speed_final;
-        WaitRobotArrived();
+
+        GoToPose(x, y, robot->h);
     }
 
     void TranslateToPositionWithoutWaiting(float x,
@@ -207,14 +212,11 @@ namespace Trajectory
                                            float speed_limit,
                                            float speed_final)
     {
-        // Update target position
-        target.x = x;
-        target.y = y;
-        target.h = robot->h;
-
         // Update linear speeds
         linear->speed_limit = speed_limit;
         linear->speed_final = speed_final;
+
+        GoToPose(x, y, robot->h);
     }
 
     void TranslateToPoint(PointF point, float speed_limit, float speed_final)
@@ -224,15 +226,11 @@ namespace Trajectory
 
     void RotateToOrientation(float h_rad, float speed_limit, float speed_final)
     {
-        // Update target orientation
-        target.x = robot->x;
-        target.y = robot->y;
-        target.h = h_rad;
-
         // Update linear speeds
         angular->speed_limit = speed_limit;
         angular->speed_final = speed_final;
-        WaitRobotArrived();
+
+        GoToPose(robot->x, robot->y, h_rad);
     }
 
     void RotateTowardsPosition(float x, float y, float speed_limit, float speed_final)
@@ -246,43 +244,22 @@ namespace Trajectory
         RotateTowardsPosition(point.x, point.y, speed_limit, speed_final);
     }
 
-    void GoToPose(float x, float y, float h)
-    {
-        // Update target position
-        target.x = x;
-        target.y = y;
-        target.h = h;
-        WaitRobotArrived();
-    }
-
     void GoToPose(float x, float y, float h, float speed_limit, float speed_final)
     {
-        // Update target position
-        target.x = x;
-        target.y = y;
-        target.h = h;
-        // TODO: adapter vitesse de rotation selon distance : vitesse angular = angle
-        // * Vitesse linear / distance if (linear.position_error != 0)
-        // {
-        //   angular.speed_max = fmin((fabsf(angular.position_error) *
-        //   linear.speed_max) / fabsf(linear.position_error), speed_ang_rads_max);
-        // }
-
         // Update linear speeds
         linear->speed_limit = speed_limit;
         linear->speed_final = speed_final;
-        WaitRobotArrived();
+
+        GoToPose(x, y, h);
     }
 
     void GoToVertex(t_vertexID id, float speed_limit, float speed_final)
     {
-        Point p = Mapping::Get_Vertex_Point(id);
-        target.x = p.x;
-        target.y = p.y;
-        target.h = robot->h;
         linear->speed_limit = speed_limit;
         linear->speed_final = speed_final;
-        WaitRobotArrived();
+
+        Point p = Mapping::Get_Vertex_Point(id);
+        GoToPose(p.x, p.y, robot->h);
     }
 
     void FallBackIfWeAreWithinObstacleLimits()
