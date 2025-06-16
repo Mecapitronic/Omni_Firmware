@@ -95,9 +95,9 @@ namespace Lidar
             {
                 printError(e.what());
             }
-            if (chrono.Check())
+            if (chrono.Check() && Chrono::print)
             {
-                // printChrono(chrono);
+                printChrono(chrono);
             }
             vTaskDelay(5);
         }

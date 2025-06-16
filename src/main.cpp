@@ -259,9 +259,9 @@ void TaskTeleplot(void *pvParameters)
         {
             printError(e.what());
         }
-        if (chrono.Check())
+        if (chrono.Check() && Chrono::print)
         {
-            // printChrono(chrono);
+            printChrono(chrono);
         }
         vTaskDelay(10);
     }
@@ -283,24 +283,14 @@ void TaskUpdate(void *pvParameters)
 
             // take some time to update the servo, maybe move it elsewhere
             ServoAX12::Update();
-            // functionChrono(1);
-            //  functionChrono(1000);
-            //   delay(3000);
-            //   // Test trajectoires
-            //    goTo.x = 500;
-            //    goTo.y = 1000; // avance 500
-            //    goTo.h = 0;
-            //    SetRobotPosition(goTo.x, goTo.y, goTo.h);
-            //    delay(5000);
-            //   //while(linear.isRunning || angular.isRunning) ;//doWhileWaiting();
         }
         catch (const std::exception &e)
         {
             printError(e.what());
         }
-        if (chrono.Check())
+        if (chrono.Check() && Chrono::print)
         {
-            // printChrono(chrono);
+            printChrono(chrono);
         }
         vTaskDelay(10);
     }
@@ -451,9 +441,9 @@ void TaskHandleCommand(void *pvParameters)
         {
             printError(e.what());
         }
-        if (chrono.Check())
+        if (chrono.Check() && Chrono::print)
         {
-            // printChrono(chrono);
+            printChrono(chrono);
         }
         vTaskDelay(10); // Allow other tasks to run
     }
@@ -678,9 +668,9 @@ void TaskMatch(void *pvParameters)
         {
             printError(e.what());
         }
-        if (chrono.Check())
+        if (chrono.Check() && Chrono::print)
         {
-            // printChrono(chrono);
+            printChrono(chrono);
         }
         vTaskDelay(10);
     }
