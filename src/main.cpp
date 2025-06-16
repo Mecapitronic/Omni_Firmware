@@ -210,7 +210,7 @@ void TaskTeleplot(void *pvParameters)
     int lastMatchTime = 0;
     println("Start TaskTeleplot");
     Timeout robotPosTimeOut, mapTimeOut, ihmTimeOut;
-    robotPosTimeOut.Start(500);
+    robotPosTimeOut.Start(50);
     mapTimeOut.Start(500);
     ihmTimeOut.Start(5000);
     Chrono chrono("Teleplot", 1000);
@@ -224,14 +224,17 @@ void TaskTeleplot(void *pvParameters)
             {
                 teleplot("Position", robot);
                 teleplot("Orient", degrees(robot.h));
-                // teleplot("Target", Trajectory::GetTarget());
-                // teleplot("TargetOrient", degrees(Trajectory::GetTarget().h));
-                teleplot("Direction",
-                         degrees(Trajectory::CartesianToPolar(Trajectory::GetTarget().x,
-                                                              Trajectory::GetTarget().y)
-                                     .angle));
+                teleplot("Target", Trajectory::GetTarget());
+                teleplot("TargetOrient", degrees(Trajectory::GetTarget().h));
+                teleplot("linear.direction", degrees(linear.direction));
+                println(">linear.isRunning:", linear.isRunning);
+                println(">angular.isRunning:", angular.isRunning);
 
-                println("OnHold : ", Trajectory::IsOnHold());
+                // teleplot("Direction",
+                //          degrees(Trajectory::CartesianToPolar(Trajectory::GetTarget().x,
+                //                                               Trajectory::GetTarget().y)
+                //                      .angle));
+
                 //  println(">fixeScale:0:0;0:2000;3000:2000;3000:0;|xy");
                 //  otos.Teleplot();
                 //  linear.Teleplot("linear");
@@ -240,8 +243,9 @@ void TaskTeleplot(void *pvParameters)
             if (mapTimeOut.IsTimeOut())
             {
                 Obstacle::PrintObstacleList();
+                println(">OnHold:", Trajectory::IsOnHold());
                 // ServoAX12::TeleplotPosition();
-                Obstacle::PrintAdversaryList();
+                // Obstacle::PrintAdversaryList();
             }
             if (ihmTimeOut.IsTimeOut())
             {
