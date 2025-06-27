@@ -19,8 +19,7 @@ void LedRGB::Initialisation(Robot *robotPosition)
     robot_position = robotPosition;
 
     // Initialize the timers
-    // we need a rotation of led every 2 seconds, so 2s/24
-    rotationTimer.Start(2000 / NUM_LEDS);
+    rotationTimer.Start(50);
     blendTimeOut.Start(5);
     blendCoef = 5;
 }
@@ -31,50 +30,74 @@ void LedRGB::robotIsStarting()
     ring_controller->showLeds(RING_BRIGHTNESS);
 }
 
-// pour faire un clignotement on stock 2 couleurs pour alterner
 void LedRGB::update()
 {
-    // Update data
-    // select right team color
-    IHM::team == Team::Jaune ? team_color = CRGB::Gold : team_color = CRGB::DodgerBlue;
-    // set time led to green if match mode, violet in test mode
-    IHM::switchMode == 1 ? clock_color = CRGB::ForestGreen : clock_color = CRGB::Purple;
-
     if (Match::matchState == State::MATCH_END)
     {
         rainbow();
         return;
     }
+    CRGB team_color = (IHM::team == Team::Jaune ? CRGB::Gold : CRGB::DodgerBlue);
+
+    displayTime();
 
     // si le bouton d'arrêt d'urgence est enclenché on voit rouge
     if (IHM::bauReady != 1)
     {
-        filling_color = CRGB::Red;
+        CRGB filling_color = CRGB::Red;
+        filling_color = glowTwoColors(filling_color, team_color);
+        fill_solid(leds, NUM_LEDS, filling_color);
+    }
+
+    displayObstacle();
+
+    ring_controller->showLeds(RING_BRIGHTNESS);
+}
+
+void LedRGB::displayTime()
+{
+    // select right team color
+    CRGB team_color = (IHM::team == Team::Jaune ? CRGB::Gold : CRGB::DodgerBlue);
+
+    fill_solid(leds, NUM_LEDS, team_color);
+
+    if (Match::matchState == State::MATCH_WAIT)
+    {
+        // 1 turn in 1 sec
+        float ratio = 1000.0 / NUM_LEDS;
+        long time = 0;
+        if (Match::matchState == State::MATCH_WAIT)
+            time = millis();
+        else
+            time = Match::getMatchTimeMs();
+        float index = (time % 1000) / ratio;
+        if (index >= NUM_LEDS)
+            index = 0;
+
+        leds[(int)index] = CRGB::Black;
     }
     else
     {
-        if (Match::matchState == State::MATCH_WAIT
-            || Match::matchState == State::MATCH_BEGIN)
+        // slowly decrease the leds from team color to black according to match time left
+        uint8_t match_time_index_led =
+            (NUM_LEDS * Match::getMatchTimeMs()) / Match::time_end_match;
+
+        leds[match_time_index_led] = team_color.lerp8(
+            CRGB::Black,
+            map(Match::getMatchTimeMs() % (Match::time_end_match / NUM_LEDS),
+                0,
+                Match::time_end_match / NUM_LEDS,
+                0,
+                255));
+        for (int i = 0; i < match_time_index_led; i++)
         {
-            // Set the team color when waiting for the match to start
-            // filling_color = team_color;
-            filling_color = glowTwoColors(team_color, team_color.lerp8(CRGB::Black, 240));
-            // blendTimeOut.timeOut = 10;
-            blendCoef = 1;
-        }
-        else
-        {
-            // Blend the team color with black for a lighter shade
-            // filling_color = team_color.lerp8(CRGB::Black, 200);
-            filling_color = glowTwoColors(team_color, team_color.lerp8(CRGB::Black, 240));
-            // blendTimeOut.timeOut = 1;
-            blendCoef = 5;
+            leds[i] = CRGB::Black;
         }
     }
-    fill_solid(leds, NUM_LEDS, filling_color); // Clear all LEDs
+}
 
-    displayTime();
-
+void LedRGB::displayObstacle()
+{
     // display obstacles around the robot
     for (const auto &obstacle : Obstacle::obstacle)
     {
@@ -83,69 +106,28 @@ void LedRGB::update()
             continue; // Skip if the obstacle radius is invalid
         }
 
+        Point robot = robot_position->GetPoint();
         // calculate obstacles orientation relative to the robot position and orientation
-        leds[directionToLedNumber(RelativeDirection(obstacle.p))] = CRGB::White;
-    }
+        float relativeDirection =
+            DirectionFromPoints(robot, obstacle.p) - robot_position->h;
+        // calculate the distance between robot and obstacle
+        float relativeDistance = DistanceBetweenPoints(robot, obstacle.p);
 
-    ring_controller->showLeds(RING_BRIGHTNESS);
-}
-
-// comme une led représente 4 secondes, on peut faire un tour complet en 1 secondes
-// faire 4 tours avant d'incrémenter la led
-// quand on est pas en match on peut faire une petite navette en allumant la led avant et
-// la led après un peu moins fort
-void LedRGB::displayTime()
-{
-    // display seconds counter in wait, begin and run states
-    if (Match::matchState != State::MATCH_END && Match::matchState != State::MATCH_STOP)
-    {
-        leds[secondsCounter] = clock_color;
-        if (rotationTimer.IsTimeOut())
-        {
-            secondsCounter++;
-        }
-    }
-
-    // update led ring display according to current robot state
-    if (Match::matchState == State::MATCH_BEGIN || Match::matchState == State::MATCH_RUN)
-    {
-        // get time instead of using timer
-        // match_time_led = (NUM_LEDS * Match::getMatchTimeMs()) / Match::time_end_match;
-
-        if (!matchClockTimer.isRunning)
-        {
-            // match lasts 100 seconds
-            matchClockTimer.Start(100000 / NUM_LEDS);
-            match_time_led = 0;
-            secondsCounter = 0;
-        }
-
-        // change of led all 4 seconds
-        if (matchClockTimer.IsTimeOut())
-        {
-            match_time_led++;
-        }
-
-        // Ensure we don't go out of bounds
-        if (match_time_led < NUM_LEDS)
-        {
-            leds[match_time_led] = clock_color;
-        }
-    }
-
-    if (secondsCounter >= NUM_LEDS)
-    {
-        secondsCounter = 0; // avoid overflow
+        if (relativeDistance > 375)
+            leds[directionToLedNumber(relativeDirection)] =
+                (IHM::team != Team::Jaune ? CRGB::Gold : CRGB::DodgerBlue);
+        else
+            leds[directionToLedNumber(relativeDirection)] = CRGB::DarkRed;
     }
 }
 
 void LedRGB::rainbow()
 {
+    static uint8_t secondsCounter = 0;
     if (rotationTimer.IsTimeOut())
     {
-        fill_rainbow_circular(leds, NUM_LEDS, secondsCounter, false);
-        ring_controller->showLeds(RING_BRIGHTNESS); // Show the current color
-        secondsCounter += 2;                        // Increment hue for the next cycle
+        fill_rainbow_circular(leds, NUM_LEDS, secondsCounter++, false);
+        ring_controller->showLeds(RING_BRIGHTNESS);
     }
 }
 
@@ -177,7 +159,6 @@ inline CRGB LedRGB::TwoColorsTransition(CRGB color1, CRGB color2)
 inline CRGB LedRGB::glowTwoColors(CRGB color1, CRGB color2)
 {
     return TwoColorsTransition(color1, color2);
-    // TwoColorsTransition(color2, color1);
 }
 
 inline CRGB LedRGB::glowOneColor(CRGB color)
@@ -185,7 +166,7 @@ inline CRGB LedRGB::glowOneColor(CRGB color)
     return LedRGB::glowTwoColors(CRGB::Black, color);
 }
 
-void LedRGB::emergencyStop()
+void LedRGB::emergencyStopAtStart()
 {
     fill_solid(leds, NUM_LEDS, CRGB::Red);
     for (uint8_t i = RING_BRIGHTNESS; i > 0; i--)
@@ -201,25 +182,17 @@ void LedRGB::emergencyStop()
     }
 }
 
-float LedRGB::RelativeDirection(Point point)
-{
-    return atan2(point.y - robot_position->y, point.x - robot_position->x)
-           - robot_position->h;
-}
-
 uint8_t LedRGB::directionToLedNumber(float angle)
 {
-    // Normalize the angle to be in the range [0, 2π]
-    while (angle < 0)
-        angle += 2 * M_PI;
-    while (angle >= 2 * M_PI)
-        angle -= 2 * M_PI;
+    // shift the angle of -90 because the 0 led in the ring face the 90° of the robot
+    angle -= HALF_PI;
 
-    // shift the angle from 90
-    angle -= 90;
+    // Normalize the angle to be in the range [0, 2π]
+    angle = NormalizeAngle2PI(angle);
+
 
     // Convert the angle to a value between 0 and NUM_LEDS
-    int led_number = static_cast<int>(angle / (2 * M_PI) * NUM_LEDS);
+    int led_number = static_cast<int>(angle / TWO_PI * NUM_LEDS);
 
     // Adjust for clockwise direction
     led_number = (NUM_LEDS - led_number) % NUM_LEDS;

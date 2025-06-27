@@ -45,7 +45,7 @@ void setup()
     while (IHM::bauReady != 1)
     {
         IHM::UpdateBAU();
-        led_ring.emergencyStop();
+        led_ring.emergencyStopAtStart();
         vTaskDelay(1);
     }
 
@@ -58,7 +58,7 @@ void setup()
     while (!otos.IsConnected() && !simulation)
     {
         otos.Initialisation(simulation);
-        led_ring.emergencyStop();
+        led_ring.emergencyStopAtStart();
         vTaskDelay(1);
     }
 

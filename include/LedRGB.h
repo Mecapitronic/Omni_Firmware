@@ -82,7 +82,7 @@ public:
 
     void robotIsStarting();
     void displayTime();
-
+    void displayObstacle();
 
     /**
      * @brief set all leds to red and glow smoothly
@@ -92,16 +92,7 @@ public:
     inline CRGB glowTwoColors(CRGB color1, CRGB color2);
     inline CRGB glowOneColor(CRGB color);
 
-    void emergencyStop();
-
-    /**
-     * @brief give the relative direction (in radians) of a given object from the robot
-     * perspective. Use robot origin and 0° (robot right)
-     *
-     * @param point the object we want the direction from (the robot)
-     * @return float direction of the object in radians
-     */
-    float RelativeDirection(Point point);
+    void emergencyStopAtStart();
 
     /**
      * @brief convert a polar point to the corresponding LED number
@@ -120,23 +111,23 @@ public:
     uint8_t directionToLedNumber(float angle);
 
 private:
-    CRGB::HTMLColorCode timerMatchColor;
+    // CRGB::HTMLColorCode timerMatchColor;
     CLEDController *ring_controller;  // Pointer to the FastLED controller for the ring
-    CRGB filling_color = CRGB::Black; // Couleur de fond
+    // CRGB filling_color = CRGB::Black; // Couleur de fond
     CRGB leds[NUM_LEDS];              // Array to hold the colors of the LEDs
-    CRGB team_color = CRGB::Black;    // Default color for the team
-    CRGB clock_color = CRGB::ForestGreen; // Color for the clock
+    // CRGB team_color = CRGB::Black;    // Default color for the team
+    //  CRGB clock_color = CRGB::ForestGreen; // Color for the clock
     Robot *robot_position;                // Pointer to the robot position
-    Timeout matchClockTimer;              // Timer to display match time
+    // Timeout matchClockTimer;              // Timer to display match time
     Timeout rotationTimer;                // Timer to rotate colors
     Timeout blendTimeOut;
     uint8_t blendAmount; // Amount of blending between two colors,
                          // that changes over time
     int8_t blendCoef;
-    uint8_t secondsCounter = 0; // permet d'afficher les secondes (1/2 rpm) pour la
-                                // rotation de couleur ou d'arc en ciel
-    uint8_t match_time_led = 0; // numero de la led à allumer
-                                // pour indiquer le temps de match écoulé
+    // uint8_t secondsCounter = 0; // permet d'afficher les secondes (1/2 rpm) pour la
+    //  rotation de couleur ou d'arc en ciel
+    // uint8_t match_time_led = 0; // numero de la led à allumer
+    //  pour indiquer le temps de match écoulé
 };
 
 #endif
