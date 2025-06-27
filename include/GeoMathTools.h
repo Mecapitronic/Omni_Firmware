@@ -51,7 +51,9 @@ float DirectionFromPositions(float xA, float yA, float xB, float yB);
  * @param pB point B: point duquel on veut la direction
  * @return float direction en radian
  */
-float DirectionFromPoint(PointF pA, PointF pB);
+float DirectionFromPoints(PointF pA, PointF pB);
+
+float DirectionFromPoints(Point pA, Point pB);
 
 /**
  * @brief Euclidean distance from position xA, yA and position xB, yB
@@ -82,5 +84,13 @@ float DistanceBetweenPoints(Point pA, Point pB);
  * @return float angle normalisé entre -π et π
  */
 float NormalizeAngle(float a_rad);
+
+/**
+ * @brief Normalisation of angle in radians between [0, 2*π]
+ *
+ * @param a_rad angle en radian
+ * @return float angle normalisé entre 0 et 2*π
+ */
+float NormalizeAngle2PI(float a_rad);
 
 #endif

@@ -15,6 +15,11 @@ float DirectionFromPoints(PointF pA, PointF pB)
     return atan2f((pB.y - pA.y), (pB.x - pA.x));
 }
 
+float DirectionFromPoints(Point pA, Point pB)
+{
+    return atan2f((pB.y - pA.y), (pB.x - pA.x));
+}
+
 float DistanceBetweenPositions(float xA, float yA, float xB, float yB)
 {
     return Norm2D((xB - xA), (yB - yA));
@@ -35,6 +40,15 @@ float NormalizeAngle(float a_rad)
     while (a_rad > PI)
         a_rad -= TWO_PI;
     while (a_rad < -PI)
+        a_rad += TWO_PI;
+    return a_rad;
+}
+
+float NormalizeAngle2PI(float a_rad)
+{
+    while (a_rad > TWO_PI)
+        a_rad -= TWO_PI;
+    while (a_rad < 0)
         a_rad += TWO_PI;
     return a_rad;
 }
