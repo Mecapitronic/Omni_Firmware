@@ -27,7 +27,8 @@ void setup()
     digitalWrite(PIN_EN_MCU, HIGH);
 
     ESP32_Helper::Initialisation();
-    delay(3000);
+    if (!simulation)
+        delay(3000);
     println("Board : ", String(ARDUINO_BOARD));
     print("Arduino Version : ", ESP_ARDUINO_VERSION_MAJOR);
     print(".", ESP_ARDUINO_VERSION_MINOR);
