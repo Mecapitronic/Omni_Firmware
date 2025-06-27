@@ -107,6 +107,9 @@ namespace ServoAX12
 
     void UpdateServo(ServoMotion &servo)
     {
+        // When BAU is OFF, servo are unavailable
+        if (IHM::bauReady != 1)
+            return;
         if (_simulation)
         {
             servo.position = servo.command_position;

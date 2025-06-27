@@ -6,6 +6,7 @@
 #include <unordered_map>
 
 #include "ESP32_Helper.h"
+#include "IHM.h"
 #include "pins.h"
 
 namespace ServoAX12
