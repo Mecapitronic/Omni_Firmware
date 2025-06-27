@@ -71,9 +71,7 @@ namespace Trajectory
 
     bool isTheObstacleToClose(Circle obstacle)
     {
-        return DistanceBetweenPoints(robot->GetPoint(), obstacle.p)
-               < OBSTACLE_TOO_CLOSE + ROBOT_RADIUS + ROBOT_MARGIN + OBSTACLE_RADIUS
-                     + OBSTACLE_MARGIN;
+        return DistanceBetweenPoints(robot->GetPoint(), obstacle.p) < OBSTACLE_TOO_CLOSE;
     }
 
     void UpdateAdversary()
@@ -273,8 +271,8 @@ namespace Trajectory
                 // on recule de 10cm dans la direction opposée de l'obstacle
                 PoseF linear_target = robot->GetPoseF();
                 PolarPoint adversary = CartesianToRelativePolar(obstacle.p);
-                linear_target.x -= 100 * cos(adversary.angle + M_PI);
-                linear_target.y -= 100 * sin(adversary.angle + M_PI);
+                linear_target.x -= 100 * cos(adversary.angle + PI);
+                linear_target.y -= 100 * sin(adversary.angle + PI);
 
                 // TODO: checker si il n'y a pas d'obstacle dans la direction opposée
                 GoToPose(linear_target.x, linear_target.y, robot->h);

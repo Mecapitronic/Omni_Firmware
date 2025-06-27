@@ -113,7 +113,7 @@ void LedRGB::displayObstacle()
         // calculate the distance between robot and obstacle
         float relativeDistance = DistanceBetweenPoints(robot, obstacle.p);
 
-        if (relativeDistance > 375)
+        if (relativeDistance > Trajectory::OBSTACLE_TOO_CLOSE)
             leds[directionToLedNumber(relativeDirection)] =
                 (IHM::team != Team::Jaune ? CRGB::Gold : CRGB::DodgerBlue);
         else

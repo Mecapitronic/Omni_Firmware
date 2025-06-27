@@ -18,9 +18,10 @@ namespace Trajectory
     // (tolérance)
     constexpr float ArrivalTriggerAngle = radians(5.0);
 
+    // distance en dessous de laquelle on robot adversaire est considéré trop prêt
+    // de nous = risque de collision
     constexpr uint16_t OBSTACLE_TOO_CLOSE =
-        20; // distance en dessous de laquelle on robot adversaire est considéré trop prêt
-            // de nous = risque de collision
+        30 + ROBOT_RADIUS + ROBOT_MARGIN + OBSTACLE_RADIUS + OBSTACLE_MARGIN;
 
     // obstacle avoidance while path finding
     void putOnHold();

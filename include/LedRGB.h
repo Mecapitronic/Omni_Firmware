@@ -9,6 +9,7 @@
 #include "Match.h"
 #include "PathPlanning/Obstacle.h"
 #include "Structure.h"
+#include "Trajectory.h"
 #include "pins.h"
 
 #define NUM_LEDS 24
