@@ -291,8 +291,7 @@ namespace ServoAX12
     {
         Printer::println("AX12 Command Help :");
         Printer::println(" > AX12Scan");
-        Printer::println(
-            "      Scan all Dynamixel servos on all protocols and baudrates");
+        Printer::println("      Scan all Dynamixel on all protocols and baudrates");
         Printer::println(" > AX12PrintInfo[:id]");
         Printer::println("      Print info for all servos or for the given id");
         Printer::println(" > AX12Pos[:id]:[position]");
@@ -380,8 +379,7 @@ namespace ServoAX12
         {
             servo.position = servo.command_position =
                 dxl.getPresentPosition(servo.id, UNIT_DEGREE);
-            println("Servo " + servo.name + " " + String(servo.id) + " : ",
-                    servo.position);
+            println("Servo %s %d : %d", servo.name, servo.id, servo.position);
         }
     }
 } // namespace ServoAX12
