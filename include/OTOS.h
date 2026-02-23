@@ -3,7 +3,6 @@
 
 #include "SparkFun_Qwiic_OTOS_Arduino_Library.h"
 #include <Arduino.h>
-#include <Wire.h>
 
 #include "ESP32_Helper.h"
 #include "pins.h"

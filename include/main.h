@@ -5,6 +5,7 @@ using namespace std;
 
 #include "ESP32_Helper.h"
 #include "pins.h"
+#include <Wire.h>
 #include <math.h>
 using namespace Printer;
 #include "GeoMathTools.h"

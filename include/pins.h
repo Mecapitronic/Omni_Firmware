@@ -57,7 +57,7 @@ constexpr size_t PIN_DIR_M2 = 4;
 constexpr size_t PIN_STEP_M3 = 2;
 constexpr size_t PIN_DIR_M3 = 1;
 
-//******************** Pins TwoWire I²C - Otos
+//******************** Pins TwoWire I²C
 /*
 #undef SDA
 #define SDA 8

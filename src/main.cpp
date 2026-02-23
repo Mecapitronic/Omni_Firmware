@@ -53,6 +53,10 @@ void setup()
 
     Lidar::Initialisation(&robot);
 
+    // Normal speed is 100 000
+    // With higher speed, instructions on I2C take less time
+    Wire.begin(SDA, SCL, 400000UL);
+
     otos.Initialisation(simulation);
     // Init sensors
     while (!otos.IsConnected() && !simulation)
