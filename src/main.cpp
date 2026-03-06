@@ -39,6 +39,12 @@ void setup()
     println();
     println("Robot Holonome Firmware");
 
+    // Normal speed is 100 000
+    // With higher speed, instructions on I2C take less time
+    Wire.begin(SDA, SCL, 400000UL);
+
+    Screen::init();
+
     // Init IHM
     IHM::InitIHM();
 
@@ -61,10 +67,6 @@ void setup()
         ServoID::Right, "Right", ServoPosition::RightMin, ServoPosition::RightMax);
 
     Lidar::Initialisation(&robot);
-
-    // Normal speed is 100 000
-    // With higher speed, instructions on I2C take less time
-    Wire.begin(SDA, SCL, 400000UL);
 
     otos.Initialisation(simulation);
     // Init sensors
