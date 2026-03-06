@@ -1,13 +1,10 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-using namespace std;
+#include "Hardware_Config.h"
 
+#include "ESP32_Hardware.h"
 #include "ESP32_Helper.h"
-#include "pins.h"
-#include <Wire.h>
-#include <math.h>
-using namespace Printer;
 #include "GeoMathTools.h"
 #include "IHM.h"
 #include "LedRGB.h"
@@ -16,12 +13,17 @@ using namespace Printer;
 #include "Motion.h"
 #include "Motor.h"
 #include "OTOS.h"
-#include "ServoAX12.h"
 #include "Structure.h"
 #include "Timer.h"
 #include "Trajectory.h"
+#include "pins.h"
+#include <Wire.h>
+#include <math.h>
 
 #include "PathPlanning/PathFinding.h"
+
+using namespace std;
+using namespace Printer;
 
 #ifndef ARDUINO_USB_MODE
 #warning /*error*/ This ESP32 SoC has no Native USB interface

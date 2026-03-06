@@ -49,7 +49,16 @@ void setup()
         vTaskDelay(1);
     }
 
-    ServoAX12::Initialisation(simulation);
+    ServoAX12::Initialisation(SERIAL_SERVO, RX_SERVO, TX_SERVO, PIN_SERVO_DIR);
+
+    ServoAX12::AddServo(
+        ServoID::UpPlank, "UpPlank", ServoPosition::Min, ServoPosition::Max);
+    ServoAX12::AddServo(
+        ServoID::UpCan, "UpCan", ServoPosition::UpCanMin, ServoPosition::UpCanMax);
+    ServoAX12::AddServo(
+        ServoID::Left, "Left", ServoPosition::LeftMin, ServoPosition::LeftMax);
+    ServoAX12::AddServo(
+        ServoID::Right, "Right", ServoPosition::RightMin, ServoPosition::RightMax);
 
     Lidar::Initialisation(&robot);
 
@@ -220,6 +229,7 @@ void TaskTeleplot(void *pvParameters)
         chrono.Start();
         try
         {
+            // ServoAX12::TeleplotAllPosition();
             if (robotPosTimeOut.IsTimeOut())
             {
                 teleplot("Position", robot);
@@ -285,9 +295,6 @@ void TaskUpdate(void *pvParameters)
             IHM::UpdateBAU();
             IHM::Blink();
             led_ring.update();
-
-            // take some time to update the servo, maybe move it elsewhere
-            ServoAX12::Update();
         }
         catch (const std::exception &e)
         {
@@ -506,8 +513,8 @@ void TaskMatch(void *pvParameters)
                 // float angle = 0;
                 //  Enable Motor & Servo Power
                 digitalWrite(PIN_EN_MCU, HIGH);
-                ServoAX12::Bas();
-                ServoAX12::Prise();
+                //ServoAX12::Bas();
+                //ServoAX12::Prise();
                 while (ServoAX12::AreAllServoMoving())
                 {
                     delay(1);
@@ -538,7 +545,7 @@ void TaskMatch(void *pvParameters)
                 // Tourner vers la dépose
                 Trajectory::RotateToOrientation(radians(178), angular.speed_max / 5, 0);
 
-                ServoAX12::Bas();
+                // Bas();
                 while (ServoAX12::AreAllServoMoving())
                 {
                     delay(1);
@@ -549,14 +556,14 @@ void TaskMatch(void *pvParameters)
                 Trajectory::TranslateToPosition(p.x, p.y, linear.speed_max / 4, 0);
 
                 // Baisser le bras
-                ServoAX12::Bas();
+                // ServoAX12::Bas();
                 while (ServoAX12::AreAllServoMoving())
                 {
                     delay(1);
                 }
 
                 // Déposer les boites
-                ServoAX12::Depose();
+                // ServoAX12::Depose();
                 while (ServoAX12::AreAllServoMoving())
                 {
                     delay(1);
@@ -567,12 +574,12 @@ void TaskMatch(void *pvParameters)
 
 
                 // --------  2eme prise --------
-                ServoAX12::Prise();
+                // ServoAX12::Prise();
                 while (ServoAX12::AreAllServoMoving())
                 {
                     delay(1);
                 }
-                ServoAX12::Bas();
+                // ServoAX12::Bas();
                 while (ServoAX12::AreAllServoMoving())
                 {
                     delay(1);
@@ -605,7 +612,7 @@ void TaskMatch(void *pvParameters)
                 Trajectory::RotateToOrientation(radians(178), angular.speed_max / 5, 0);
 
                 // Monter le bras
-                ServoAX12::Haut();
+                // ServoAX12::Haut();
                 while (ServoAX12::AreAllServoMoving())
                 {
                     delay(1);
@@ -616,14 +623,14 @@ void TaskMatch(void *pvParameters)
                 Trajectory::TranslateToPosition(p.x, p.y, linear.speed_max / 4, 0);
 
                 // Poser le bras
-                ServoAX12::Mid();
+                // ServoAX12::Mid();
                 while (ServoAX12::AreAllServoMoving())
                 {
                     delay(1);
                 }
 
                 // Déposer les boites
-                ServoAX12::Depose();
+                // ServoAX12::Depose();
                 while (ServoAX12::AreAllServoMoving())
                 {
                     delay(1);
@@ -633,12 +640,12 @@ void TaskMatch(void *pvParameters)
                 Trajectory::TranslateToPosition(p.x, p.y + 150, linear.speed_max, 0);
 
                 // Descendre le bras
-                ServoAX12::Bas();
+                // ServoAX12::Bas();
                 while (ServoAX12::AreAllServoMoving())
                 {
                     delay(1);
                 }
-                ServoAX12::Prise();
+                // ServoAX12::Prise();
                 while (ServoAX12::AreAllServoMoving())
                 {
                     delay(1);
