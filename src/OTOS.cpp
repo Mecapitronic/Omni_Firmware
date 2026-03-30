@@ -2,7 +2,7 @@
 
 using namespace Printer;
 
-void OpticalTrackingOdometrySensor::Initialisation(bool simulation)
+void OpticalTrackingOdometrySensor::Initialisation()
 {
     println("Init QwiicOTOS");
 

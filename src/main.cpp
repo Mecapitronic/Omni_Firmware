@@ -3,6 +3,11 @@
 /****************************************************************************************
  * Variables
  ****************************************************************************************/
+#ifdef SIMULATOR
+const bool simulation = true;
+#else
+const bool simulation = false;
+#endif
 
 Robot robot;
 TimerThread timerMotion;
@@ -70,11 +75,11 @@ void setup()
 
     Lidar::Initialisation(&robot);
 
-    otos.Initialisation(simulation);
+    otos.Initialisation();
     // Init sensors
     while (!otos.IsConnected() && !simulation)
     {
-        otos.Initialisation(simulation);
+        otos.Initialisation();
         led_ring.emergencyStopAtStart();
         vTaskDelay(1);
     }

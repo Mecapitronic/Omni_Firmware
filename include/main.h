@@ -41,16 +41,12 @@ using namespace Printer;
 
 #endif
 
-#ifdef SIMULATOR
-const bool simulation = true;
-#else
-const bool simulation = false;
-#endif
 
 // distance between center of robot and center of wheel in mm => equal to mm/radian
 #define CENTER_WHEEL_DISTANCE 115.0
 #define MM_PER_RAD CENTER_WHEEL_DISTANCE
 
+extern bool simulation;
 extern Robot robot;
 extern TimerThread timerMotion;
 void timerMotionCallback(TimerHandle_t xTimer);

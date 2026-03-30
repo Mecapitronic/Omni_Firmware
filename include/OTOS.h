@@ -5,6 +5,7 @@
 #include <Arduino.h>
 
 #include "ESP32_Helper.h"
+#include "main.h"
 #include "pins.h"
 
 typedef sfeTkError_t sfTkError_t;
@@ -12,7 +13,7 @@ typedef sfeTkError_t sfTkError_t;
 class OpticalTrackingOdometrySensor
 {
 public:
-    void Initialisation(bool simulation = false);
+    void Initialisation();
     bool IsConnected();
     void Update();
     void HandleCommand(Command cmd);
