@@ -3,6 +3,8 @@
 /****************************************************************************************
  * Variables
  ****************************************************************************************/
+
+Robot robot;
 TimerThread timerMotion;
 
 LedRGB led_ring;
@@ -11,14 +13,12 @@ Motor motor;
 Motion linear;
 Motion angular;
 
-Robot robot;
-
 OpticalTrackingOdometrySensor otos;
 
 void setup()
 {
     // display state as soon as possible to show it is starting
-    led_ring.Initialisation(&robot);
+    led_ring.Initialisation();
     delay(500); // display for 1/2 second
 
     pinMode(PIN_EN_MCU, OUTPUT);

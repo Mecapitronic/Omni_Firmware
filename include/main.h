@@ -51,6 +51,7 @@ const bool simulation = false;
 #define CENTER_WHEEL_DISTANCE 115.0
 #define MM_PER_RAD CENTER_WHEEL_DISTANCE
 
+extern Robot robot;
 extern TimerThread timerMotion;
 void timerMotionCallback(TimerHandle_t xTimer);
 

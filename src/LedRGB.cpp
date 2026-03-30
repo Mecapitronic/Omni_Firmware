@@ -2,7 +2,7 @@
 
 using namespace Printer;
 
-void LedRGB::Initialisation(Robot *robotPosition)
+void LedRGB::Initialisation()
 {
     // Initialize timers for color transitions and rotation
     print("RGB initialisation of ", NUM_LEDS, " pixels");
@@ -14,9 +14,6 @@ void LedRGB::Initialisation(Robot *robotPosition)
     // Set the initial color of the LEDs to black
     fill_solid(leds, NUM_LEDS, CRGB::Purple);
     ring_controller->showLeds(RING_BRIGHTNESS);
-
-    // Initialize the robot position pointer
-    robot_position = robotPosition;
 
     // Initialize the timers
     rotationTimer.Start(50);
@@ -106,12 +103,11 @@ void LedRGB::displayObstacle()
             continue; // Skip if the obstacle radius is invalid
         }
 
-        Point robot = robot_position->GetPoint();
         // calculate obstacles orientation relative to the robot position and orientation
         float relativeDirection =
-            DirectionFromPoints(robot, obstacle.p) - robot_position->h;
+            DirectionFromPoints(robot.GetPoint(), obstacle.p) - robot.h;
         // calculate the distance between robot and obstacle
-        float relativeDistance = DistanceBetweenPoints(robot, obstacle.p);
+        float relativeDistance = DistanceBetweenPoints(robot.GetPoint(), obstacle.p);
 
         if (relativeDistance > Trajectory::OBSTACLE_TOO_CLOSE)
             leds[directionToLedNumber(relativeDirection)] =

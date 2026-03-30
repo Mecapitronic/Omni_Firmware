@@ -10,6 +10,7 @@
 #include "PathPlanning/Obstacle.h"
 #include "Structure.h"
 #include "Trajectory.h"
+#include "main.h"
 #include "pins.h"
 
 #define NUM_LEDS 24
@@ -56,10 +57,8 @@ public:
      * @brief initialise the RGB LED ring, sets the brightness and prepares the ring
      * controller.
      *
-     * @param robotPosition pointer to robot position in order to display the obstacles
-     * and adversaries positions relative to the robot
      */
-    void Initialisation(Robot *robotPosition);
+    void Initialisation();
 
     /**
      * @brief update led ring display according to current robot state.
@@ -118,7 +117,6 @@ private:
     CRGB leds[NUM_LEDS];              // Array to hold the colors of the LEDs
     // CRGB team_color = CRGB::Black;    // Default color for the team
     //  CRGB clock_color = CRGB::ForestGreen; // Color for the clock
-    Robot *robot_position;                // Pointer to the robot position
     // Timeout matchClockTimer;              // Timer to display match time
     Timeout rotationTimer;                // Timer to rotate colors
     Timeout blendTimeOut;
