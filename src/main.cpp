@@ -48,6 +48,8 @@ void setup()
     // Init IHM
     IHM::InitIHM();
 
+    ColorSensor::Initialisation();
+
     while (IHM::bauReady != 1)
     {
         IHM::UpdateBAU();
@@ -297,6 +299,7 @@ void TaskUpdate(void *pvParameters)
             IHM::UpdateBAU();
             IHM::Blink();
             led_ring.update();
+            ColorSensor::Update();
         }
         catch (const std::exception &e)
         {
@@ -448,6 +451,10 @@ void TaskHandleCommand(void *pvParameters)
                     Obstacle::Add_Obstacle(num, {0, 0});
                     Mapping::Update_Passability_Obstacle();
                     Obstacle::PrintObstacleList();
+                }
+                else if (cmd.cmd == "ColorSensor" && cmd.size == 1)
+                {
+                    ColorSensor::PrintDebug(cmd.data[0]);
                 }
             }
         }

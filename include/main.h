@@ -5,6 +5,8 @@
 
 #include "ESP32_Hardware.h"
 #include "ESP32_Helper.h"
+
+#include "ColorSensor.h"
 #include "GeoMathTools.h"
 #include "IHM.h"
 #include "LedRGB.h"
@@ -17,6 +19,7 @@
 #include "Timer.h"
 #include "Trajectory.h"
 #include "pins.h"
+
 #include <Wire.h>
 #include <math.h>
 
