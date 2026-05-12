@@ -1,39 +1,35 @@
 #include "main.h"
 
+using namespace Printer;
+using namespace IHM;
+using namespace Hardware_Config;
+
 /****************************************************************************************
  * Variables
  ****************************************************************************************/
-#ifdef SIMULATOR
-const bool simulation = true;
-#else
-const bool simulation = false;
-#endif
-
 Robot robot;
 TimerThread timerMotion;
 
-LedRGB led_ring;
+// LedRGB led_ring;
 Motor motor;
 
 Motion linear;
 Motion angular;
 
-OpticalTrackingOdometrySensor otos;
-
 void setup()
 {
     // display state as soon as possible to show it is starting
-    led_ring.Initialisation();
-    delay(500); // display for 1/2 second
-
-    pinMode(PIN_EN_MCU, OUTPUT);
-    // digitalWrite(PIN_EN_MCU, LOW);
-    //  We need it to init the servos
-    digitalWrite(PIN_EN_MCU, HIGH);
+    // led_ring.Initialisation();
+    // delay(500); // display for 1/2 second
 
     ESP32_Helper::Initialisation();
-    if (!simulation)
-        delay(3000);
+    println("Robot Holonome Firmware");
+
+    Hardware::Initialisation(false);
+    Power::EnablePower();
+
+    Match::SetNumPami(10);
+    /*
     println("Board : ", String(ARDUINO_BOARD));
     print("Arduino Version : ", ESP_ARDUINO_VERSION_MAJOR);
     print(".", ESP_ARDUINO_VERSION_MINOR);
@@ -41,48 +37,31 @@ void setup()
     println("ESP IDF Version : ", String(esp_get_idf_version()));
     println("Temperature : ", temperatureRead(), " deg Celsius");
     println("Frequency CPU : ", getCpuFrequencyMhz(), " MHz");
-    println();
-    println("Robot Holonome Firmware");
+    println();*/
 
-    // Normal speed is 100 000
-    // With higher speed, instructions on I2C take less time
-    Wire.begin(SDA, SCL, 400000UL);
+    // ColorSensor::Initialisation();
+    ServoAX12::ServoConfig servoConfig;
+    servoConfig.ax12Id = 18;
+    servoConfig.AddPosition(0, Hardware_Config::ServoPosition::Min);
+    servoConfig.AddPosition(100, Hardware_Config::ServoPosition::Pos1);
+    servoConfig.AddPosition(200, Hardware_Config::ServoPosition::Pos2);
+    servoConfig.AddPosition(250, Hardware_Config::ServoPosition::Pos3);
+    servoConfig.AddPosition(300, Hardware_Config::ServoPosition::Max);
+    ServoAX12::AddServo(Hardware_Config::ServoID::Up, "Up", servoConfig);
 
-    Screen::init();
-
-    // Init IHM
-    IHM::InitIHM();
-
-    ColorSensor::Initialisation();
-
-    while (IHM::bauReady != 1)
-    {
-        IHM::UpdateBAU();
-        led_ring.emergencyStopAtStart();
-        vTaskDelay(1);
-    }
-
-    ServoAX12::Initialisation(SERIAL_SERVO, RX_SERVO, TX_SERVO, PIN_SERVO_DIR);
-
-    ServoAX12::AddServo(
-        ServoID::UpPlank, "UpPlank", ServoPosition::Min, ServoPosition::Max);
-    ServoAX12::AddServo(
-        ServoID::UpCan, "UpCan", ServoPosition::UpCanMin, ServoPosition::UpCanMax);
-    ServoAX12::AddServo(
-        ServoID::Left, "Left", ServoPosition::LeftMin, ServoPosition::LeftMax);
-    ServoAX12::AddServo(
-        ServoID::Right, "Right", ServoPosition::RightMin, ServoPosition::RightMax);
+    servoConfig.ax12Id = 17;
+    servoConfig.AddPosition(0, Hardware_Config::ServoPosition::Min);
+    servoConfig.AddPosition(100, Hardware_Config::ServoPosition::Pos1);
+    servoConfig.AddPosition(200, Hardware_Config::ServoPosition::Pos2);
+    servoConfig.AddPosition(250, Hardware_Config::ServoPosition::Pos3);
+    servoConfig.AddPosition(300, Hardware_Config::ServoPosition::Max);
+    ServoAX12::AddServo(Hardware_Config::ServoID::Front, "Fwd", servoConfig);
+    ServoAX12::StartUpdateTask();
 
     Lidar::Initialisation(&robot);
 
-    otos.Initialisation();
-    // Init sensors
-    while (!otos.IsConnected() && !simulation)
-    {
-        otos.Initialisation();
-        led_ring.emergencyStopAtStart();
-        vTaskDelay(1);
-    }
+    // led_ring.emergencyStopAtStart();
+    OTOS::Initialisation();
 
     // Init motors
     motor.Initialisation(Motor::OMNIDIRECTIONAL_3_MOTORS, CENTER_WHEEL_DISTANCE);
@@ -105,10 +84,10 @@ void setup()
     Mapping::Initialize_Passability_Graph();
 
     // Start Point
-    Point start = Mapping::Get_Vertex_Point(3);
+    Point start = Mapping::Get_Vertex_Point(1);
     // Initial pose
-    otos.SetPose(start.x, start.y, radians(0));
-    robot.SetPose(start.x, start.y, radians(0));
+    OTOS::SetPose(start.x, start.y, radians(90));
+    robot.SetPose(start.x, start.y, radians(90));
     Trajectory::Reset();
     
     Mapping::Update_Start_Vertex((int16_t)robot.x, (int16_t)robot.y);
@@ -121,10 +100,10 @@ void setup()
     timerMotion.Start();
 
     // Put at least the 1 Tick delay, this is needed so the watchdog doesn't trigger
-    TaskThread(TaskTeleplot, "TaskTeleplot", 10000, 10, 0);
-    TaskThread(TaskUpdate, "TaskUpdate", 10000, 15, 1);
-    TaskThread(TaskHandleCommand, "TaskHandleCommand", 20000, 5, 1);
-    TaskThread(TaskMatch, "TaskMatch", 20000, 10, 1);
+    //TaskThread(TaskTeleplot, "TaskTeleplot", 10000, 5, 0);
+    // TaskThread(TaskUpdate, "TaskUpdate", 10000, 15, 0);
+    TaskThread(TaskHandleCommand, "TaskHandleCommand", 20000, 5, 0);
+    TaskThread(TaskMatch, "TaskMatch", 20000, 15, 1);
 
     // Send to PC all the mapping data
     ESP32_Helper::HandleCommand(Command("UpdateMapping"));
@@ -145,12 +124,8 @@ void timerMotionCallback(TimerHandle_t xTimer)
     if (timerMotion.IsEnable())
     {
         timerMotion.Running(true);
-        // Odometry Update
-        if (!simulation)
-        {
-            otos.Update();
-        }
-        else
+        // Odometry is updated from Hardware task callback to avoid I2C conflicts.
+        if (simulation)
         {
             float motor1_speed = motor.GetMotorSpeed(1);
             float motor2_speed = motor.GetMotorSpeed(2);
@@ -164,30 +139,31 @@ void timerMotionCallback(TimerHandle_t xTimer)
             float v_ang = (-(motor1_speed + motor2_speed + motor3_speed)
                            / (3 * CENTER_WHEEL_DISTANCE));
 
-            float theta = otos.position.h; // orientation actuelle du robot
+            float theta = OTOS::position.h; // orientation actuelle du robot
             float v_x_global = v_x_relatif * cos(theta) - v_y_relatif * sin(theta);
             float v_y_global = v_x_relatif * sin(theta) + v_y_relatif * cos(theta);
 
-            otos.acceleration.x = v_x_global - otos.velocity.x;
-            otos.acceleration.y = v_y_global - otos.velocity.y;
-            otos.acceleration.h = v_ang - otos.velocity.h;
+            OTOS::acceleration.x = v_x_global - OTOS::velocity.x;
+            OTOS::acceleration.y = v_y_global - OTOS::velocity.y;
+            OTOS::acceleration.h = v_ang - OTOS::velocity.h;
 
-            otos.velocity.x = v_x_global;
-            otos.velocity.y = v_y_global;
-            otos.velocity.h = v_ang;
+            OTOS::velocity.x = v_x_global;
+            OTOS::velocity.y = v_y_global;
+            OTOS::velocity.h = v_ang;
 
             // Mise à jour des positions en fonction des vitesses
-            otos.position.x += v_x_global * timerMotion.Period() / 1000;
-            otos.position.y += v_y_global * timerMotion.Period() / 1000;
-            otos.position.h += v_ang * timerMotion.Period() / 1000;
+            OTOS::position.x += v_x_global * timerMotion.Period() / 1000;
+            OTOS::position.y += v_y_global * timerMotion.Period() / 1000;
+            OTOS::position.h += v_ang * timerMotion.Period() / 1000;
         }
 
         // Actual position update
-        robot.SetPose(otos.position.x, otos.position.y, otos.position.h);
+        robot.SetPose(OTOS::position.x, OTOS::position.y, OTOS::position.h);
+        Screen::SetPose(robot.GetPose());
 
         // Actual velocity update, in global field reference
-        linear.velocity_actual = Norm2D(otos.velocity.x, otos.velocity.y);
-        angular.velocity_actual = otos.velocity.h;
+        linear.velocity_actual = Norm2D(OTOS::velocity.x, OTOS::velocity.y);
+        angular.velocity_actual = OTOS::velocity.h;
 
         // Trajectory update => error update
         Trajectory::UpdateTrajectory();
@@ -227,10 +203,9 @@ void TaskTeleplot(void *pvParameters)
 {
     int lastMatchTime = 0;
     println("Start TaskTeleplot");
-    Timeout robotPosTimeOut, mapTimeOut, ihmTimeOut;
-    robotPosTimeOut.Start(50);
+    Timeout robotPosTimeOut, mapTimeOut;
+    robotPosTimeOut.Start(100);
     mapTimeOut.Start(500);
-    ihmTimeOut.Start(5000);
     Chrono chrono("Teleplot", 1000);
 
     while (true)
@@ -243,11 +218,11 @@ void TaskTeleplot(void *pvParameters)
             {
                 teleplot("Position", robot);
                 teleplot("Orient", degrees(robot.h));
-                teleplot("Target", Trajectory::GetTarget());
-                teleplot("TargetOrient", degrees(Trajectory::GetTarget().h));
-                teleplot("linear.direction", degrees(linear.direction));
-                println(">linear.isRunning:", linear.isRunning);
-                println(">angular.isRunning:", angular.isRunning);
+                // teleplot("Target", Trajectory::GetTarget());
+                // teleplot("TargetOrient", degrees(Trajectory::GetTarget().h));
+                // teleplot("linear.direction", degrees(linear.direction));
+                // println(">linear.isRunning:", linear.isRunning);
+                // println(">angular.isRunning:", angular.isRunning);
 
                 // teleplot("Direction",
                 //          degrees(Trajectory::CartesianToPolar(Trajectory::GetTarget().x,
@@ -262,22 +237,17 @@ void TaskTeleplot(void *pvParameters)
             if (mapTimeOut.IsTimeOut())
             {
                 Obstacle::PrintObstacleList();
-                println(">OnHold:", Trajectory::IsOnHold());
+                // println(">OnHold:", Trajectory::IsOnHold());
                 // ServoAX12::TeleplotPosition();
                 // Obstacle::PrintAdversaryList();
             }
-            if (ihmTimeOut.IsTimeOut())
-            {
-                //             Match::printMatch();
-                //             IHM::PrintAll();
-            }
 
             // Countdown
-            if (lastMatchTime != (int)(Match::getMatchTimeSec()))
-            {
-                println("Match Time : ", (int)(Match::getMatchTimeSec()));
-                lastMatchTime = (int)(Match::getMatchTimeSec());
-            }
+            // if (lastMatchTime != (int)(Match::getMatchTimeSec()))
+            //{
+            //    // println("Match Time : ", (int)(Match::getMatchTimeSec()));
+            //    lastMatchTime = (int)(Match::getMatchTimeSec());
+            //}
         }
         catch (const std::exception &e)
         {
@@ -300,11 +270,8 @@ void TaskUpdate(void *pvParameters)
         chrono.Start();
         try
         {
-            Match::updateMatch();
-            IHM::UpdateBAU();
-            IHM::Blink();
-            led_ring.update();
-            ColorSensor::Update();
+            // led_ring.update();
+            //  ColorSensor::Update();
         }
         catch (const std::exception &e)
         {
@@ -330,20 +297,14 @@ void TaskHandleCommand(void *pvParameters)
             if (ESP32_Helper::HasWaitingCommand())
             {
                 Command cmd = ESP32_Helper::GetCommand();
-
-                otos.HandleCommand(cmd);
+                println("Received Command: %s", cmd.ToString().c_str());
                 motor.HandleCommand(cmd);
-                if (cmd.cmd.startsWith("AX12"))
-                {
-                    ServoAX12::HandleCommand(cmd);
-                }
 
-                if (cmd.cmd == "Help")
+                if (cmd.cmdEquals("Help"))
                 {
-                    otos.PrintCommandHelp();
                     motor.PrintCommandHelp();
                 }
-                else if (cmd.cmd == "GoToPose" && cmd.size == 3)
+                else if (cmd.cmdEquals("GoToPose") && cmd.size == 3)
                 {
                     // GoToPose:500;500;90
                     // GoToPose:500;500;0
@@ -351,29 +312,30 @@ void TaskHandleCommand(void *pvParameters)
                     // GoToPose:0;0;45
                     // GoToPose:0;0;0
                     PoseF goTo = PoseF(cmd.data[0], cmd.data[1], radians(cmd.data[2]));
-                    print("Robot go to x=", goTo.x);
-                    print(" y=", goTo.y);
-                    print(" h=", goTo.h);
+                    print("Robot go to x= %f", goTo.x);
+                    print(" y= %f", goTo.y);
+                    print(" h= %f", goTo.h);
                     println();
                     Trajectory::GoToPose(goTo.x, goTo.y, goTo.h, linear.speed_max, 0);
                 }
-                else if (cmd.cmd == "SetPose" && cmd.size == 3)
+                else if (cmd.cmdEquals("SetPose") && cmd.size == 3)
                 {
+                    println("Set Robot Pose");
                     // SetPose:2000:200:9000
                     // SetPose:500;500;0
                     // SetPose:1500;1000;0
                     timerMotion.WaitForDisable();
                     PoseF goTo = PoseF(cmd.data[0], cmd.data[1], radians(cmd.data[2]));
-                    print("Robot set to x=", goTo.x);
-                    print(" y=", goTo.y);
-                    print(" h=", goTo.h);
+                    print("Robot set to x= %f", goTo.x);
+                    print(" y= %f", goTo.y);
+                    print(" h= %f", goTo.h);
                     println();
                     robot.SetPose(goTo.x, goTo.y, goTo.h);
-                    otos.SetPose(robot.x, robot.y, robot.h);
+                    OTOS::SetPose(robot.x, robot.y, robot.h);
                     Trajectory::Reset();
                     timerMotion.Enable();
                 }
-                else if (cmd.cmd == "UpdateMapping")
+                else if (cmd.cmdEquals("UpdateMapping"))
                 {
                     Mapping::Update_Start_Vertex((int16_t)robot.x, (int16_t)robot.y);
                     Mapping::Update_Passability_Graph();
@@ -381,10 +343,10 @@ void TaskHandleCommand(void *pvParameters)
                     Mapping::PrintSegmentList();
                     Mapping::PrintCircleList();
                     Obstacle::PrintObstacleList();
-                    println("RobotRadius:", ROBOT_RADIUS);
-                    println("RobotMargin:", ROBOT_MARGIN);
+                    println("RobotRadius: %d", ROBOT_RADIUS);
+                    println("RobotMargin: %d", ROBOT_MARGIN);
                 }
-                else if (cmd.cmd == "PF")
+                else if (cmd.cmdEquals("PF"))
                 {
                     bool result = false;
                     // PathFinding
@@ -405,41 +367,41 @@ void TaskHandleCommand(void *pvParameters)
                         println("PF Found");
                         for (auto &v : PathFinding::solution)
                         {
-                            println("Vertex id:", v);
+                            println("Vertex id: %d", v);
                         }
                     }
                     else
                     {
-                        print("PF Not Found");
+                        println("PF Not Found");
                     }
                 }
-                else if (cmd.cmd == "Nav" && cmd.size == 1)
+                else if (cmd.cmdEquals("Nav") && cmd.size == 1)
                 {
                     Trajectory::Navigate_To_Vertex(cmd.data[0], linear.speed_max, 0);
                 }
-                else if (cmd.cmd == "VertexList")
+                else if (cmd.cmdEquals("VertexList"))
                 {
                     Mapping::PrintVertexList();
                 }
-                else if (cmd.cmd == "SegmentList")
+                else if (cmd.cmdEquals("SegmentList"))
                 {
                     Mapping::PrintSegmentList();
                 }
-                else if (cmd.cmd == "CircleList")
+                else if (cmd.cmdEquals("CircleList"))
                 {
                     Mapping::PrintCircleList();
                 }
-                else if (cmd.cmd == "MappingList")
+                else if (cmd.cmdEquals("MappingList"))
                 {
                     Mapping::PrintVertexList();
                     Mapping::PrintSegmentList();
                     Mapping::PrintCircleList();
                 }
-                else if (cmd.cmd == "ObstacleList")
+                else if (cmd.cmdEquals("ObstacleList"))
                 {
                     Obstacle::PrintObstacleList();
                 }
-                else if (cmd.cmd == "AddObs" && cmd.size == 3)
+                else if (cmd.cmdEquals("AddObs") && cmd.size == 3)
                 {
                     // AddObs:0:500:1000
                     int num = cmd.data[0];
@@ -450,14 +412,14 @@ void TaskHandleCommand(void *pvParameters)
                     Mapping::Update_Passability_Obstacle();
                     Obstacle::PrintObstacleList();
                 }
-                else if (cmd.cmd == "RemoveObstacle" && cmd.size == 1)
+                else if (cmd.cmdEquals("RemoveObstacle") && cmd.size == 1)
                 {
                     int num = cmd.data[0];
                     Obstacle::Add_Obstacle(num, {0, 0});
                     Mapping::Update_Passability_Obstacle();
                     Obstacle::PrintObstacleList();
                 }
-                else if (cmd.cmd == "ColorSensor" && cmd.size == 1)
+                else if (cmd.cmdEquals("ColorSensor") && cmd.size == 1)
                 {
                     ColorSensor::PrintDebug(cmd.data[0]);
                 }
@@ -478,30 +440,19 @@ void TaskHandleCommand(void *pvParameters)
 void TaskMatch(void *pvParameters)
 {
     println("Start TaskMatch");
-    Chrono chrono("Match", 1000);
+    Chrono chrono("MainMatch", 10000);
     while (true)
     {
         chrono.Start();
         try
         {
-            // Attente du démarrage du match par la tirette
-            if (Match::matchState == State::MATCH_WAIT)
+            // Attente insertion de la tirette de démarrage
+            if (Match::matchState == Match::State::MATCH_BOOT)
             {
-                IHM::UpdateHMI();
-                // Disable Motor & Servo Power in Match mode during waiting
-                // if (IHM::switchMode == 1)
-                // {
-                //     // digitalWrite(PIN_EN_MCU, LOW);
-                // }
-                // else
-                // {
-                //     // digitalWrite(PIN_EN_MCU, HIGH);
-                // }
-                digitalWrite(PIN_EN_MCU, HIGH);
             }
 
-            // Match en cours
-            if (Match::matchState == State::MATCH_BEGIN)
+            // En attente de retrait de la tirette pour démarrer le match
+            if (Match::matchState == Match::State::MATCH_WAIT)
             {
                 // Enable Motor & Servo Power
                 digitalWrite(PIN_EN_MCU, HIGH);
@@ -510,21 +461,17 @@ void TaskMatch(void *pvParameters)
                 // Start Point
                 Point p = Mapping::Get_Vertex_Point(3);
                 // Initial pose
-                otos.SetPose(p.x, p.y, radians(0));
+                OTOS::SetPose(p.x, p.y, radians(0));
                 robot.SetPose(p.x, p.y, radians(0));
                 // Reset odometry
                 Trajectory::Reset();
                 timerMotion.Enable();
-
-                Match::matchState = State::MATCH_RUN;
-                Match::printMatch();
             }
 
-            // Démarrage du robot
-            if (Match::matchState == State::MATCH_RUN)
+            // Match en cours
+            if (Match::matchState == Match::State::MATCH_RUN)
             {
                 Point p;
-                // float angle = 0;
                 //  Enable Motor & Servo Power
                 digitalWrite(PIN_EN_MCU, HIGH);
                 //ServoAX12::Bas();
@@ -668,18 +615,18 @@ void TaskMatch(void *pvParameters)
                 // Tourner devant soi
                 Trajectory::RotateToOrientation(radians(0), angular.speed_max, 0);
 
-                // Restart in waiting State
-                Match::resetMatch();
+                // Fin des actions
+                Match::matchState = Match::State::MATCH_STOP;
             }
 
             // Arrêt du robot
-            if (Match::matchState == State::MATCH_STOP)
+            if (Match::matchState == Match::State::MATCH_STOP)
             {
                 // Wait for end of match
             }
 
             // Fin du match
-            if (Match::matchState == State::MATCH_END)
+            if (Match::matchState == Match::State::MATCH_END)
             {
                 // Disable Motor & Servo Power
                 digitalWrite(PIN_EN_MCU, LOW);
@@ -687,7 +634,9 @@ void TaskMatch(void *pvParameters)
                 // Disable Motion timer
                 timerMotion.WaitForDisable();
                 motor.Update(0, 0, 0);
-                ServoAX12::StopAllServo();
+                // Wait for reset
+                if (IHM::switchMode == 0 && IHM::tirettePresent == 0)
+                    Match::matchState = Match::State::MATCH_BOOT;
             }
         }
         catch (const std::exception &e)
@@ -698,7 +647,7 @@ void TaskMatch(void *pvParameters)
         {
             printChrono(chrono);
         }
-        vTaskDelay(10);
+        vTaskDelay(1);
     }
 }
 

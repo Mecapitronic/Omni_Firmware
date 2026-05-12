@@ -5,6 +5,7 @@
  * Includes
  ****************************************************************************************/
 #include "GeoMathTools.h"
+#include "IHM.h"
 #include "Obstacle.h"
 
 namespace Mapping
@@ -32,7 +33,7 @@ namespace Mapping
     /****************************************************************************************
      * Prototypes
      ****************************************************************************************/
-    void Initialize_Map(Team team);
+    void Initialize_Map(IHM::Team team);
 
     void Set_Adjacent(t_vertexID id1, t_vertexID id2);
     void Clear_Adjacent(t_vertexID id1, t_vertexID id2);

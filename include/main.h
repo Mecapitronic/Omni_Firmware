@@ -1,8 +1,6 @@
 #ifndef MAIN_H
 #define MAIN_H
 
-#include "Hardware_Config.h"
-
 #include "ESP32_Hardware.h"
 #include "ESP32_Helper.h"
 
@@ -46,7 +44,6 @@ using namespace Printer;
 #define CENTER_WHEEL_DISTANCE 115.0
 #define MM_PER_RAD CENTER_WHEEL_DISTANCE
 
-extern bool simulation;
 extern Robot robot;
 extern TimerThread timerMotion;
 void timerMotionCallback(TimerHandle_t xTimer);

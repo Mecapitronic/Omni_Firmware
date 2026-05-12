@@ -10,25 +10,17 @@
 
 typedef sfeTkError_t sfTkError_t;
 
-class OpticalTrackingOdometrySensor
+namespace OTOS
 {
-public:
     void Initialisation();
-    bool IsConnected();
     void Update();
-    void HandleCommand(Command cmd);
-    const void PrintCommandHelp();
 
     void SetPose(float x, float y, float h);
     void Teleplot();
 
-    PoseF position;
-    PoseF velocity;
-    PoseF acceleration;
-
-private:
-    bool connected = false;
-    QwiicOTOS myOtos;
-};
+    extern PoseF position;
+    extern PoseF velocity;
+    extern PoseF acceleration;
+} // namespace OTOS
 
 #endif

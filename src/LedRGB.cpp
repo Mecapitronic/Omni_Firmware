@@ -6,10 +6,11 @@ void LedRGB::Initialisation()
 {
     // Initialize timers for color transitions and rotation
     print("RGB initialisation of ", NUM_LEDS, " pixels");
-    println(" on pin ", PIN_WS2812_LED);
+    println(" on pin ", Hardware_Config::PIN_WS2812_LED);
 
     // Initialize the FastLED library
-    ring_controller = &FastLED.addLeds<NEOPIXEL, PIN_WS2812_LED>(leds, NUM_LEDS);
+    ring_controller =
+        &FastLED.addLeds<NEOPIXEL, Hardware_Config::PIN_WS2812_LED>(leds, NUM_LEDS);
     FastLED.setBrightness(RING_BRIGHTNESS);
     // Set the initial color of the LEDs to black
     fill_solid(leds, NUM_LEDS, CRGB::Purple);
@@ -29,12 +30,12 @@ void LedRGB::robotIsStarting()
 
 void LedRGB::update()
 {
-    if (Match::matchState == State::MATCH_END)
+    if (Match::matchState == Match::State::MATCH_END)
     {
         rainbow();
         return;
     }
-    CRGB team_color = (IHM::team == Team::Jaune ? CRGB::Gold : CRGB::DodgerBlue);
+    CRGB team_color = (IHM::team == IHM::Team::Jaune ? CRGB::Gold : CRGB::DodgerBlue);
 
     displayTime();
 
@@ -54,16 +55,16 @@ void LedRGB::update()
 void LedRGB::displayTime()
 {
     // select right team color
-    CRGB team_color = (IHM::team == Team::Jaune ? CRGB::Gold : CRGB::DodgerBlue);
+    CRGB team_color = (IHM::team == IHM::Team::Jaune ? CRGB::Gold : CRGB::DodgerBlue);
 
     fill_solid(leds, NUM_LEDS, team_color);
 
-    if (Match::matchState == State::MATCH_WAIT)
+    if (Match::matchState == Match::State::MATCH_WAIT)
     {
         // 1 turn in 1 sec
         float ratio = 1000.0 / NUM_LEDS;
         long time = 0;
-        if (Match::matchState == State::MATCH_WAIT)
+        if (Match::matchState == Match::State::MATCH_WAIT)
             time = millis();
         else
             time = Match::getMatchTimeMs();
@@ -78,18 +79,18 @@ void LedRGB::displayTime()
         // slowly decrease the leds from team color to black according to match time left
         uint8_t match_time_index_led =
             (NUM_LEDS * Match::getMatchTimeMs()) / Match::time_end_match;
-
-        leds[match_time_index_led] = team_color.lerp8(
-            CRGB::Black,
-            map(Match::getMatchTimeMs() % (Match::time_end_match / NUM_LEDS),
-                0,
-                Match::time_end_match / NUM_LEDS,
-                0,
-                255));
-        for (int i = 0; i < match_time_index_led; i++)
-        {
-            leds[i] = CRGB::Black;
-        }
+        /*
+                leds[match_time_index_led] = team_color.lerp8(
+                    CRGB::Black,
+                    map(Match::getMatchTimeMs() % (Match::time_end_match / NUM_LEDS),
+                        0,
+                        Match::time_end_match / NUM_LEDS,
+                        0,
+                        255));
+                for (int i = 0; i < match_time_index_led; i++)
+                {
+                    leds[i] = CRGB::Black;
+                }*/
     }
 }
 
@@ -111,7 +112,7 @@ void LedRGB::displayObstacle()
 
         if (relativeDistance > Trajectory::OBSTACLE_TOO_CLOSE)
             leds[directionToLedNumber(relativeDirection)] =
-                (IHM::team != Team::Jaune ? CRGB::Gold : CRGB::DodgerBlue);
+                (IHM::team != IHM::Team::Jaune ? CRGB::Gold : CRGB::DodgerBlue);
         else
             leds[directionToLedNumber(relativeDirection)] = CRGB::DarkRed;
     }

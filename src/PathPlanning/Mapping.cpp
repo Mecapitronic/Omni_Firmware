@@ -20,9 +20,9 @@ namespace Mapping
      * Initialize all map with defined segment, circle, vertex and potential false
      *obstacle
      ****************************************************************************************/
-    void Initialize_Map(Team team)
+    void Initialize_Map(IHM::Team team)
     {
-        if (team == Team::Jaune)
+        if (team == IHM::Team::Jaune)
         {
             // Segment
             segment[0] = Segment(Point(0, 1500), Point(1500, 1500));
@@ -56,7 +56,7 @@ namespace Mapping
             vertex[24].point = Point(1000, 1250);
             vertex[25].point = Point(1250, 1250);
         }
-        else if (team == Team::Bleu)
+        else if (team == IHM::Team::Bleu)
         {
             // Segment
             segment[0] = Segment(Point(3000, 1500), Point(1500, 1500));

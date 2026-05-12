@@ -7,34 +7,6 @@
 /****************************************************************************************
  * Enum Class
  ****************************************************************************************/
-// Bleu = 0
-// Jaune = 1
-enum class Team
-{
-    Bleu,
-    Jaune,
-    None
-};
-
-//
-
-/**
- * @brief WAIT BEGIN RUN STOP END
- *
- * WAIT attend que le match démarre, BEGIN le match démarre avec la tirette (état
- * temporaire très court) RUN le match est en cours, STOP les actions sont terminées, on
- * attend la fin du timer, END le match et le timer sont terminés
- *
- */
-enum class State
-{
-    MATCH_WAIT,
-    MATCH_BEGIN,
-    MATCH_RUN,
-    MATCH_STOP,
-    MATCH_END
-};
-
 /*
 #define CMD_FREE		0
 #define CMD_BUSY		1
