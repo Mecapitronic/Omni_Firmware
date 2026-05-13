@@ -285,6 +285,7 @@ namespace Trajectory
     // Does not return until arrived
     void Navigate_To_Vertex(t_vertexID id, float speed_limit, float speed_final)
     {
+        print("Navigate_To_Vertex %d", id);
         t_vertexID target_vertex = 0;
         Point p = Mapping::Get_Vertex_Point(id);
         if(!Obstacle::Is_In_Map(p))
@@ -301,10 +302,9 @@ namespace Trajectory
                 && PathFinding::solution.size() > 0
                 && target_vertex != PathFinding::solution.front())
             {
-                print("Path to vertex ", id);
-                println(" found with ", PathFinding::solution.size(), " points.");
+                println("Path to vertex %d found with %d points.", id, PathFinding::solution.size());
                 PathFinding::ListVertexPrint(PathFinding::solution, "solution");
-                println("Next point: ", PathFinding::solution.front());
+                println("Next point: %d", PathFinding::solution.front());
 
                 target_vertex = PathFinding::solution.front();
                 GoToVertex(PathFinding::solution.front(), speed_limit, speed_final);

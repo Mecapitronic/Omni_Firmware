@@ -305,6 +305,7 @@ void TaskHandleCommand(void *pvParameters)
                 }
                 else if(cmd.cmdEquals("Restart"))
                 {
+                    println("Restart !");
                     Match::matchState = Match::State::MATCH_BOOT;
                 }
                 else if (cmd.cmdEquals("GoToPose") && cmd.size == 3)
@@ -462,10 +463,10 @@ void TaskMatch(void *pvParameters)
                 timerMotion.WaitForDisable();
                 Mapping::Initialize_Map(IHM::team);
                 // Start Point
-                Point p = Mapping::Get_Vertex_Point(3);
+                Point p = Mapping::Get_Vertex_Point(1);
                 // Initial pose
-                OTOS::SetPose(p.x, p.y, radians(0));
-                robot.SetPose(p.x, p.y, radians(0));
+                OTOS::SetPose(p.x, p.y, radians(180));
+                robot.SetPose(p.x, p.y, radians(180));
                 // Reset odometry
                 Trajectory::Reset();
                 timerMotion.Enable();
@@ -477,8 +478,8 @@ void TaskMatch(void *pvParameters)
                 Point p;
                 //  Enable Motor & Servo Power
                 digitalWrite(PIN_EN_MCU, HIGH);
-                //ServoAX12::Bas();
-                //ServoAX12::Prise();
+                ServoAX12::SetServoPosition(Hardware_Config::ServoID::Up, Hardware_Config::ServoPosition::Pos2);
+                ServoAX12::SetServoPosition(Hardware_Config::ServoID::Front, Hardware_Config::ServoPosition::Pos2);
                 while (ServoAX12::AreAllServoMoving())
                 {
                     delay(1);
@@ -486,35 +487,46 @@ void TaskMatch(void *pvParameters)
 
 
                 // --------  1ere prise --------
-                // Nav prise vertex 25
-                Trajectory::Navigate_To_Vertex(25, linear.speed_max, 0);
+                // Nav prise vertex 3
+                Trajectory::Navigate_To_Vertex(3, linear.speed_max, 0);
 
                 // Tourner vers la prise
-                // angle = 0; //-88;
-                Trajectory::RotateToOrientation(radians(0), angular.speed_max, 0);
+                // angle = 180;
+                Trajectory::RotateToOrientation(radians(90), angular.speed_max, 0);
 
                 // Prise
-                p = Mapping::Get_Vertex_Point(25);
-                Trajectory::GoToPose(p.x, p.y + 100, radians(0), linear.speed_max, 0);
-                Trajectory::GoToPose(
-                    p.x + 30, p.y + 100, radians(0), linear.speed_max, 0);
-                Trajectory::GoToPose(
-                    p.x - 30, p.y + 100, radians(0), linear.speed_max, 0);
+                p = Mapping::Get_Vertex_Point(3);
+                Trajectory::GoToPose(p.x-200, p.y, radians(90), linear.speed_max, 0);
 
-
-                // --------  1ere dépose --------
-                // Nav dépose vertex 8
-                Trajectory::Navigate_To_Vertex(8, linear.speed_max / 4, 0);
-
-                // Tourner vers la dépose
-                Trajectory::RotateToOrientation(radians(178), angular.speed_max / 5, 0);
-
-                // Bas();
+                ServoAX12::SetServoPosition(Hardware_Config::ServoID::Up, Hardware_Config::ServoPosition::Pos1, 2000);
+                while (ServoAX12::AreAllServoMoving())
+                {
+                    delay(1);
+                }
+                ServoAX12::SetServoPosition(Hardware_Config::ServoID::Front, Hardware_Config::ServoPosition::Pos1, 2000);
                 while (ServoAX12::AreAllServoMoving())
                 {
                     delay(1);
                 }
 
+                // --------  1ere dépose --------
+                // Nav dépose vertex 4
+                Trajectory::Navigate_To_Vertex(4, linear.speed_max, 0);
+
+                // Tourner vers la dépose
+                Trajectory::RotateToOrientation(radians(90), angular.speed_max, 0);
+                
+                ServoAX12::SetServoPosition(Hardware_Config::ServoID::Up, Hardware_Config::ServoPosition::Pos2, 2000);
+                while (ServoAX12::AreAllServoMoving())
+                {
+                    delay(1);
+                }
+                ServoAX12::SetServoPosition(Hardware_Config::ServoID::Front, Hardware_Config::ServoPosition::Pos2, 2000);
+                while (ServoAX12::AreAllServoMoving())
+                {
+                    delay(1);
+                }
+/*
                 // Avancer vers la dépose
                 p = Mapping::Get_Vertex_Point(3);
                 Trajectory::TranslateToPosition(p.x, p.y, linear.speed_max / 4, 0);
@@ -617,7 +629,7 @@ void TaskMatch(void *pvParameters)
 
                 // Tourner devant soi
                 Trajectory::RotateToOrientation(radians(0), angular.speed_max, 0);
-
+*/
                 // Fin des actions
                 Match::matchState = Match::State::MATCH_STOP;
             }
