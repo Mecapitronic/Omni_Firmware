@@ -16,10 +16,15 @@ namespace Hardware_Config
 {
     enum class ServoPosition
     {
+        // Up=58 Fwd=48
         Min = 0,
+        // Up=58 Fwd=7
         Pos1,
+        // Up=100, Fwd=48
         Pos2,
+        // Up=150, Fwd=240
         Pos3,
+        // Up=290, Fwd=270
         Max,
         Count
     };

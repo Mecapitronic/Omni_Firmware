@@ -42,19 +42,19 @@ void setup()
     // ColorSensor::Initialisation();
     ServoAX12::ServoConfig servoConfig;
     servoConfig.ax12Id = 18;
-    servoConfig.AddPosition(0, Hardware_Config::ServoPosition::Min);
-    servoConfig.AddPosition(100, Hardware_Config::ServoPosition::Pos1);
-    servoConfig.AddPosition(200, Hardware_Config::ServoPosition::Pos2);
-    servoConfig.AddPosition(250, Hardware_Config::ServoPosition::Pos3);
-    servoConfig.AddPosition(300, Hardware_Config::ServoPosition::Max);
+    servoConfig.AddPosition(58, Hardware_Config::ServoPosition::Min);   // position départ
+    servoConfig.AddPosition(58, Hardware_Config::ServoPosition::Pos1);  // Position basse
+    servoConfig.AddPosition(100, Hardware_Config::ServoPosition::Pos2); // position juste au dessus des caisses
+    servoConfig.AddPosition(150, Hardware_Config::ServoPosition::Pos3); // position au dessus d'une caisse sur la tranche
+    servoConfig.AddPosition(290, Hardware_Config::ServoPosition::Max);  // Tout en haut
     ServoAX12::AddServo(Hardware_Config::ServoID::Up, "Up", servoConfig);
 
     servoConfig.ax12Id = 17;
-    servoConfig.AddPosition(0, Hardware_Config::ServoPosition::Min);
-    servoConfig.AddPosition(100, Hardware_Config::ServoPosition::Pos1);
-    servoConfig.AddPosition(200, Hardware_Config::ServoPosition::Pos2);
-    servoConfig.AddPosition(250, Hardware_Config::ServoPosition::Pos3);
-    servoConfig.AddPosition(300, Hardware_Config::ServoPosition::Max);
+    servoConfig.AddPosition(48, Hardware_Config::ServoPosition::Min);   // position départ
+    servoConfig.AddPosition(7, Hardware_Config::ServoPosition::Pos1);   // position finale de retournement de la dernière caisse !! ne pas etre en position basse
+    servoConfig.AddPosition(48, Hardware_Config::ServoPosition::Pos2);  // position repli
+    servoConfig.AddPosition(240, Hardware_Config::ServoPosition::Pos3); // position de maintient des caisses
+    servoConfig.AddPosition(270, Hardware_Config::ServoPosition::Max);  // position de prise des caisses
     ServoAX12::AddServo(Hardware_Config::ServoID::Front, "Fwd", servoConfig);
 
     Lidar::Initialisation(&robot);

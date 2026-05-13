@@ -7,7 +7,7 @@ ESP32_FAST_PWM *stepper3;
 
 void Motor::Initialisation(MotorBaseType _motorBaseType, float _centerToWheel)
 {
-    println("Initialisation Motor : ", _motorBaseType, " Motors");
+    println("Initialisation Motors");
     motorBaseType = _motorBaseType;
     centerToWheel = _centerToWheel;
 
