@@ -8,6 +8,7 @@ namespace OTOS
     {
         bool connected = false;
         QwiicOTOS myOtos;
+        bool setPose = false;
     } // namespace
 
     PoseF position;
@@ -32,14 +33,7 @@ namespace OTOS
         {
             println("OTOS connected!");
 
-            println(
-                "Ensure the OTOS is flat and stationary, then enter any key to calibrate "
-                "the IMU");
-
-            // Clear the serial buffer
-            // while (available()) read();
-            // Wait for user input
-            // while (!available());
+            println("Ensure the OTOS is flat and stationary");
 
             println("Calibrating IMU ...");
 
@@ -102,6 +96,7 @@ namespace OTOS
             sfe_otos_pose2d_t currentPose = {0, 0, 0};
             myOtos.setPosition(currentPose);
 
+            /*
             sfTkError_t error;
             sfe_otos_signal_process_config_t config;
             error = myOtos.getSignalProcessConfig(config);
@@ -114,14 +109,14 @@ namespace OTOS
                 // println("enRot : ", config.enRot);
                 // println("enAcc : ", config.enAcc);
                 // println("enLut : ", config.enLut);
-            }
+            }*/
         }
         Hardware::SetExternalI2CUpdateCallback(Update);
     }
 
     void Update()
     {
-        if (connected)
+        if (connected && !setPose)
         {
             sfTkError_t error;
             sfe_otos_pose2d_t myPosition;
@@ -151,7 +146,7 @@ namespace OTOS
             error = myOtos.getPosVelAcc(myPosition, myVelocity, myAcceleration);
             if (error != 0)
             {
-                print("Error getPosVelAcc : ", error);
+                println("Error getPosVelAcc : ", error);
             }
             else
             {
@@ -170,6 +165,7 @@ namespace OTOS
 
     void SetPose(float x, float y, float h)
     {
+        setPose = true;
         sfTkError_t error;
         // Reset the tracking algorithm - this resets the position to the origin,
         // but can also be used to recover from some rare tracking errors
@@ -187,7 +183,7 @@ namespace OTOS
             error = myOtos.setPosition(currentPose);
             while (error != 0 && retrySetPose < 5)
             {
-                println("OTOS Error SetPose : ", error);
+                println("OTOS Error SetPose : %d", error);
                 delay(100);
                 error = myOtos.setPosition(currentPose);
                 retrySetPose++;
@@ -197,7 +193,8 @@ namespace OTOS
         position.x = x;
         position.y = y;
         position.h = h;
-        Update();
+        println("OTOS SetPose to x= %0.2f, y= %0.2f, h= %0.2f", x, y, h);
+        setPose = false;
     }
 
     void Teleplot()

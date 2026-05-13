@@ -56,7 +56,6 @@ void setup()
     servoConfig.AddPosition(250, Hardware_Config::ServoPosition::Pos3);
     servoConfig.AddPosition(300, Hardware_Config::ServoPosition::Max);
     ServoAX12::AddServo(Hardware_Config::ServoID::Front, "Fwd", servoConfig);
-    ServoAX12::StartUpdateTask();
 
     Lidar::Initialisation(&robot);
 
@@ -85,9 +84,10 @@ void setup()
 
     // Start Point
     Point start = Mapping::Get_Vertex_Point(1);
+    println("Start Point: x=%d y=%d", start.x, start.y);
     // Initial pose
-    OTOS::SetPose(start.x, start.y, radians(90));
-    robot.SetPose(start.x, start.y, radians(90));
+    OTOS::SetPose(start.x, start.y, radians(180));
+    robot.SetPose(start.x, start.y, radians(180));
     Trajectory::Reset();
     
     Mapping::Update_Start_Vertex((int16_t)robot.x, (int16_t)robot.y);
@@ -100,7 +100,7 @@ void setup()
     timerMotion.Start();
 
     // Put at least the 1 Tick delay, this is needed so the watchdog doesn't trigger
-    //TaskThread(TaskTeleplot, "TaskTeleplot", 10000, 5, 0);
+    TaskThread(TaskTeleplot, "TaskTeleplot", 10000, 5, 0);
     // TaskThread(TaskUpdate, "TaskUpdate", 10000, 15, 0);
     TaskThread(TaskHandleCommand, "TaskHandleCommand", 20000, 5, 0);
     TaskThread(TaskMatch, "TaskMatch", 20000, 15, 1);
@@ -195,7 +195,6 @@ void timerMotionCallback(TimerHandle_t xTimer)
         // Motor update => in local robot reference
         motor.Update(linear.velocity_command, linear.direction, angular.velocity_command);
     }
-
     timerMotion.Running(false);
 }
 
@@ -204,8 +203,8 @@ void TaskTeleplot(void *pvParameters)
     int lastMatchTime = 0;
     println("Start TaskTeleplot");
     Timeout robotPosTimeOut, mapTimeOut;
-    robotPosTimeOut.Start(100);
-    mapTimeOut.Start(500);
+    robotPosTimeOut.Start(300);
+    mapTimeOut.Start(300);
     Chrono chrono("Teleplot", 1000);
 
     while (true)
@@ -303,6 +302,10 @@ void TaskHandleCommand(void *pvParameters)
                 if (cmd.cmdEquals("Help"))
                 {
                     motor.PrintCommandHelp();
+                }
+                else if(cmd.cmdEquals("Restart"))
+                {
+                    Match::matchState = Match::State::MATCH_BOOT;
                 }
                 else if (cmd.cmdEquals("GoToPose") && cmd.size == 3)
                 {
