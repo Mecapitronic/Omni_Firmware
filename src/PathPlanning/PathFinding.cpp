@@ -2,6 +2,7 @@
  * Includes
  ****************************************************************************************/
 #include "PathPlanning/PathFinding.h"
+using namespace Printer;
 
 namespace PathFinding
 {
@@ -42,9 +43,13 @@ namespace PathFinding
         open.push_back(startNode);
         // ListAddFirst(open, startNode);
         int iteration = 0;
+        Timeout pathTimeOut;
+        pathTimeOut.Start(5000);
 
         while (open.size() > 0)
         {
+            if(pathTimeOut.IsTimeOut())
+                break;
             // on récupére le premier noeud de la liste cad le meilleur
             best = open.front();
             pop_front(open);
@@ -80,7 +85,16 @@ namespace PathFinding
                             return Mapping::Is_Equal_Vertex(node.currentID,
                                                             dummy.currentID);
                         });
-                    // if(it != close.end()) // we assume it's in !
+                    if (it == close.end())
+                    {
+                        // should not occure because we assume it's in !
+                        if (PRINT_PF)
+                        {
+                            println("Parent node not found in close list, abort path reconstruction");
+                        }
+                        solution.clear();
+                        return false;
+                    }
                     pos = it - close.begin();
                     // pos = ListIsDataExist(close, dummy);
                     dummy = close.at(pos);
@@ -105,7 +119,7 @@ namespace PathFinding
 
             if (PRINT_PF)
             {
-                printf("\n");
+                println();
                 ListPrint(open, "open");
                 ListPrint(close, "close");
                 ListPrint(listPossible, "listPossible");
@@ -122,7 +136,9 @@ namespace PathFinding
         // No path found
         if (PRINT_PF)
         {
-            printf("No solution founded !\n");
+            println("No solution founded !");
+            if(pathTimeOut.IsTimeOut())
+                println("Path Finding Timeout");
         }
         return false;
     }

@@ -4,6 +4,7 @@
 #include "Mapping.h"
 #include "NodeItem.h"
 #include "Structure.h"
+#include "Printer.h"
 
 using namespace Mapping;
 
