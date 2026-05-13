@@ -92,20 +92,23 @@ namespace Obstacle
     {
         if (obstacle_enable)
         {
-            if (p.x != 0 && p.y != 0 && Is_In_Map(p) && id >= 0 && id < MAX_OBSTACLE
-                && !Is_False_Obstacle(p))
+            if(id >= 0 && id < MAX_OBSTACLE)
             {
-                obstacle[id].p.x = p.x;
-                obstacle[id].p.y = p.y;
-                obstacle[id].r = OBSTACLE_RADIUS;
+                if (p.x != 0 && p.y != 0 && Is_In_Map(p)
+                    && !Is_False_Obstacle(p))
+                {
+                    obstacle[id].p.x = p.x;
+                    obstacle[id].p.y = p.y;
+                    obstacle[id].r = OBSTACLE_RADIUS;
 
-                // adversary[id].x = p.x;
-                // adversary[id].y = p.y;
-            }
-            else
-            {
-                obstacle[id] = Circle(0, 0, 0);
-                // adversary[id] = PolarPoint();
+                    // adversary[id].x = p.x;
+                    // adversary[id].y = p.y;
+                }
+                else
+                {
+                    obstacle[id] = Circle(0, 0, 0);
+                    // adversary[id] = PolarPoint();
+                }
             }
         }
     }

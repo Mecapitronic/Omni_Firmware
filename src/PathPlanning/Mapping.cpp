@@ -25,70 +25,68 @@ namespace Mapping
         if (team == IHM::Team::Jaune)
         {
             // Segment
-            segment[0] = Segment(Point(0, 1500), Point(1500, 1500));
-            segment[1] = Segment(Point(1500, 1500), Point(1500, 0));
+            segment[0] = Segment(Point(600, 2000), Point(600, 1550));
+            segment[1] = Segment(Point(600, 1550), Point(2400, 1550));
+            segment[2] = Segment(Point(2400, 1550), Point(2400, 2000));
             // Circle
+            circle[0] = Circle(2850, 1200, 100);
+            circle[1] = Circle(2850, 400, 100);
+            circle[2] = Circle(1100, 150, 100);
+            circle[3] = Circle(1150, 800, 100);
+            circle[4] = Circle(1900, 150, 100);
+            circle[5] = Circle(1850, 800, 100);
+            circle[6] = Circle(150, 1200, 100);
+            circle[7] = Circle(150, 400, 100);
             // Vertex
             vertex[0].point = Point(0, 0);
-            vertex[1].point = Point(250, 250);
-            vertex[2].point = Point(500, 250);
-            vertex[3].point = Point(750, 250);
-            vertex[4].point = Point(1000, 250);
-            vertex[5].point = Point(1250, 250);
-            vertex[6].point = Point(250, 500);
-            vertex[7].point = Point(500, 500);
-            vertex[8].point = Point(750, 500);
-            vertex[9].point = Point(1000, 500);
-            vertex[10].point = Point(1250, 500);
-            vertex[11].point = Point(250, 750);
-            vertex[12].point = Point(500, 750);
-            vertex[13].point = Point(750, 750);
-            vertex[14].point = Point(1000, 750);
-            vertex[15].point = Point(1250, 750);
-            vertex[16].point = Point(250, 1000);
-            vertex[17].point = Point(500, 1000);
-            vertex[18].point = Point(750, 1000);
-            vertex[19].point = Point(1000, 1000);
-            vertex[20].point = Point(1250, 1000);
-            vertex[21].point = Point(250, 1250);
-            vertex[22].point = Point(500, 1250);
-            vertex[23].point = Point(750, 1250);
-            vertex[24].point = Point(1000, 1250);
-            vertex[25].point = Point(1250, 1250);
+            vertex[1].point = Point(300, 1750);
+            vertex[2].point = Point(300, 1300);
+            vertex[3].point = Point(450, 1200);
+            vertex[4].point = Point(400, 800);
+            vertex[5].point = Point(450, 400);
+            vertex[6].point = Point(700, 400);
+            vertex[7].point = Point(800, 500);
+            vertex[8].point = Point(800, 1100);
+            vertex[9].point = Point(1250, 1100);
+            vertex[10].point = Point(1150, 1100);
+            vertex[11].point = Point(1150, 500);
+            vertex[12].point = Point(1100, 450);
+            vertex[13].point = Point(1500, 400);
+            vertex[14].point = Point(1500, 500);
+            vertex[15].point = Point(1500, 1100);
         }
         else if (team == IHM::Team::Bleu)
         {
             // Segment
-            segment[0] = Segment(Point(3000, 1500), Point(1500, 1500));
-            segment[1] = Segment(Point(1500, 1500), Point(1500, 0));
+            segment[0] = Segment(Point(2400, 2000), Point(2400, 1550));
+            segment[1] = Segment(Point(2400, 1550), Point(600, 1550));
+            segment[2] = Segment(Point(600, 1550), Point(600, 2000));
             // Circle
+            circle[0] = Circle(150, 1200, 100);
+            circle[1] = Circle(150, 400, 100);
+            circle[2] = Circle(1900, 150, 100);
+            circle[3] = Circle(1850, 800, 100);
+            circle[4] = Circle(1100, 150, 100);
+            circle[5] = Circle(1150, 800, 100);
+            circle[6] = Circle(2850, 1200, 100);
+            circle[7] = Circle(2850, 400, 100);
             // Vertex
             vertex[0].point = Point(0, 0);
-            vertex[1].point = Point(2750, 250);
-            vertex[2].point = Point(2500, 250);
-            vertex[3].point = Point(2250, 250);
-            vertex[4].point = Point(2000, 250);
-            vertex[5].point = Point(1750, 250);
-            vertex[6].point = Point(2750, 500);
-            vertex[7].point = Point(2500, 500);
-            vertex[8].point = Point(2250, 500);
-            vertex[9].point = Point(2000, 500);
-            vertex[10].point = Point(1750, 500);
-            vertex[11].point = Point(2750, 750);
-            vertex[12].point = Point(2500, 750);
-            vertex[13].point = Point(2250, 750);
-            vertex[14].point = Point(2000, 750);
-            vertex[15].point = Point(1750, 750);
-            vertex[16].point = Point(2750, 1000);
-            vertex[17].point = Point(2500, 1000);
-            vertex[18].point = Point(2250, 1000);
-            vertex[19].point = Point(2000, 1000);
-            vertex[20].point = Point(1750, 1000);
-            vertex[21].point = Point(2750, 1250);
-            vertex[22].point = Point(2500, 1250);
-            vertex[23].point = Point(2250, 1250);
-            vertex[24].point = Point(2000, 1250);
-            vertex[25].point = Point(1750, 1250);
+            vertex[1].point = Point(2700, 1750);
+            vertex[2].point = Point(2700, 1300);
+            vertex[3].point = Point(2550, 1200);
+            vertex[4].point = Point(2600, 800);
+            vertex[5].point = Point(2550, 400);
+            vertex[6].point = Point(2300, 400);
+            vertex[7].point = Point(2200, 500);
+            vertex[8].point = Point(2200, 1100);
+            vertex[9].point = Point(1750, 1100);
+            vertex[10].point = Point(1850, 1100);
+            vertex[11].point = Point(1850, 500);
+            vertex[12].point = Point(1900, 450);
+            vertex[13].point = Point(1500, 400);
+            vertex[14].point = Point(1500, 500);
+            vertex[15].point = Point(1500, 1100);
         }
     }
 
@@ -97,8 +95,11 @@ namespace Mapping
      ****************************************************************************************/
     void Set_Adjacent(t_vertexID id1, t_vertexID id2)
     {
-        vertex[id1].adjacency_active |= ((t_adjacency)1u << id2);
-        vertex[id2].adjacency_active |= ((t_adjacency)1u << id1);
+        if(id1 >= 0 && id1 < Max_Vertex && id2 >= 0 && id2 < Max_Vertex)
+        {
+            vertex[id1].adjacency_active |= ((t_adjacency)1u << id2);
+            vertex[id2].adjacency_active |= ((t_adjacency)1u << id1);
+        }
     }
 
     /****************************************************************************************
@@ -106,8 +107,11 @@ namespace Mapping
      ****************************************************************************************/
     void Clear_Adjacent(t_vertexID id1, t_vertexID id2)
     {
-        vertex[id1].adjacency_active &= ~((t_adjacency)1u << id2);
-        vertex[id2].adjacency_active &= ~((t_adjacency)1u << id1);
+        if(id1 >= 0 && id1 < Max_Vertex && id2 >= 0 && id2 < Max_Vertex)
+        {
+            vertex[id1].adjacency_active &= ~((t_adjacency)1u << id2);
+            vertex[id2].adjacency_active &= ~((t_adjacency)1u << id1);
+        }
     }
 
     /****************************************************************************************
@@ -115,9 +119,12 @@ namespace Mapping
      ****************************************************************************************/
     boolean Is_Adjacent(t_vertexID id1, t_vertexID id2)
     {
-        if ((vertex[id1].adjacency_active & ((t_adjacency)1u << id2))
-            || (vertex[id2].adjacency_active & ((t_adjacency)1u << id1)))
-            return true;
+        if(id1 >= 0 && id1 < Max_Vertex && id2 >= 0 && id2 < Max_Vertex)
+        {
+            if ((vertex[id1].adjacency_active & ((t_adjacency)1u << id2))
+                || (vertex[id2].adjacency_active & ((t_adjacency)1u << id1)))
+                return true;
+        }
 
         return false;
     }
