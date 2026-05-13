@@ -90,27 +90,22 @@ namespace Obstacle
      ****************************************************************************************/
     void Add_Obstacle(uint8_t id, Point p)
     {
-        if (obstacle_enable)
-        {
-            if(id >= 0 && id < MAX_OBSTACLE)
-            {
-                if (p.x != 0 && p.y != 0 && Is_In_Map(p)
-                    && !Is_False_Obstacle(p))
-                {
-                    obstacle[id].p.x = p.x;
-                    obstacle[id].p.y = p.y;
-                    obstacle[id].r = OBSTACLE_RADIUS;
+        if (!obstacle_enable || id >= MAX_OBSTACLE)
+            return;
 
-                    // adversary[id].x = p.x;
-                    // adversary[id].y = p.y;
-                }
-                else
-                {
-                    obstacle[id] = Circle(0, 0, 0);
-                    // adversary[id] = PolarPoint();
-                }
+        if (p.x != 0 && p.y != 0 && Is_In_Map(p) && !Is_False_Obstacle(p))
+        {
+            Point robot_point = Mapping::Get_Vertex_Point(0);
+            if (Get_Distance_Point(&robot_point, &p) <= MAXIMUM_OBSTACLE_DISTANCE)
+            {
+                obstacle[id].p.x = p.x;
+                obstacle[id].p.y = p.y;
+                obstacle[id].r = OBSTACLE_RADIUS;
+                return;
             }
         }
+        obstacle[id] = Circle(0, 0, 0);
+        // adversary[id] = PolarPoint();
     }
 
     void PrintObstacleList()
