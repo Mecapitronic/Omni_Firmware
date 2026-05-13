@@ -69,6 +69,7 @@ namespace Mapping
     void Update_Start_Vertex(int16_t x, int16_t y);
     void removeCircle(int id);
     void changeCircle(int id, int x, int y, int r = 50);
+    boolean Is_In_Map(Point p);
 
     void PrintVertex0();
     void PrintVertexList();

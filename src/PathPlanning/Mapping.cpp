@@ -663,6 +663,20 @@ namespace Mapping
         }
     }
 
+    boolean Is_In_Map(Point p)
+    {
+        // check map border limits
+        if (p.x < 0)
+            return false;
+        if (p.x > MAP_X_MAX)
+            return false;
+        if (p.y < 0)
+            return false;
+        if (p.y > MAP_Y_MAX)
+            return false;
+        return true;
+    }
+
     void PrintVertex0()
     {
         String str = "VertexList:";

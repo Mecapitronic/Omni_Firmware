@@ -257,7 +257,7 @@ namespace Trajectory
         linear->speed_final = speed_final;
 
         Point p = Mapping::Get_Vertex_Point(id);
-        if(Obstacle::Is_In_Map(p))
+        if(Mapping::Is_In_Map(p))
             GoToPose(p.x, p.y, robot->h);
     }
 
@@ -288,7 +288,7 @@ namespace Trajectory
         print("Navigate_To_Vertex %d", id);
         t_vertexID target_vertex = 0;
         Point p = Mapping::Get_Vertex_Point(id);
-        if(!Obstacle::Is_In_Map(p))
+        if(!Mapping::Is_In_Map(p))
             return;
         // TODO: dans l'idéal on regarde uniquement les obstacles dans la moitié du
         // terrain où on est pour éviter le flicker de la trajectoire

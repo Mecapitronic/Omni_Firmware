@@ -71,20 +71,6 @@ namespace Obstacle
         return false;
     }
 
-    boolean Is_In_Map(Point p)
-    {
-        // check map border limits
-        if (p.x < 0)
-            return false;
-        if (p.x > MAP_X_MAX)
-            return false;
-        if (p.y < 0)
-            return false;
-        if (p.y > MAP_Y_MAX)
-            return false;
-        return true;
-    }
-
     /****************************************************************************************
      * Add circle obstacle for graph
      ****************************************************************************************/
@@ -93,7 +79,7 @@ namespace Obstacle
         if (!obstacle_enable || id >= MAX_OBSTACLE)
             return;
 
-        if (p.x != 0 && p.y != 0 && Is_In_Map(p) && !Is_False_Obstacle(p))
+        if (p.x != 0 && p.y != 0 && Mapping::Is_In_Map(p) && !Is_False_Obstacle(p))
         {
             Point robot_point = Mapping::Get_Vertex_Point(0);
             if (Get_Distance_Point(&robot_point, &p) <= MAXIMUM_OBSTACLE_DISTANCE)
