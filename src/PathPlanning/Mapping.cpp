@@ -602,10 +602,9 @@ namespace Mapping
 
     Point Get_Vertex_Point(t_vertexID id)
     {
-        if (id >= 0 && id < Max_Vertex)
-            return vertex[id].point;
-        else
+        if (id >= Max_Vertex)
             return Point(0, 0); // return invalid point if id is out of range
+        return vertex[id].point;
     }
 
     /****************************************************************************************
@@ -619,9 +618,12 @@ namespace Mapping
     /****************************************************************************************
      * Return 1 if the vertex is valid
      ****************************************************************************************/
-    boolean Is_Valid_Vertex(uint8_t vertexID)
+    boolean Is_Valid_Vertex(uint8_t id)
     {
-        return (&vertex[vertexID].point.x != 0 || &vertex[vertexID].point.y != 0);
+        if (id >= Max_Vertex)
+            return false;
+
+        return (vertex[id].point.x != 0 && vertex[id].point.y != 0);
     }
 
     /****************************************************************************************

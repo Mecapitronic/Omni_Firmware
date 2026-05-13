@@ -64,7 +64,7 @@ namespace Mapping
     t_vertexID Get_End_Vertex(void);
     Point Get_Vertex_Point(t_vertexID id);
     boolean Is_Equal_Vertex(t_vertexID id1, t_vertexID id2);
-    boolean Is_Valid_Vertex(uint8_t vertexID);
+    boolean Is_Valid_Vertex(uint8_t id);
     uint32_t Get_Distance_Vertex(t_vertexID id1, t_vertexID id2);
     void Update_Start_Vertex(int16_t x, int16_t y);
     void removeCircle(int id);
