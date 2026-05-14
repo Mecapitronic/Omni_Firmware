@@ -40,20 +40,13 @@ namespace Mapping
             // Vertex
             vertex[0].point = Point(0, 0);
             vertex[1].point = Point(300, 1750);
-            vertex[2].point = Point(300, 1300);
-            vertex[3].point = Point(450, 1200);
-            vertex[4].point = Point(400, 800);
-            vertex[5].point = Point(450, 400);
-            vertex[6].point = Point(700, 400);
-            vertex[7].point = Point(800, 500);
-            vertex[8].point = Point(800, 1100);
-            vertex[9].point = Point(1250, 1100);
-            vertex[10].point = Point(1150, 1100);
-            vertex[11].point = Point(1150, 500);
-            vertex[12].point = Point(1100, 450);
-            vertex[13].point = Point(1500, 400);
-            vertex[14].point = Point(1500, 500);
-            vertex[15].point = Point(1500, 1100);
+            vertex[2].point = Point(150, 1400);
+            vertex[3].point = Point(600, 800);
+            vertex[4].point = Point(150, 600);
+            vertex[5].point = Point(300, 800);
+            vertex[6].point = Point(200, 200);
+            vertex[7].point = Point(900, 150);
+            vertex[8].point = Point(700, 300);
         }
         else if (team == IHM::Team::Bleu)
         {
@@ -73,20 +66,13 @@ namespace Mapping
             // Vertex
             vertex[0].point = Point(0, 0);
             vertex[1].point = Point(2700, 1750);
-            vertex[2].point = Point(2700, 1300);
-            vertex[3].point = Point(2550, 1200);
-            vertex[4].point = Point(2600, 800);
-            vertex[5].point = Point(2550, 400);
-            vertex[6].point = Point(2300, 400);
-            vertex[7].point = Point(2200, 500);
-            vertex[8].point = Point(2200, 1100);
-            vertex[9].point = Point(1750, 1100);
-            vertex[10].point = Point(1850, 1100);
-            vertex[11].point = Point(1850, 500);
-            vertex[12].point = Point(1900, 450);
-            vertex[13].point = Point(1500, 400);
-            vertex[14].point = Point(1500, 500);
-            vertex[15].point = Point(1500, 1100);
+            vertex[2].point = Point(2850, 1400);
+            vertex[3].point = Point(2400, 800);
+            vertex[4].point = Point(2850, 600);
+            vertex[5].point = Point(2700, 800);
+            vertex[6].point = Point(2800, 200);
+            vertex[7].point = Point(2100, 150);
+            vertex[8].point = Point(2300, 300);
         }
     }
 
