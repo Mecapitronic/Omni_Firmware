@@ -9,6 +9,7 @@ namespace OTOS
         bool connected = false;
         QwiicOTOS myOtos;
         bool setPose = false;
+        bool updating = false;
     } // namespace
 
     PoseF position;
@@ -116,6 +117,7 @@ namespace OTOS
 
     void Update()
     {
+        updating = true;
         if (connected && !setPose)
         {
             sfTkError_t error;
@@ -161,12 +163,18 @@ namespace OTOS
                 acceleration.h = myAcceleration.h;
             }
         }
+        updating = false;
     }
 
     void SetPose(float x, float y, float h)
     {
+        while(!updating)
+        {
+            println("Waiting for OTOS update to finish before setting pose...");
+            delay(100);
+        }
         setPose = true;
-        sfTkError_t error;
+        sfTkError_t error = 1;
         // Reset the tracking algorithm - this resets the position to the origin,
         // but can also be used to recover from some rare tracking errors
         myOtos.resetTracking();
@@ -176,17 +184,29 @@ namespace OTOS
         // another source of location information (eg. vision odometry), you can set
         // the OTOS location to match and it will continue to track from there.
         sfe_otos_pose2d_t currentPose = {x / 1000, y / 1000, h};
-
+        println("OTOS SetPose to x= %0.2f, y= %0.2f, h= %0.2f", x, y, h);
+        sfe_otos_pose2d_t poseTmp;
         if (connected)
         {
             int retrySetPose = 0;
-            error = myOtos.setPosition(currentPose);
-            while (error != 0 && retrySetPose < 5)
+            while (1)
             {
-                println("OTOS Error SetPose : %d", error);
-                delay(100);
                 error = myOtos.setPosition(currentPose);
                 retrySetPose++;
+                if(error == 0)
+                {
+                    println("OTOS SetPose successful after %d retries", retrySetPose);
+                    error = myOtos.getPosition(poseTmp);
+                    if(error == 0)
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    println("OTOS Error SetPose : %d", error);
+                }
+                delay(100);
             }
         }
         // Force position, but will be override when update occurs
