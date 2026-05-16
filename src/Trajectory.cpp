@@ -24,6 +24,8 @@ namespace Trajectory
         // sans flinguer la traj
         bool trajOnHold = false;
 
+        Timeout timeOutTraj;
+
     } // namespace
 
     void Initialisation(Motion *_linear, Motion *_angular, Robot *_robot)
@@ -205,18 +207,6 @@ namespace Trajectory
         GoToPose(x, y, robot->h);
     }
 
-    void TranslateToPositionWithoutWaiting(float x,
-                                           float y,
-                                           float speed_limit,
-                                           float speed_final)
-    {
-        // Update linear speeds
-        linear->speed_limit = speed_limit;
-        linear->speed_final = speed_final;
-
-        GoToPose(x, y, robot->h);
-    }
-
     void TranslateToPoint(PointF point, float speed_limit, float speed_final)
     {
         TranslateToPosition(point.x, point.y, speed_limit, speed_final);
@@ -248,6 +238,16 @@ namespace Trajectory
         linear->speed_limit = speed_limit;
         linear->speed_final = speed_final;
 
+        GoToPose(x, y, h);
+    }
+    
+    void GoToPoseTimeout(float x, float y, float h, float speed_limit, float speed_final, uint32_t timeout_ms)
+    {
+        // Update linear speeds
+        linear->speed_limit = speed_limit;
+        linear->speed_final = speed_final;
+
+        timeOutTraj.Start(timeout_ms);
         GoToPose(x, y, h);
     }
 
@@ -316,17 +316,24 @@ namespace Trajectory
 
     bool WaitRobotArrived()
     {
-        while (trajOnHold
-               || DistanceBetweenPositions(robot->x, robot->y, target.x, target.y)
-                      > ArrivalTriggerDistance
-               || (NormalizeAngle(abs(robot->h - target.h)) > ArrivalTriggerAngle))
+        if(!timeOutTraj.isRunning)
         {
+            timeOutTraj.Start(10000);
+        }
+        while (trajOnHold
+               || DistanceBetweenPositions(robot->x, robot->y, target.x, target.y) > ArrivalTriggerDistance
+               || (NormalizeAngle(abs(robot->h - target.h)) > ArrivalTriggerAngle))
+
+        {
+            if(timeOutTraj.IsTimeOut())
+                break;
             // println("distance : ",
             //         DistanceBetweenPositions(robot->x, robot->y, target.x, target.y));
             // println("angle : ",
             //         (float)(degrees(NormalizeAngle(abs(robot->h - target.h)))));
             delay(100);
         }
+        timeOutTraj.Stop();
 
         Debugger::WaitForAvailableSteps();
         // while (linear->isRunning || angular->isRunning)

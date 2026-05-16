@@ -39,14 +39,15 @@ namespace Mapping
             circle[7] = Circle(150, 400, 100);
             // Vertex
             vertex[0].point = Point(0, 0);
-            vertex[1].point = Point(300, 1750);
-            vertex[2].point = Point(150, 1400);
+            vertex[1].point = Point(183, 1717);
+            vertex[2].point = Point(175, 1400);
             vertex[3].point = Point(600, 800);
-            vertex[4].point = Point(150, 600);
+            vertex[4].point = Point(175, 600);
             vertex[5].point = Point(300, 800);
-            vertex[6].point = Point(200, 200);
-            vertex[7].point = Point(900, 150);
-            vertex[8].point = Point(700, 300);
+            vertex[6].point = Point(450, 800);
+            vertex[7].point = Point(900, 250);
+            vertex[8].point = Point(1300, 250);
+            vertex[9].point = Point(700, 350);
         }
         else if (team == IHM::Team::Bleu)
         {
@@ -65,14 +66,15 @@ namespace Mapping
             circle[7] = Circle(2850, 400, 100);
             // Vertex
             vertex[0].point = Point(0, 0);
-            vertex[1].point = Point(2700, 1750);
-            vertex[2].point = Point(2850, 1400);
+            vertex[1].point = Point(2817, 1717);
+            vertex[2].point = Point(2825, 1400);
             vertex[3].point = Point(2400, 800);
-            vertex[4].point = Point(2850, 600);
+            vertex[4].point = Point(2825, 600);
             vertex[5].point = Point(2700, 800);
-            vertex[6].point = Point(2800, 200);
-            vertex[7].point = Point(2100, 150);
-            vertex[8].point = Point(2300, 300);
+            vertex[6].point = Point(2550, 800);
+            vertex[7].point = Point(2100, 250);
+            vertex[8].point = Point(1700, 250);
+            vertex[9].point = Point(2300, 350);
         }
     }
 
@@ -81,7 +83,7 @@ namespace Mapping
      ****************************************************************************************/
     void Set_Adjacent(t_vertexID id1, t_vertexID id2)
     {
-        if(id1 >= 0 && id1 < Max_Vertex && id2 >= 0 && id2 < Max_Vertex)
+        if (id1 >= 0 && id1 < Max_Vertex && id2 >= 0 && id2 < Max_Vertex)
         {
             vertex[id1].adjacency_active |= ((t_adjacency)1u << id2);
             vertex[id2].adjacency_active |= ((t_adjacency)1u << id1);
@@ -93,7 +95,7 @@ namespace Mapping
      ****************************************************************************************/
     void Clear_Adjacent(t_vertexID id1, t_vertexID id2)
     {
-        if(id1 >= 0 && id1 < Max_Vertex && id2 >= 0 && id2 < Max_Vertex)
+        if (id1 >= 0 && id1 < Max_Vertex && id2 >= 0 && id2 < Max_Vertex)
         {
             vertex[id1].adjacency_active &= ~((t_adjacency)1u << id2);
             vertex[id2].adjacency_active &= ~((t_adjacency)1u << id1);
@@ -105,7 +107,7 @@ namespace Mapping
      ****************************************************************************************/
     boolean Is_Adjacent(t_vertexID id1, t_vertexID id2)
     {
-        if(id1 >= 0 && id1 < Max_Vertex && id2 >= 0 && id2 < Max_Vertex)
+        if (id1 >= 0 && id1 < Max_Vertex && id2 >= 0 && id2 < Max_Vertex)
         {
             if ((vertex[id1].adjacency_active & ((t_adjacency)1u << id2))
                 || (vertex[id2].adjacency_active & ((t_adjacency)1u << id1)))

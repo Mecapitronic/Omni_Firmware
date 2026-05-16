@@ -155,9 +155,12 @@ struct Robot : PoseF
      ****************************************************************************************/
     void SetPose(float x_mm, float y_mm, float h_rad)
     {
-        x = x_mm;
-        y = y_mm;
-        h = h_rad;
+        if(x_mm>0 && y_mm>0)
+        {
+            x = x_mm;
+            y = y_mm;
+            h = h_rad;
+        }
     }
 
     PoseF GetPoseF()

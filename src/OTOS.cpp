@@ -19,7 +19,7 @@ namespace OTOS
     void Initialisation()
     {
         println("Init QwiicOTOS");
-
+        //if(!connected)
         connected = myOtos.begin();
         int retryConnect = 1;
         while (!connected && !simulation)
@@ -94,8 +94,8 @@ namespace OTOS
             // the origin. If your robot does not start at the origin, or you have
             // another source of location information (eg. vision odometry), you can set
             // the OTOS location to match and it will continue to track from there.
-            sfe_otos_pose2d_t currentPose = {0, 0, 0};
-            myOtos.setPosition(currentPose);
+            //sfe_otos_pose2d_t currentPose = {0, 0, 0};
+            //myOtos.setPosition(currentPose);
 
             /*
             sfTkError_t error;
@@ -168,53 +168,60 @@ namespace OTOS
 
     void SetPose(float x, float y, float h)
     {
-        while(!updating)
+        if(x>0 && y>0)
         {
-            println("Waiting for OTOS update to finish before setting pose...");
-            delay(100);
-        }
-        setPose = true;
-        sfTkError_t error = 1;
-        // Reset the tracking algorithm - this resets the position to the origin,
-        // but can also be used to recover from some rare tracking errors
-        myOtos.resetTracking();
-
-        // After resetting the tracking, the OTOS will report that the robot is at
-        // the origin. If your robot does not start at the origin, or you have
-        // another source of location information (eg. vision odometry), you can set
-        // the OTOS location to match and it will continue to track from there.
-        sfe_otos_pose2d_t currentPose = {x / 1000, y / 1000, h};
-        println("OTOS SetPose to x= %0.2f, y= %0.2f, h= %0.2f", x, y, h);
-        sfe_otos_pose2d_t poseTmp;
-        if (connected)
-        {
-            int retrySetPose = 0;
-            while (1)
+            while(updating)
             {
-                error = myOtos.setPosition(currentPose);
-                retrySetPose++;
-                if(error == 0)
-                {
-                    println("OTOS SetPose successful after %d retries", retrySetPose);
-                    error = myOtos.getPosition(poseTmp);
-                    if(error == 0)
-                    {
-                        break;
-                    }
-                }
-                else
-                {
-                    println("OTOS Error SetPose : %d", error);
-                }
+                println("Waiting for OTOS update to finish before setting pose...");
                 delay(100);
             }
+            setPose = true;
+
+            Initialisation();
+            
+            sfTkError_t error = 1;
+
+            // After resetting the tracking, the OTOS will report that the robot is at
+            // the origin. If your robot does not start at the origin, or you have
+            // another source of location information (eg. vision odometry), you can set
+            // the OTOS location to match and it will continue to track from there.
+            sfe_otos_pose2d_t currentPose = {x / 1000, y / 1000, h};
+            println("OTOS SetPose to x= %0.2f, y= %0.2f, h= %0.2f", x, y, degrees(h));
+            sfe_otos_pose2d_t poseTmp;
+            if (connected)
+            {
+                int retrySetPose = 0;
+                while (1)
+                {
+                    error = myOtos.setPosition(currentPose);
+                    retrySetPose++;
+                    if(error == 0)
+                    {
+                        println("OTOS SetPose successful after %d retries", retrySetPose);
+                        error = myOtos.getPosition(poseTmp);
+                        if(error == 0 && poseTmp.x > 0 && poseTmp.y > 0)
+                        {
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        println("OTOS Error SetPose : %d", error);
+                    }
+                    delay(100);
+                }
+            }
+            // Force position, but will be override when update occurs
+            position.x = x;
+            position.y = y;
+            position.h = h;
+            println("OTOS SetPose to x= %0.2f, y= %0.2f, h= %0.2f", x, y, degrees(h));
+            setPose = false;
         }
-        // Force position, but will be override when update occurs
-        position.x = x;
-        position.y = y;
-        position.h = h;
-        println("OTOS SetPose to x= %0.2f, y= %0.2f, h= %0.2f", x, y, h);
-        setPose = false;
+        else
+        {
+            println("OTOS SetPose invalid, x and y must be positive");
+        }
     }
 
     void Teleplot()

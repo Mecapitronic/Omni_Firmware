@@ -53,5 +53,7 @@ void timerMotionCallback(TimerHandle_t xTimer);
 [[noreturn]] void TaskHandleCommand(void *pvParameters);
 [[noreturn]] void TaskMatch(void *pvParameters);
 
+void InitRobotOTOS(Point pInit, float angle);
+
 void functionChrono(int nbrLoop = 1);
 #endif

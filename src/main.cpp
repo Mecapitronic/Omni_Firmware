@@ -44,15 +44,15 @@ void setup()
     servoConfig.ax12Id = 18;
     servoConfig.AddPosition(58, Hardware_Config::ServoPosition::Min);   // position départ
     servoConfig.AddPosition(58, Hardware_Config::ServoPosition::Pos1);  // Position basse
-    servoConfig.AddPosition(100, Hardware_Config::ServoPosition::Pos2); // position juste au dessus des caisses
+    servoConfig.AddPosition(110, Hardware_Config::ServoPosition::Pos2); // position juste au dessus des caisses
     servoConfig.AddPosition(150, Hardware_Config::ServoPosition::Pos3); // position au dessus d'une caisse sur la tranche
     servoConfig.AddPosition(290, Hardware_Config::ServoPosition::Max);  // Tout en haut
     ServoAX12::AddServo(Hardware_Config::ServoID::Up, "Up", servoConfig);
 
     servoConfig.ax12Id = 17;
     servoConfig.AddPosition(48, Hardware_Config::ServoPosition::Min);   // position départ
-    servoConfig.AddPosition(7, Hardware_Config::ServoPosition::Pos1);   // position finale de retournement de la dernière caisse !! ne pas etre en position basse
-    servoConfig.AddPosition(48, Hardware_Config::ServoPosition::Pos2);  // position repli
+    servoConfig.AddPosition(60, Hardware_Config::ServoPosition::Pos1);   // position 
+    servoConfig.AddPosition(200, Hardware_Config::ServoPosition::Pos2);  // position retournement
     servoConfig.AddPosition(240, Hardware_Config::ServoPosition::Pos3); // position de maintient des caisses
     servoConfig.AddPosition(270, Hardware_Config::ServoPosition::Max);  // position de prise des caisses
     ServoAX12::AddServo(Hardware_Config::ServoID::Front, "Fwd", servoConfig);
@@ -60,16 +60,16 @@ void setup()
     Lidar::Initialisation(&robot);
 
     // led_ring.emergencyStopAtStart();
-    OTOS::Initialisation();
+    //OTOS::Initialisation();
 
     // Init motors
     motor.Initialisation(Motor::OMNIDIRECTIONAL_3_MOTORS, CENTER_WHEEL_DISTANCE);
 
     // Init Motion
     // Linear max speed and acceleration
-    linear.Initialisation(1000, 500);
+    linear.Initialisation(1500, 500);
     // Angular max speed and acceleration
-    angular.Initialisation(radians(200), radians(500));
+    angular.Initialisation(radians(500), radians(500));
     // Init end position tolerance
     linear.SetMargin(1);           // 1 mm
     angular.SetMargin(radians(1)); // 1 deg
@@ -97,7 +97,8 @@ void setup()
     timerMotion = TimerThread(timerMotionCallback,
                               "Timer Motion",
                               (1000 * Motion::dt_motion) / portTICK_PERIOD_MS);
-    timerMotion.Start();
+    // we will start it after match begin
+    //timerMotion.Start();
 
     // Put at least the 1 Tick delay, this is needed so the watchdog doesn't trigger
     TaskThread(TaskTeleplot, "TaskTeleplot", 10000, 5, 0);
@@ -159,7 +160,12 @@ void timerMotionCallback(TimerHandle_t xTimer)
 
         // Actual position update
         robot.SetPose(OTOS::position.x, OTOS::position.y, OTOS::position.h);
+        
+        // Update Screen
         Screen::SetPose(robot.GetPose());
+        PoseF targetScreenF = Trajectory::GetTarget();
+        Pose targetScreen = Pose(targetScreenF.x, targetScreenF.y, targetScreenF.h);
+        Screen::SetTarget(targetScreen);
 
         // Actual velocity update, in global field reference
         linear.velocity_actual = Norm2D(OTOS::velocity.x, OTOS::velocity.y);
@@ -441,6 +447,22 @@ void TaskHandleCommand(void *pvParameters)
     }
 }
 
+void InitRobotOTOS(Point pInit, float angle)
+{
+
+                timerMotion.WaitForDisable();
+                // Initial pose
+                OTOS::SetPose(pInit.x, pInit.y, angle);
+                robot.SetPose(pInit.x, pInit.y, angle);
+                // Reset odometry
+                Trajectory::Reset();
+                //  Enable Motor & Servo Power
+                Power::EnablePower();
+                delay(100);
+                timerMotion.Enable();
+                timerMotion.Start();
+}
+
 void TaskMatch(void *pvParameters)
 {
     println("Start TaskMatch");
@@ -454,6 +476,7 @@ void TaskMatch(void *pvParameters)
             if (Match::matchState == Match::State::MATCH_BOOT)
             {
                 Power::EnablePower();
+                ServoAX12::RepliHaut();
             }
 
             // En attente de retrait de la tirette pour démarrer le match
@@ -461,38 +484,21 @@ void TaskMatch(void *pvParameters)
             {
                 // Disable Motor & Servo Power
                 Power::DisablePower();
-                timerMotion.WaitForDisable();
+                
                 Mapping::Initialize_Map(IHM::team);
-                // Start Point
-                Point p = Mapping::Get_Vertex_Point(1);
-                // Initial pose
-                OTOS::SetPose(p.x, p.y, radians(180));
-                robot.SetPose(p.x, p.y, radians(180));
-                // Reset odometry
-                Trajectory::Reset();
-                timerMotion.Enable();
-                ServoAX12::SetServoPosition(Hardware_Config::ServoID::Up, Hardware_Config::ServoPosition::Pos1);
-                ServoAX12::SetServoPosition(Hardware_Config::ServoID::Front, Hardware_Config::ServoPosition::Pos2);
-                delay(100);
             }
 
             // Match en cours
             if (Match::matchState == Match::State::MATCH_RUN)
             {
+                InitRobotOTOS(Mapping::Get_Vertex_Point(1), radians(180));
+
                 Point p;
-                //  Enable Motor & Servo Power
-                Power::EnablePower();
-                ServoAX12::SetServoPosition(Hardware_Config::ServoID::Up, Hardware_Config::ServoPosition::Pos2);
-                ServoAX12::SetServoPosition(Hardware_Config::ServoID::Front, Hardware_Config::ServoPosition::Pos2);
-                while (ServoAX12::AreAllServoMoving())
-                {
-                    delay(1);
-                }
+                
 
                 // --------  1ere prise --------
                 // prise vertex 2
-                ServoAX12::SetServoPosition(Hardware_Config::ServoID::Up, Hardware_Config::ServoPosition::Pos2);
-                ServoAX12::SetServoPosition(Hardware_Config::ServoID::Front, Hardware_Config::ServoPosition::Max);
+                ServoAX12::PrePrise();
                 
                 p = Mapping::Get_Vertex_Point(2);
                 Trajectory::GoToPose(p.x, p.y+50, radians(180), linear.speed_max, 0);
@@ -506,16 +512,7 @@ void TaskMatch(void *pvParameters)
                 p = Mapping::Get_Vertex_Point(2);
                 Trajectory::GoToPose(p.x, p.y-100, radians(180), linear.speed_max, 0);
 
-                ServoAX12::SetServoPosition(Hardware_Config::ServoID::Up, Hardware_Config::ServoPosition::Pos1);
-                while (ServoAX12::AreAllServoMoving())
-                {
-                    delay(10);
-                }
-                ServoAX12::SetServoPosition(Hardware_Config::ServoID::Front, Hardware_Config::ServoPosition::Pos3);
-                while (ServoAX12::AreAllServoMoving())
-                {
-                    delay(10);
-                }
+                ServoAX12::Prise();
 
                 // --------  1ere dépose --------
                 // dépose vertex 3
@@ -525,17 +522,23 @@ void TaskMatch(void *pvParameters)
                     Trajectory::GoToPose(p.x, p.y, radians(-90), linear.speed_max, 0);
                 else
                     Trajectory::GoToPose(p.x, p.y, radians(90), linear.speed_max, 0);
+                
+                // on pousse les elements dans la case d'après
+                if(IHM::team == IHM::Team::Jaune)
+                    Trajectory::GoToPoseTimeout(p.x+500, p.y, radians(-90), linear.speed_max, 0, 5000);
+                else
+                    Trajectory::GoToPoseTimeout(p.x-500, p.y, radians(90), linear.speed_max, 0, 5000);
+
+                // on revient à la 1ère dépose
+                p = Mapping::Get_Vertex_Point(3);
+                if(IHM::team == IHM::Team::Jaune)
+                    Trajectory::GoToPose(p.x, p.y, radians(-90), linear.speed_max, 0);
+                else
+                    Trajectory::GoToPose(p.x, p.y, radians(90), linear.speed_max, 0);
+
                 delay(1000);
-                ServoAX12::SetServoPosition(Hardware_Config::ServoID::Front, Hardware_Config::ServoPosition::Max);
-                while (ServoAX12::AreAllServoMoving())
-                {
-                    delay(10);
-                }
-                ServoAX12::SetServoPosition(Hardware_Config::ServoID::Up, Hardware_Config::ServoPosition::Pos3);
-                while (ServoAX12::AreAllServoMoving())
-                {
-                    delay(10);
-                }
+                ServoAX12::Retourne();
+                ServoAX12::Depose();
                 delay(1000);
                 
                 
@@ -554,17 +557,24 @@ void TaskMatch(void *pvParameters)
                 p = Mapping::Get_Vertex_Point(4);
                 Trajectory::GoToPose(p.x, p.y-100, radians(180), linear.speed_max, 0);
 
-                ServoAX12::SetServoPosition(Hardware_Config::ServoID::Up, Hardware_Config::ServoPosition::Pos1);
-                while (ServoAX12::AreAllServoMoving())
-                {
-                    delay(10);
-                }
-                ServoAX12::SetServoPosition(Hardware_Config::ServoID::Front, Hardware_Config::ServoPosition::Pos3);
-                while (ServoAX12::AreAllServoMoving())
-                {
-                    delay(10);
-                }
+                ServoAX12::Prise();
                 delay(1000);
+/*
+                if(IHM::team == IHM::Team::Jaune)
+                Trajectory::GoToPoseTimeout(p.x-100, p.y-500, radians(180), linear.speed_max, 0,3000);
+                else
+                Trajectory::GoToPoseTimeout(p.x+100, p.y-500, radians(180), linear.speed_max, 0,3000);
+
+                
+                Point pInit1;
+                if(IHM::team == IHM::Team::Jaune)
+                    pInit1 = Point(126, 310);
+                else
+                    pInit1 = Point(3000-126, 310);
+
+                InitRobotOTOS(pInit1, radians(180));
+*/
+                
                 // sortie de la dépose
                 if(IHM::team == IHM::Team::Jaune)
                     Trajectory::GoToPose(p.x+250, p.y-100, radians(180), linear.speed_max, 0);
@@ -580,65 +590,101 @@ void TaskMatch(void *pvParameters)
                 else
                     Trajectory::GoToPose(p.x-100, p.y, radians(-90), linear.speed_max, 0);
                 
+                ServoAX12::Retourne();
+                ServoAX12::Depose();
+                // Monte au max pour etre au dessus de la bordure
+                ServoAX12::SetServoPosition(Hardware_Config::ServoID::Up, Hardware_Config::ServoPosition::Max);
+                while (ServoAX12::AreAllServoMoving())
+                {
+                    delay(10);
+                }
+
+                // on pousse legerement les caisses
                 if(IHM::team == IHM::Team::Jaune)
-                    Trajectory::GoToPose(p.x+50, p.y, radians(90), linear.speed_max, 0);
+                    Trajectory::GoToPoseTimeout(p.x+50, p.y, radians(90), linear.speed_max, 0, 2000);
                 else
+                    Trajectory::GoToPoseTimeout(p.x-50, p.y, radians(-90), linear.speed_max, 0, 2000);
+
+                if(IHM::team == IHM::Team::Jaune)
+                    Trajectory::GoToPose(p.x+150, p.y, radians(90), linear.speed_max, 0);
+                else
+                    Trajectory::GoToPose(p.x-150, p.y, radians(-90), linear.speed_max, 0);
+
+
+                // --------  3eme prise --------
+                // vertex 7
+                p = Mapping::Get_Vertex_Point(7);
+                if(IHM::team == IHM::Team::Jaune)
                     Trajectory::GoToPose(p.x-50, p.y, radians(-90), linear.speed_max, 0);
+                else
+                    Trajectory::GoToPose(p.x+50, p.y, radians(90), linear.speed_max, 0);
+                
+                ServoAX12::PrePrise();
 
-                ServoAX12::SetServoPosition(Hardware_Config::ServoID::Front, Hardware_Config::ServoPosition::Max);
-                while (ServoAX12::AreAllServoMoving())
-                {
-                    delay(10);
-                }
-                ServoAX12::SetServoPosition(Hardware_Config::ServoID::Up, Hardware_Config::ServoPosition::Pos3);
-                while (ServoAX12::AreAllServoMoving())
-                {
-                    delay(10);
-                }
+                if(IHM::team == IHM::Team::Jaune)
+                    Trajectory::GoToPose(p.x+100, p.y, radians(-90), linear.speed_max, 0);
+                else
+                    Trajectory::GoToPose(p.x-100, p.y, radians(90), linear.speed_max, 0);
+                    
+
+                ServoAX12::Prise();
+
+                // ---------  3eme dépose --------
+                // vertex 8                
+                p = Mapping::Get_Vertex_Point(8);
+                
+                if(IHM::team == IHM::Team::Jaune)
+                    Trajectory::GoToPose(p.x, p.y, radians(-90), linear.speed_max, 0);
+                else
+                    Trajectory::GoToPose(p.x, p.y, radians(90), linear.speed_max, 0);
+
+                    ServoAX12::Retourne();
+                ServoAX12::Depose();
+                // Monte au max pour etre au dessus de la bordure
+                ServoAX12::SetServoPosition(Hardware_Config::ServoID::Up, Hardware_Config::ServoPosition::Max);
+                ServoAX12::WaitAllServo();
+
+                if(IHM::team == IHM::Team::Jaune)
+                    Trajectory::GoToPose(p.x-100, p.y, radians(-90), linear.speed_max, 0);
+                else
+                    Trajectory::GoToPose(p.x+100, p.y, radians(90), linear.speed_max, 0);
+
+
+                // Curseur
+                Trajectory::RotateToOrientation(radians(180), angular.speed_max/2, 0);
+                delay(2000);
+                ServoAX12::PrePrise();
+                 ServoAX12::SetServoPosition(Hardware_Config::ServoID::Up, Hardware_Config::ServoPosition::Min);
+               ServoAX12::WaitAllServo();
                 delay(1000);
+                p = Mapping::Get_Vertex_Point(9);
+                    Trajectory::GoToPose(p.x, p.y-100, radians(180), linear.speed_max/2, 0);
 
-                // --------  Curseur --------
-                // curseur vertex 6
+                    ServoAX12::SetServoPosition(Hardware_Config::ServoID::Up, Hardware_Config::ServoPosition::Max);
+               ServoAX12::WaitAllServo();
+               delay(1000);
+                // retour en arrière
+                p = Mapping::Get_Vertex_Point(9);
                 
-                /*
-                // approche
-                Trajectory::GoToVertex(6, linear.speed_max, 0);
+                    Trajectory::GoToPose(p.x, p.y+200, radians(180), linear.speed_max, 0);
+
+                    ServoAX12::RepliHaut();
+
+
+
+                // --------  Retour en zone de départ --------
+
+                // point d'attente vertex 6
+
                 p = Mapping::Get_Vertex_Point(6);
-                
-                //prise
-                if(IHM::team == IHM::Team::Jaune)
-                    Trajectory::GoToPose(p.x-50, p.y-50, radians(180), linear.speed_max, 0);
-                else
-                    Trajectory::GoToPose(p.x+50, p.y-50, radians(180), linear.speed_max, 0);
-                
-                // translate
-                if(IHM::team == IHM::Team::Jaune)
-                    Trajectory::TranslateToPosition(p.x+550, p.y, linear.speed_max, 0);
-                else
-                    Trajectory::TranslateToPosition(p.x-550, p.y, linear.speed_max, 0);
-                
-                // recule
-                if(IHM::team == IHM::Team::Jaune)
-                    Trajectory::TranslateToPosition(p.x+550, p.y+100, linear.speed_max, 0);
-                else
-                    Trajectory::TranslateToPosition(p.x-550, p.y+100, linear.speed_max, 0);
-                */
-
-                // --------  Repli zone --------
-                // zone départ
-
-                // point d'attente
-                if(IHM::team == IHM::Team::Jaune)
-                    p.x = 450;
-                else
-                    p.x = 3000-450;
-                p.y = 800;
                 Trajectory::GoToPose(p.x, p.y, radians(0), linear.speed_max, 0);
+
+                // Pos repli sans attendre
                 ServoAX12::SetServoPosition(Hardware_Config::ServoID::Up, Hardware_Config::ServoPosition::Pos3);
-                ServoAX12::SetServoPosition(Hardware_Config::ServoID::Front, Hardware_Config::ServoPosition::Pos2);
+                ServoAX12::SetServoPosition(Hardware_Config::ServoID::Front, Hardware_Config::ServoPosition::Pos1);
 
                 // attente sortie des PAMI
-                while(Match::getMatchTimeMs() < Match::time_start_match+7000)
+                while(Match::getMatchTimeMs() < Match::time_start_match+8500)
                 {
                     delay(10);
                 }

@@ -18,13 +18,17 @@ namespace Hardware_Config
     {
         // Up=58 Fwd=48
         Min = 0,
-        // Up=58 Fwd=7
+
+        // Up=58 bas, Fwd=48 replié
         Pos1,
-        // Up=100, Fwd=48
+
+        // Up=110 avant prise, Fwd=150 retourne
         Pos2,
-        // Up=150, Fwd=240
+
+        // Up=150 depose, Fwd=240 prise
         Pos3,
-        // Up=290, Fwd=270
+        
+        // Up=290 max, Fwd=270 dépose
         Max,
         Count
     };

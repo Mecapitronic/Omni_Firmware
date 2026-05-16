@@ -95,11 +95,7 @@ namespace Trajectory
      * @param speed_final
      */
     void TranslateToPosition(float x, float y, float speed_limit, float speed_final);
-    void TranslateToPositionWithoutWaiting(float x,
-                                           float y,
-                                           float speed_limit,
-                                           float speed_final);
-
+    
     /**
      * @brief Pure translation to point, with limit and final speed
      *
@@ -157,6 +153,9 @@ namespace Trajectory
      * @param speed_limit
      * @param speed_final
      */
+    
+    void GoToPoseTimeout(float x, float y, float h, float speed_limit, float speed_final, uint32_t timeout_ms);
+    
     void GoToVertex(t_vertexID id, float speed_limit, float speed_final);
 
     /**
