@@ -88,6 +88,7 @@ void setup()
     // Initial pose
     OTOS::SetPose(start.x, start.y, radians(180));
     robot.SetPose(start.x, start.y, radians(180));
+    Screen::SetPose(robot.GetPose());
     Trajectory::Reset();
     
     Mapping::Update_Start_Vertex((int16_t)robot.x, (int16_t)robot.y);
@@ -302,7 +303,7 @@ void TaskHandleCommand(void *pvParameters)
             if (ESP32_Helper::HasWaitingCommand())
             {
                 Command cmd = ESP32_Helper::GetCommand();
-                println("Received Command: %s", cmd.ToString().c_str());
+                println("Received Command: %s", cmd.ToString());
                 motor.HandleCommand(cmd);
 
                 if (cmd.cmdEquals("Help"))
@@ -334,16 +335,15 @@ void TaskHandleCommand(void *pvParameters)
                     // SetPose:2000:200:9000
                     // SetPose:500;500;0
                     // SetPose:1500;1000;0
-                    timerMotion.WaitForDisable();
-                    PoseF goTo = PoseF(cmd.data[0], cmd.data[1], radians(cmd.data[2]));
-                    print("Robot set to x= %f", goTo.x);
-                    print(" y= %f", goTo.y);
-                    print(" h= %f", goTo.h);
-                    println();
-                    robot.SetPose(goTo.x, goTo.y, goTo.h);
-                    OTOS::SetPose(robot.x, robot.y, robot.h);
-                    Trajectory::Reset();
-                    timerMotion.Enable();
+                    Point otosInit = Point(cmd.data[0], cmd.data[1]);
+                    int angle = cmd.data[2];
+                    print("Robot set to x= %d y=%d h=%d", otosInit.x, otosInit.y, angle);
+                    InitRobotOTOS(otosInit, radians(angle));
+                }
+                else if (cmd.cmdEquals("GetPose"))
+                {
+                    Pose pose = robot.GetPose();
+                    println("Robot Pose: x= %d y= %d h= %d", pose.x, pose.y, degrees(pose.h));
                 }
                 else if (cmd.cmdEquals("UpdateMapping"))
                 {
@@ -454,6 +454,7 @@ void InitRobotOTOS(Point pInit, float angle)
                 // Initial pose
                 OTOS::SetPose(pInit.x, pInit.y, angle);
                 robot.SetPose(pInit.x, pInit.y, angle);
+                Screen::SetPose(robot.GetPose());
                 // Reset odometry
                 Trajectory::Reset();
                 //  Enable Motor & Servo Power

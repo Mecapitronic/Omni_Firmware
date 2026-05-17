@@ -39,7 +39,9 @@ namespace OTOS
             println("Calibrating IMU ...");
 
             // Calibrate the IMU, which removes the accelerometer and gyroscope offsets
-            myOtos.calibrateImu();
+            sfTkError_t error = myOtos.calibrateImu();
+            if (error != 0)
+                printError("Error calibrating IMU : " + String(error));
 
             println("IMU calibration done !");
 

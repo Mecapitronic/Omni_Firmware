@@ -138,6 +138,7 @@ namespace Trajectory
         UpdateAdversary();
         if (isThereAnObstacleInFrontOfMe())
         {
+            Screen::SetHold(true);
             putOnHold();
             if (pending_target == PoseF())
             {
@@ -149,6 +150,7 @@ namespace Trajectory
         }
         else
         {
+            Screen::SetHold(false);
             if (pending_target != PoseF())
             {
                 // restore target
