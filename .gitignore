@@ -1,5 +1,6 @@
 # PlatformIO
 .pio
+/bin
 
 # VSCode
 .vscode/.browse.c_cpp.db*
