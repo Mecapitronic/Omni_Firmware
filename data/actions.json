@@ -1,0 +1,32 @@
+{
+  "version": 1,
+  "date": "2026-10-06",
+  "actions": [
+    {
+      "ID": 1,
+      "vertexID": "2",
+      "mission": 0,
+      "possible": true,
+      "done": false,
+      "iteration": 1,
+      "point": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "function": ""
+    },
+    {
+      "ID": 2,
+      "vertexID": "3",
+      "mission": 0,
+      "possible": true,
+      "done": false,
+      "iteration": 1,
+      "point": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "function": ""
+    }
+  ]
+}

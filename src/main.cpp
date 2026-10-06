@@ -94,6 +94,10 @@ void setup()
     Mapping::Update_Start_Vertex((int16_t)robot.x, (int16_t)robot.y);
     Mapping::Update_Passability_Graph();
 
+    // Load actions from JSON file
+    Strategy::Initialisation();
+    Strategy::Print();
+
     // Create a timer => for motion
     timerMotion = TimerThread(timerMotionCallback,
                               "Timer Motion",
@@ -223,7 +227,7 @@ void TaskTeleplot(void *pvParameters)
             if (robotPosTimeOut.IsTimeOut())
             {
                 teleplot("Position", robot);
-                teleplot("Orient", degrees(robot.h));
+                teleplot("Orient", (int)degrees(robot.h));
                 // teleplot("Target", Trajectory::GetTarget());
                 // teleplot("TargetOrient", degrees(Trajectory::GetTarget().h));
                 // teleplot("linear.direction", degrees(linear.direction));

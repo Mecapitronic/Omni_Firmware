@@ -23,6 +23,8 @@
 
 #include "PathPlanning/PathFinding.h"
 
+#include "Strategy/Strategy.h"
+
 using namespace std;
 using namespace Printer;
 
