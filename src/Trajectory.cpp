@@ -318,7 +318,7 @@ namespace Trajectory
 
     bool WaitRobotArrived()
     {
-        if(!timeOutTraj.isRunning)
+        if(!timeOutTraj.IsRunning())
         {
             timeOutTraj.Start(10000);
         }
