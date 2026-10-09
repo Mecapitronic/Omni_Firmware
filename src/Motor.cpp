@@ -117,8 +117,8 @@ void Motor::HandleCommand(Command cmd)
 
 void Motor::PrintCommandHelp()
 {
-    Printer::println("Motor Command Help :");
-    Printer::println(" > Motor:[int];[int];[int]");
+    Printer::println("Motor Command Help");
+    Printer::println(" > Motor:[int]:[int]:[int]");
     Printer::println("      [int] number of motor, frequency of motor in Hz, duty cycle "
                      "of motor between 0 and 100");
     Printer::println();

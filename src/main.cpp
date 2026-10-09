@@ -307,7 +307,6 @@ void TaskHandleCommand(void *pvParameters)
             if (ESP32_Helper::HasWaitingCommand())
             {
                 Command cmd = ESP32_Helper::GetCommand();
-                println("Received Command: %s", cmd.ToString());
                 motor.HandleCommand(cmd);
 
                 if (cmd.cmdEquals("Help"))
