@@ -6,11 +6,11 @@ void LedRGB::Initialisation()
 {
     // Initialize timers for color transitions and rotation
     print("RGB initialisation of ", NUM_LEDS, " pixels");
-    println(" on pin ", Hardware_Config::PIN_WS2812_LED);
+    println(" on pin ", Hardware_Config::PIN_LED_WS2812);
 
     // Initialize the FastLED library
     ring_controller =
-        &FastLED.addLeds<NEOPIXEL, Hardware_Config::PIN_WS2812_LED>(leds, NUM_LEDS);
+        &FastLED.addLeds<NEOPIXEL, Hardware_Config::PIN_LED_WS2812>(leds, NUM_LEDS);
     FastLED.setBrightness(RING_BRIGHTNESS);
     // Set the initial color of the LEDs to black
     fill_solid(leds, NUM_LEDS, CRGB::Purple);
