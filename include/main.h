@@ -58,4 +58,11 @@ void timerMotionCallback(TimerHandle_t xTimer);
 void InitRobotOTOS(Point pInit, float angle);
 
 void functionChrono(int nbrLoop = 1);
+
+void Depose();
+void PrePrise();
+void Prise();
+void Retourne();
+void Repli();
+void RepliHaut();
 #endif

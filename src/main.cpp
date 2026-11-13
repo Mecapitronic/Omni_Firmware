@@ -475,7 +475,7 @@ void TaskMatch(void *pvParameters)
             if (Match::matchState == Match::State::MATCH_BOOT)
             {
                 Power::EnablePower();
-                //ServoAX12::RepliHaut();
+                RepliHaut();
             }
 
             // En attente de retrait de la tirette pour démarrer le match
@@ -497,7 +497,7 @@ void TaskMatch(void *pvParameters)
 
                 // --------  1ere prise --------
                 // prise vertex 2
-                //ServoAX12::PrePrise();
+                PrePrise();
                 
                 p = Mapping::Get_Vertex_Point(2);
                 Trajectory::GoToPose(p.x, p.y+50, radians(180), linear.speed_max, 0);
@@ -511,7 +511,7 @@ void TaskMatch(void *pvParameters)
                 p = Mapping::Get_Vertex_Point(2);
                 Trajectory::GoToPose(p.x, p.y-100, radians(180), linear.speed_max, 0);
 
-                //ServoAX12::Prise();
+                Prise();
 
                 // --------  1ere dépose --------
                 // dépose vertex 3
@@ -536,8 +536,8 @@ void TaskMatch(void *pvParameters)
                     Trajectory::GoToPose(p.x, p.y, radians(90), linear.speed_max, 0);
 
                 delay(1000);
-                //ServoAX12::Retourne();
-                //ServoAX12::Depose();
+                Retourne();
+                Depose();
                 delay(1000);
                 
                 
@@ -556,7 +556,7 @@ void TaskMatch(void *pvParameters)
                 p = Mapping::Get_Vertex_Point(4);
                 Trajectory::GoToPose(p.x, p.y-100, radians(180), linear.speed_max, 0);
 
-                //ServoAX12::Prise();
+                Prise();
                 delay(1000);
 /*
                 if(IHM::team == IHM::Team::Jaune)
@@ -589,11 +589,11 @@ void TaskMatch(void *pvParameters)
                 else
                     Trajectory::GoToPose(p.x-100, p.y, radians(-90), linear.speed_max, 0);
                 
-                //ServoAX12::Retourne();
-                //ServoAX12::Depose();
+                Retourne();
+                Depose();
                 // Monte au max pour etre au dessus de la bordure
-                //ServoAX12::SetServoPosition(Hardware_Config::ServoID::Up, Hardware_Config::ServoPosition::Max);
-                //ServoAX12::WaitAllServo();
+                ServoAX12::SetServoPosition(Hardware_Config::ServoID::Up, Hardware_Config::ServoPosition::Max);
+                ServoAX12::WaitAllServo();
 
                 // on pousse legerement les caisses
                 if(IHM::team == IHM::Team::Jaune)
@@ -615,7 +615,7 @@ void TaskMatch(void *pvParameters)
                 else
                     Trajectory::GoToPose(p.x+50, p.y, radians(90), linear.speed_max, 0);
                 
-                //ServoAX12::PrePrise();
+                PrePrise();
 
                 if(IHM::team == IHM::Team::Jaune)
                     Trajectory::GoToPose(p.x+100, p.y, radians(-90), linear.speed_max, 0);
@@ -623,7 +623,7 @@ void TaskMatch(void *pvParameters)
                     Trajectory::GoToPose(p.x-100, p.y, radians(90), linear.speed_max, 0);
                     
 
-                //ServoAX12::Prise();
+                Prise();
 
                 // ---------  3eme dépose --------
                 // vertex 8                
@@ -634,11 +634,11 @@ void TaskMatch(void *pvParameters)
                 else
                     Trajectory::GoToPose(p.x, p.y, radians(90), linear.speed_max, 0);
 
-                //ServoAX12::Retourne();
-                //ServoAX12::Depose();
+                Retourne();
+                Depose();
                 // Monte au max pour etre au dessus de la bordure
-                //ServoAX12::SetServoPosition(Hardware_Config::ServoID::Up, Hardware_Config::ServoPosition::Max);
-                //ServoAX12::WaitAllServo();
+                ServoAX12::SetServoPosition(Hardware_Config::ServoID::Up, Hardware_Config::ServoPosition::Max);
+                ServoAX12::WaitAllServo();
 
                 if(IHM::team == IHM::Team::Jaune)
                     Trajectory::GoToPose(p.x-100, p.y, radians(-90), linear.speed_max, 0);
@@ -649,22 +649,22 @@ void TaskMatch(void *pvParameters)
                 // Curseur
                 Trajectory::RotateToOrientation(radians(180), angular.speed_max/2, 0);
                 delay(2000);
-                //ServoAX12::PrePrise();
-                 //ServoAX12::SetServoPosition(Hardware_Config::ServoID::Up, Hardware_Config::ServoPosition::Min);
-               //ServoAX12::WaitAllServo();
+                PrePrise();
+                ServoAX12::SetServoPosition(Hardware_Config::ServoID::Up, Hardware_Config::ServoPosition::Min);
+                ServoAX12::WaitAllServo();
                 delay(1000);
                 p = Mapping::Get_Vertex_Point(9);
                     Trajectory::GoToPose(p.x, p.y-100, radians(180), linear.speed_max/2, 0);
 
-                    //ServoAX12::SetServoPosition(Hardware_Config::ServoID::Up, Hardware_Config::ServoPosition::Max);
-               //ServoAX12::WaitAllServo();
-               delay(1000);
+                ServoAX12::SetServoPosition(Hardware_Config::ServoID::Up, Hardware_Config::ServoPosition::Max);
+                ServoAX12::WaitAllServo();
+                delay(1000);
                 // retour en arrière
                 p = Mapping::Get_Vertex_Point(9);
                 
-                    Trajectory::GoToPose(p.x, p.y+200, radians(180), linear.speed_max, 0);
+                Trajectory::GoToPose(p.x, p.y+200, radians(180), linear.speed_max, 0);
 
-                    //ServoAX12::RepliHaut();
+                RepliHaut();
 
 
 
@@ -676,8 +676,8 @@ void TaskMatch(void *pvParameters)
                 Trajectory::GoToPose(p.x, p.y, radians(0), linear.speed_max, 0);
 
                 // Pos repli sans attendre
-                //ServoAX12::SetServoPosition(Hardware_Config::ServoID::Up, Hardware_Config::ServoPosition::Pos3);
-                //ServoAX12::SetServoPosition(Hardware_Config::ServoID::Front, Hardware_Config::ServoPosition::Pos1);
+                ServoAX12::SetServoPosition(Hardware_Config::ServoID::Up, Hardware_Config::ServoPosition::Pos3);
+                ServoAX12::SetServoPosition(Hardware_Config::ServoID::Front, Hardware_Config::ServoPosition::Pos1);
 
                 // attente sortie des PAMI
                 while(Match::getMatchTimeMs() < Match::time_start_match+8500)
@@ -749,4 +749,67 @@ void functionChrono(int nbrLoop)
     print(" or ", chrono, " µs/func ");
     print(" = ", chrono / 1000, " ms/func.");
     println();
+}
+
+void Depose()
+{
+    ServoAX12::SetServoPosition(Hardware_Config::ServoID::Front,
+                                Hardware_Config::ServoPosition::Max);
+    ServoAX12::WaitServo(Hardware_Config::ServoID::Front);
+    ServoAX12::SetServoPosition(Hardware_Config::ServoID::Up,
+                                Hardware_Config::ServoPosition::Pos3);
+    ServoAX12::WaitServo(Hardware_Config::ServoID::Up);
+}
+
+void PrePrise()
+{
+    ServoAX12::SetServoPosition(Hardware_Config::ServoID::Up,
+                                Hardware_Config::ServoPosition::Pos3);
+    ServoAX12::WaitServo(Hardware_Config::ServoID::Up);
+    ServoAX12::SetServoPosition(Hardware_Config::ServoID::Front,
+                                Hardware_Config::ServoPosition::Max);
+    ServoAX12::WaitServo(Hardware_Config::ServoID::Front);
+}
+
+void Prise()
+{
+    ServoAX12::SetServoPosition(Hardware_Config::ServoID::Up,
+                                Hardware_Config::ServoPosition::Pos1);
+    ServoAX12::WaitServo(Hardware_Config::ServoID::Up);
+    ServoAX12::SetServoPosition(Hardware_Config::ServoID::Front,
+                                Hardware_Config::ServoPosition::Pos3);
+    ServoAX12::WaitServo(Hardware_Config::ServoID::Front);
+}
+
+void Retourne()
+{
+    ServoAX12::SetServoPosition(Hardware_Config::ServoID::Up,
+                                Hardware_Config::ServoPosition::Pos2);
+    ServoAX12::WaitServo(Hardware_Config::ServoID::Up);
+    ServoAX12::SetServoPosition(Hardware_Config::ServoID::Front,
+                                Hardware_Config::ServoPosition::Pos2);
+    ServoAX12::WaitServo(Hardware_Config::ServoID::Front);
+    ServoAX12::SetServoPosition(Hardware_Config::ServoID::Up,
+                                Hardware_Config::ServoPosition::Pos3);
+    ServoAX12::WaitServo(Hardware_Config::ServoID::Up);
+}
+
+void Repli()
+{
+    ServoAX12::SetServoPosition(Hardware_Config::ServoID::Up,
+                                Hardware_Config::ServoPosition::Pos1);
+    ServoAX12::WaitServo(Hardware_Config::ServoID::Up);
+    ServoAX12::SetServoPosition(Hardware_Config::ServoID::Front,
+                                Hardware_Config::ServoPosition::Min);
+    ServoAX12::WaitServo(Hardware_Config::ServoID::Front);
+}
+
+void RepliHaut()
+{
+    ServoAX12::SetServoPosition(Hardware_Config::ServoID::Up,
+                                Hardware_Config::ServoPosition::Pos2);
+    ServoAX12::WaitServo(Hardware_Config::ServoID::Up);
+    ServoAX12::SetServoPosition(Hardware_Config::ServoID::Front,
+                                Hardware_Config::ServoPosition::Pos1);
+    ServoAX12::WaitServo(Hardware_Config::ServoID::Front);
 }
