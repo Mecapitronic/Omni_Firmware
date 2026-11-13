@@ -1,5 +1,6 @@
 {
     "cSpell.words": [
+        "Adafruit",
         "arduino",
         "devkit",
         "dutycycle",
@@ -12,7 +13,15 @@
         "setpoint",
         "teleplot",
         "uart",
-        "wokwi"
+        "wokwi",
+        "pami",
+        "Pami",
+        "PAMI",
+        "DYNAMIXEL",
+        "Dynamixel",
+        "dynamixel",
+        "Teleplot",
+        "teleplot"
     ],
     "files.associations": {
         "string": "cpp",

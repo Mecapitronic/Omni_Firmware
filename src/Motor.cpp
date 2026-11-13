@@ -41,6 +41,19 @@ void Motor::Initialisation(MotorBaseType _motorBaseType, float _centerToWheel)
     {
         stepper3 = new ESP32_FAST_PWM(PIN_STEP_M3, 500, 0, 6, BIT_RESOLUTION);
     }
+
+    ESP32_Helper::RegisterCommand("Motor", "Motor:<id:int>:<frequency:int>:<dutyCycle:int@%> - Set motor PWM; id: 1..2 (3 for a three-motor base), frequency in Hz (> 0), dutyCycle: 0..100.",
+            FunctionCommand(
+                if (cmd.hasData(3)) {
+                    if (cmd.data[2] < 0 || 100 < cmd.data[2])
+                    {
+                        println("Invalid Duty Cycle");
+                        return;
+                    }
+                    if (cmd.data[0] == 1) {stepper1->setPWM(cmd.data[1], cmd.data[2]);}
+                    else if (cmd.data[0] == 2) {stepper2->setPWM(cmd.data[1], cmd.data[2]);}
+                    else if (cmd.data[0] == 3 && stepper3 != nullptr) {stepper3->setPWM(cmd.data[1], cmd.data[2]);}
+                } ));
 }
 
 void Motor::Update(float linear_speed_mms,
@@ -88,40 +101,6 @@ void Motor::Update(float linear_speed_mms,
         SetMotorSpeed(2, motor2_speed);
         SetMotorSpeed(3, motor3_speed);
     }
-}
-
-void Motor::HandleCommand(Command cmd)
-{
-    if (cmd.cmd == "Motor" && cmd.size == 3)
-    {
-        // Motor:1;1000;50
-        // Motor:1;1;50
-        if (cmd.data[2] < 0 || 100 < cmd.data[2])
-        {
-            println("Invalid Duty Cycle");
-            return;
-        }
-
-        print("Motor ", cmd.data[0]);
-        print(" with freq ", cmd.data[1], " Hz");
-        println(" with duty ", cmd.data[2], " %");
-
-        if (cmd.data[0] == 1)
-            stepper1->setPWM(cmd.data[1], cmd.data[2]);
-        if (cmd.data[0] == 2)
-            stepper2->setPWM(cmd.data[1], cmd.data[2]);
-        if (cmd.data[0] == 3 && motorBaseType == OMNIDIRECTIONAL_3_MOTORS)
-            stepper3->setPWM(cmd.data[1], cmd.data[2]);
-    }
-}
-
-void Motor::PrintCommandHelp()
-{
-    Printer::println("Motor Command Help");
-    Printer::println(" > Motor:[int]:[int]:[int]");
-    Printer::println("      [int] number of motor, frequency of motor in Hz, duty cycle "
-                     "of motor between 0 and 100");
-    Printer::println();
 }
 
 void Motor::SetMotorSpeed(int motor_ID, float speed_mms)
@@ -174,14 +153,6 @@ void Motor::SetMotorSpeed(int motor_ID, float speed_mms)
         }
     }
 }
-
-/*
-void Motor::SetMotorsSpeed(float speed_1_mms, float speed_2_mms, float speed_3_mms)
-{
-    SetMotorSpeed(1, speed_1_mms);
-    SetMotorSpeed(2, speed_2_mms);
-    SetMotorSpeed(3, speed_3_mms);
-}*/
 
 float Motor::GetMotorSpeed(int motor_ID)
 {

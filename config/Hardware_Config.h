@@ -1,9 +1,9 @@
 #ifndef HARDWARE_CONFIG_H
 #define HARDWARE_CONFIG_H
-#include <HardwareSerial.h>
 #include <cstddef>
+#include <HardwareSerial.h>
 #include <pins_arduino.h>
-// Copy this file to your include project folder and change it's name to Hardware_Config.h
+// Copy this file to the config folder in your project and change it's name to Hardware_Config.h
 // Then you can modify the one in your project at your convenience
 
 #ifdef SIMULATOR

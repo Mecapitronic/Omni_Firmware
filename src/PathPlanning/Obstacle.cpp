@@ -87,12 +87,12 @@ namespace Obstacle
                 obstacle[id].p.x = p.x;
                 obstacle[id].p.y = p.y;
                 obstacle[id].r = OBSTACLE_RADIUS;
-                Screen::SetObstacle(id, p);
+                Screen::SetObstacle(id, (p.x!=0&&p.y!=0)?1:0);
                 return;
             }
         }
         obstacle[id] = Circle(0, 0, 0);
-        Screen::SetObstacle(id, {0,0});
+        Screen::SetObstacle(id, 0);
         // adversary[id] = PolarPoint();
     }
 

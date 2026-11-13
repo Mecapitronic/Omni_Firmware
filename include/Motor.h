@@ -91,10 +91,7 @@ enum MotorBaseType
 
     void Initialisation(MotorBaseType _motorBaseType, float _centerToWheel);
     void Update(float linear_speed_mms, float linear_direction_rad, float angular_speed_rad);
-    void HandleCommand(Command cmd);
-    void PrintCommandHelp();
     
-    //void SetMotorsSpeed(float speed_1_mms,float speed_2_mms,float speed_3_mms);
     void SetMotorSpeed(int motor_ID, float speed_mms);
     float GetMotorSpeed(int motor_ID);
     void test_ledc(void);
