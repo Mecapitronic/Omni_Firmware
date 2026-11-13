@@ -87,7 +87,7 @@ namespace Obstacle
                 obstacle[id].p.x = p.x;
                 obstacle[id].p.y = p.y;
                 obstacle[id].r = OBSTACLE_RADIUS;
-                Screen::SetObstacle(id, (p.x!=0&&p.y!=0)?1:0);
+                Screen::SetObstacle(id, Get_Distance_Point(&robot_point, &p)/100);
                 return;
             }
         }
